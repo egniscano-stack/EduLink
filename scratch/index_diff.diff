@@ -1,0 +1,1790 @@
+diff --git a/index.html b/index.html
+index 938cdb7..79a333d 100644
+--- a/index.html
++++ b/index.html
+@@ -8,7 +8,7 @@
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+-  <link rel="stylesheet" href="style.css?v=1.0.4">
++  <link rel="stylesheet" href="style.css?v=1.0.11">
+ </head>
+ <body class="light-theme">
+ 
+@@ -622,927 +622,971 @@
+           <div class="device-power"></div>
+         </div>
+         
+-        <!-- Sliding Drawer for Teacher Management -->
+-        <div class="teachers-drawer hidden" id="teachersDrawer">
+-          <div class="drawer-header">
+-            <h3>👨‍🏫 Gestión de Docentes</h3>
+-            <button class="close-drawer-btn" id="closeDrawerBtn">×</button>
+-          </div>
+-          
+-          <div class="drawer-body">
+-            <!-- Toggle between List and Form -->
+-            <div class="drawer-tabs">
+-              <button class="tab-btn active" id="btnListTab">Lista</button>
+-              <button class="tab-btn" id="btnFormTab">+ Registrar</button>
++        <div class="screen-content" id="screenContent">
++
++          <!-- Supabase Schema Warning Banner -->
++          <div class="supabase-banner hidden" id="supabaseBanner">
++            <div class="banner-content">
++              <span class="banner-icon">⚠️</span>
++              <span class="banner-text">Supabase conectado, pero <strong>faltan las tablas en tu base de datos</strong>. Haz clic para obtener el script SQL de configuración.</span>
+             </div>
++            <button class="chubby-btn primary banner-action-btn" id="openSqlModalBtn">Ver SQL</button>
++          </div>
+ 
+-            <!-- TAB 1: Teachers List -->
+-            <div class="drawer-tab-content active" id="tabTeachersList">
+-              <div class="teachers-container-list" id="teachersContainerList">
+-                <!-- Dynamic teacher cards with accordions go here -->
+-              </div>
++          <!-- Admin Landing Page: Vista General -->
++          <div class="admin-landing-view" id="adminLandingView">
++            
++            <!-- Title -->
++            <div class="landing-title-block">
++              <h2>Vista General</h2>
++              <p>Resumen y administración rápida del colegio</p>
+             </div>
+ 
+-            <!-- TAB 2: Add Teacher Form -->
+-            <div class="drawer-tab-content" id="tabAddTeacher">
+-              <form id="addTeacherForm" class="chubby-form">
+-                
+-                <div class="form-group">
+-                  <label for="regTeacherName">Nombre del Docente</label>
+-                  <input type="text" id="regTeacherName" placeholder="Ej: Prof. María Delgado" required autocomplete="off">
++            <div class="landing-accordion-container">
++              <!-- Accordion 1: Docentes -->
++              <div class="chubby-card accordion-card" id="landingDocentesCard">
++                <div class="accordion-card-header" style="display:flex; justify-content:space-between; align-items:center; padding:18px 22px; cursor:pointer;">
++                  <h4 style="margin:0;"><span class="icon">👨‍🏫</span> Lista de Docentes (<span id="landingDocentesCount">0</span>)</h4>
++                  <span class="accordion-arrow" style="transition: transform 0.3s; font-size: 0.8rem; color: var(--text-muted);">▼</span>
+                 </div>
+-                
+-                <div class="form-row">
+-                  <div class="form-group">
+-                    <label for="regTeacherEmpId">N° Empleado</label>
+-                    <input type="text" id="regTeacherEmpId" placeholder="Ej: ED-40812" required autocomplete="off">
+-                  </div>
+-                  <div class="form-group">
+-                    <label for="regTeacherCedula">N° Cédula</label>
+-                    <input type="text" id="regTeacherCedula" placeholder="Ej: 4-780-5543" required autocomplete="off">
++                <div class="accordion-card-content" id="landingDocentesContent">
++                  <div class="accordion-card-content-inner">
++                    <div id="landingDocentesList"></div>
+                   </div>
+                 </div>
++              </div>
+ 
+-                <div class="form-row">
+-                  <div class="form-group">
+-                    <label for="regTeacherAge">Edad</label>
+-                    <input type="number" id="regTeacherAge" placeholder="30" min="20" max="70" required>
+-                  </div>
+-                  <div class="form-group">
+-                    <label for="regTeacherGrade">Grado Asignado</label>
+-                    <select id="regTeacherGrade" required>
+-                      <option value="2B">Aula 2B (Matemáticas)</option>
+-                      <option value="3A">Aula 3A (Ciencias)</option>
+-                      <option value="1A">Aula 1A (Inglés)</option>
+-                    </select>
+-                  </div>
++              <!-- Accordion 2: Aulas -->
++              <div class="chubby-card accordion-card" id="landingAulasCard">
++                <div class="accordion-card-header" style="display:flex; justify-content:space-between; align-items:center; padding:18px 22px; cursor:pointer;">
++                  <h4 style="margin:0;"><span class="icon">🏫</span> Lista de Aulas (<span id="landingAulasCount">0</span>)</h4>
++                  <span class="accordion-arrow" style="transition: transform 0.3s; font-size: 0.8rem; color: var(--text-muted);">▼</span>
+                 </div>
+-
+-                <div class="form-group">
+-                  <label for="regTeacherPhoto">Foto de Perfil</label>
+-                  <div class="file-upload-wrapper">
+-                    <input type="file" id="regTeacherPhoto" accept="image/*" class="chubby-file-input">
+-                    <div class="file-upload-preview" id="teacherPhotoPreview">
+-                      <span>Subir Foto (PNG/JPG)</span>
+-                    </div>
++                <div class="accordion-card-content" id="landingAulasContent">
++                  <div class="accordion-card-content-inner">
++                    <div id="landingAulasList"></div>
+                   </div>
+                 </div>
+-
+-                <div class="form-group">
+-                  <label for="regTeacherSpecs">Especializaciones / Cursos (Separados por comas)</label>
+-                  <input type="text" id="regTeacherSpecs" placeholder="Ej: Lic. en Educación, Diplomado en Robótica" required autocomplete="off">
+-                </div>
+-
+-                <div class="form-group">
+-                  <label for="regTeacherSubjects">Asignaturas (Separadas por comas)</label>
+-                  <input type="text" id="regTeacherSubjects" placeholder="Ej: Ciencias Naturales, Física, Química" required autocomplete="off">
+-                </div>
+-
+-                <button type="submit" class="chubby-btn primary full-width">
+-                  <span>💾 Registrar Docente</span>
+-                </button>
+-              </form>
+-            </div>
+-          </div>
+-        </div>
+-
+-        <!-- Sliding Drawer for Student Management -->
+-        <div class="students-drawer hidden" id="studentsDrawer">
+-          <div class="drawer-header">
+-            <h3>👥 Gestión de Estudiantes</h3>
+-            <button class="close-drawer-btn" id="closeStudentsDrawerBtn">×</button>
+-          </div>
+-          
+-          <div class="drawer-body">
+-            <!-- Toggle between List and Form -->
+-            <div class="drawer-tabs">
+-              <button class="tab-btn active" id="btnStudentListTab">Lista</button>
+-              <button class="tab-btn" id="btnStudentFormTab">+ Registrar</button>
+-            </div>
+-
+-            <!-- TAB 1: Students List -->
+-            <div class="drawer-tab-content active" id="tabStudentsList">
+-              <div class="students-container-list" id="studentsContainerList">
+-                <!-- Dynamic student cards go here -->
+               </div>
+             </div>
++          </div>
+ 
+-            <!-- TAB 2: Add Student Form -->
+-            <div class="drawer-tab-content" id="tabAddStudent">
+-              <form id="addStudentForm" class="chubby-form">
+-                
+-                <div class="form-group">
+-                  <label for="regStudentName">Nombre Completo</label>
+-                  <input type="text" id="regStudentName" placeholder="Ej: Juan Pérez" required autocomplete="off">
++          <!-- Main Dashboard Layout -->
++          <div class="dashboard-grid hidden" id="dashboardGrid">
++            
++            <!-- LEFT COLUMN: The Cascade Flow -->
++            <section class="dashboard-col cascade-col">
++              
++              <!-- NODE A: Teacher Profile Badge -->
++              <div class="chubby-card teacher-badge effect-3d" id="teacherNode">
++                <div class="card-glow-bg"></div>
++                <div class="card-header collapsible-header">
++                  <h4><span class="icon">👨‍🏫</span> Perfil Docente</h4>
++                  <span class="card-collapse-arrow">▲</span>
+                 </div>
+-
+-                <div class="form-row">
+-                  <div class="form-group">
+-                    <label for="regStudentCedula">Número de Cédula</label>
+-                    <input type="text" id="regStudentCedula" placeholder="Ej: 8-990-1234" required autocomplete="off">
+-                  </div>
+-                  <div class="form-group">
+-                    <label for="regStudentGrade">Grado Asignado</label>
+-                    <select id="regStudentGrade" required>
+-                      <option value="2B">Aula 2B</option>
+-                      <option value="3A">Aula 3A</option>
+-                      <option value="1A">Aula 1A</option>
+-                    </select>
++                
++                <div class="card-body-collapse">
++                  <div class="teacher-header">
++                    <div class="avatar-container avatar-3d">
++                      <img src="assets/prof_egnis.png" alt="Prof. Egnis Cano" id="teacherAvatar">
++                    </div>
++                    <div class="teacher-info">
++                      <span class="badge badge-cyan">Profesor Líder</span>
++                      <h3 id="teacherNameDisplay">Prof. Egnis Cano</h3>
++                      <p class="teacher-meta" id="teacherSubjectsDisplay"><span class="meta-icon">📐</span> Matemáticas | Aula 2B</p>
++                      <p class="teacher-meta-id" id="teacherEmpIdDisplay"><span class="meta-icon">🆔</span> ID: ED-90210</p>
++                    </div>
+                   </div>
+-                </div>
+-
+-                <div class="form-row">
+-                  <div class="form-group">
+-                    <label for="regStudentAge">Edad</label>
+-                    <input type="number" id="regStudentAge" placeholder="Ej: 8" required min="1" max="25">
++                  <div class="teacher-footer">
++                    <div class="stat-pill">
++                      <span class="stat-num" id="teacherAgeDisplay">32</span>
++                      <span class="stat-lbl">Edad</span>
++                    </div>
++                    <div class="stat-pill">
++                      <span class="stat-num" id="teacherStudentsCount">32</span>
++                      <span class="stat-lbl">Alumnos</span>
++                    </div>
++                    <div class="stat-pill highlight">
++                      <span class="stat-num" id="teacherGradeDisplay">2B</span>
++                      <span class="stat-lbl">Salón</span>
++                    </div>
+                   </div>
+-                  <div class="form-group">
+-                    <label for="regStudentBirthYear">Año de Nacimiento</label>
+-                    <input type="number" id="regStudentBirthYear" placeholder="Ej: 2018" required min="1990" max="2026">
++                  <div style="padding-top: 14px; display: flex; gap: 10px;">
++                    <button type="button" class="chubby-btn primary full-width" id="adminEditTeacherBtn" style="height: 38px; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 0.85rem;">
++                      <span>✏️ Editar Docente</span>
++                    </button>
+                   </div>
+                 </div>
++              </div>
+ 
+-                <div class="form-row">
+-                  <div class="form-group">
+-                    <label for="regStudentBloodType">Tipo de Sangre</label>
+-                    <input type="text" id="regStudentBloodType" placeholder="Ej: O+" autocomplete="off">
++              <!-- NODE C: Mid Node - Class List -->
++              <div class="chubby-card class-list-card effect-3d" id="classListNode">
++                <div class="card-header collapsible-header">
++                  <h4><span class="icon">👥</span> Lista de Clases (<span id="activeClassLabel">Aula 2B</span>)</h4>
++                  <div style="display: flex; align-items: center; gap: 8px;">
++                    <span class="student-count" id="activeClassCount">3 Activos</span>
++                    <span class="card-collapse-arrow">▲</span>
+                   </div>
+-                  <div class="form-group">
+-                    <label for="regStudentStatus">Condición del Estudiante</label>
+-                    <select id="regStudentStatus" required>
+-                      <option value="Nuevo">Nuevo Ingreso</option>
+-                      <option value="Traslado">Traslado</option>
+-                    </select>
++                </div>
++                
++                <div class="card-body-collapse">
++                  <p class="helper-text">Selecciona un estudiante para expandir su ecosistema de datos:</p>
++                  <div class="students-list" id="studentsList">
++                    <!-- Dynamically populated via JS -->
+                   </div>
+                 </div>
++              </div>
+ 
+-                <div class="form-group">
+-                  <label for="regStudentAddress">Dirección de Residencia</label>
+-                  <input type="text" id="regStudentAddress" placeholder="Ej: Calle 50, Ciudad de Panamá" required autocomplete="off">
+-                </div>
++            </section>
+ 
+-                <div class="form-group">
+-                  <label for="regStudentMedicalConditions">Condiciones Médicas / Alergias</label>
+-                  <input type="text" id="regStudentMedicalConditions" placeholder="Ej: Alergia a la penicilina, asma, ninguna" autocomplete="off">
++            <!-- MIDDLE COLUMN: Expanded Details Panel (Node D) -->
++            <section class="dashboard-col detail-col" id="detailPanel">
++              
++              <div class="chubby-card student-detail-card effect-3d active" id="studentDetailCard">
++                <div class="card-glow-bg"></div>
++                <div class="card-header collapsible-header">
++                  <h4><span class="icon">📊</span> Ficha del Estudiante</h4>
++                  <span class="card-collapse-arrow">▲</span>
+                 </div>
+-
+-                <div class="form-group">
+-                  <label for="regStudentPhoto">Foto de Perfil</label>
+-                  <div class="file-upload-wrapper">
+-                    <input type="file" id="regStudentPhoto" accept="image/*" class="chubby-file-input">
+-                    <div class="file-upload-preview" id="studentPhotoPreview">
+-                      <span>Subir Foto (PNG/JPG)</span>
++                
++                <div class="card-body-collapse">
++                  <!-- Selected Student Header -->
++                  <div class="detail-header">
++                    <div class="detail-avatar-container">
++                      <img src="assets/student_juan.png" alt="Detalle Estudiante" id="detailStudentImg">
++                    </div>
++                    <div class="detail-title">
++                      <span class="badge badge-lime" id="detailStudentRole">Estudiante Destacado</span>
++                      <h3 id="detailStudentName">Juan Pérez</h3>
++                      <p class="detail-subtext">Expediente: <strong id="detailStudentId">#EL-20412</strong></p>
+                     </div>
+                   </div>
+-                </div>
+ 
+-                <div class="form-row">
+-                  <div class="form-group">
+-                    <label for="regStudentParentName">Nombre de Tutor 1</label>
+-                    <input type="text" id="regStudentParentName" placeholder="Ej: Carlos Pérez" required autocomplete="off">
+-                  </div>
+-                  <div class="form-group">
+-                    <label for="regStudentParentPhone">Teléfono de Tutor 1</label>
+-                    <input type="text" id="regStudentParentPhone" placeholder="Ej: +507 6890-4432" required autocomplete="off">
+-                  </div>
+-                </div>
++                  <!-- Widgets Grid -->
++                  <div class="detail-widgets">
++                    
++                    <!-- Widget 1: Academic Grades by Subject -->
++                    <div class="widget-box grades-widget">
++                      <h5><span class="icon">📊</span> Calificaciones Académicas</h5>
++                      <p class="widget-subtitle">Promedio por materia y período curricular</p>
++                      
++                      <div class="grades-table-container" id="gradesTableContainer">
++                        <!-- Populated dynamically by JS -->
++                        <p class="helper-text">Selecciona un alumno para ver sus calificaciones.</p>
++                      </div>
++                    </div>
+ 
+-                <div class="form-row">
+-                  <div class="form-group">
+-                    <label for="regStudentTutor2Name">Nombre de Tutor 2</label>
+-                    <input type="text" id="regStudentTutor2Name" placeholder="Ej: Marta Gómez" autocomplete="off">
+-                  </div>
+-                  <div class="form-group">
+-                    <label for="regStudentTutor2Phone">Teléfono de Tutor 2</label>
+-                    <input type="text" id="regStudentTutor2Phone" placeholder="Ej: +507 6221-5589" autocomplete="off">
+-                  </div>
+-                </div>
++                    <!-- Widget 2: Conduct (Emoji Matrix) -->
++                    <div class="widget-box conduct-widget">
++                      <h5><span class="icon">🎭</span> Conducta Escolar</h5>
++                      <p class="widget-subtitle">Historial de comportamiento e interacción</p>
++                      
++                      <div class="emoji-matrix" id="conductMatrix">
++                        <div class="emoji-btn active" data-conduct="excelente" title="Excelente">
++                          <span class="emoji">🌟</span>
++                          <span class="emoji-label">Brillante</span>
++                        </div>
++                        <div class="emoji-btn" data-conduct="participativo" title="Participativo">
++                          <span class="emoji">🙋‍♂️</span>
++                          <span class="emoji-label">Activo</span>
++                        </div>
++                        <div class="emoji-btn" data-conduct="enfocado" title="Enfocado">
++                          <span class="emoji">🧠</span>
++                          <span class="emoji-label">Enfocado</span>
++                        </div>
++                        <div class="emoji-btn" data-conduct="conversador" title="Conversador">
++                          <span class="emoji">💬</span>
++                          <span class="emoji-label">Platicador</span>
++                        </div>
++                      </div>
++                      <div class="conduct-status-box">
++                        <p id="conductDescription">Juan demuestra gran liderazgo y participación constante. ¡Sigue así!</p>
++                      </div>
++                    </div>
+ 
+-                <div class="form-group">
+-                  <label for="regStudentParentEmail">Correo de Contacto (Opcional)</label>
+-                  <input type="email" id="regStudentParentEmail" placeholder="Ej: tutor@email.com" autocomplete="off">
+-                </div>
++                    <!-- Widget 3: Personal & Parent Data -->
++                    <div class="widget-box parents-widget">
++                      <h5><span class="icon">👪</span> Datos de Tutor & Contacto</h5>
++                      <div class="parent-info-card">
++                        <div class="parent-avatar">👨‍👩‍👦</div>
++                        <div class="parent-meta">
++                          <strong id="parentName">Carlos Pérez (Padre)</strong>
++                          <span id="parentPhone">📞 +507 6890-4432</span>
++                        </div>
++                      </div>
++                      <div class="contact-actions-grid">
++                        <a href="tel:+50768904432" class="contact-icon-btn btn-3d call" title="Llamar">
++                          <span>📞</span>
++                        </a>
++                        <button class="contact-icon-btn btn-3d chat" id="triggerDirectChat" title="Enviar Mensaje">
++                          <span>💬</span>
++                        </button>
++                        <a href="mailto:carlos.perez@email.com" class="contact-icon-btn btn-3d email" title="Correo">
++                          <span>✉️</span>
++                        </a>
++                      </div>
++                    </div>
+ 
+-                <button type="submit" class="chubby-btn primary full-width">
+-                  <span>💾 Registrar Estudiante</span>
+-                </button>
+-              </form>
+-            </div>
+-          </div>
+-        </div>
++                     <!-- Widget 6: Student Technical & Medical Data -->
++                     <div class="widget-box technical-widget">
++                       <h5><span class="icon">📋</span> Información General & Médica</h5>
++                       <div class="technical-info-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.78rem; margin-top: 10px; color: var(--text-main);">
++                         <div><strong>Cédula:</strong> <span id="detailStudentCedula">-</span></div>
++                         <div><strong>Edad:</strong> <span id="detailStudentAge">-</span></div>
++                         <div><strong>Año Nac.:</strong> <span id="detailStudentBirthYear">-</span></div>
++                         <div><strong>Tipo Sangre:</strong> <span id="detailStudentBloodType">-</span></div>
++                         <div style="grid-column: span 2;"><strong>Condición:</strong> <span id="detailStudentStatus">-</span> | <strong>Asistencia:</strong> <span id="detailStudentAttendance" style="font-weight: bold;">-</span></div>
++                         <div style="grid-column: span 2;"><strong>Dirección:</strong> <span id="detailStudentAddress">-</span></div>
++                         <div style="grid-column: span 2;"><strong>Cond. Médicas:</strong> <span id="detailStudentMedicalConditions">-</span></div>
++                         <div style="grid-column: span 2; border-top: 1px dashed var(--text-main); padding-top: 6px; margin-top: 4px;">
++                           <strong>Tutor 2:</strong> <span id="detailStudentTutor2Name">-</span> 
++                           (<span id="detailStudentTutor2Phone">-</span>)
++                         </div>
++                       </div>
++                     </div>
+ 
+-        <!-- Sliding Drawer for Admin Settings & Users Creation -->
+-        <div class="settings-drawer hidden" id="settingsDrawer">
+-          <div class="drawer-header">
+-            <h3>⚙️ Configuración & Usuarios</h3>
+-            <button class="close-drawer-btn" id="closeSettingsDrawerBtn">×</button>
+-          </div>
+-          
+-          <div class="drawer-body">
+-            <!-- Toggle between School Details Form, Create User Form, and Users List -->
+-            <div class="drawer-tabs">
+-              <button class="tab-btn active" id="btnSchoolDetailsTab">Datos Escuela</button>
+-              <button class="tab-btn" id="btnCreateUserTab">+ Crear Usuario</button>
+-              <button class="tab-btn" id="btnUsersListTab">👥 Usuarios</button>
+-            </div>
++                    <!-- Widget 4: Teacher Incidents Feed -->
++                    <div class="widget-box incidents-widget" style="grid-column: span 2;">
++                      <h5><span class="icon">⚠️</span> Registro de Incidencias (Docente)</h5>
++                      <div class="incident-feed" id="adminStudentIncidentsFeed" style="max-height: 140px; margin-top: 8px;">
++                        <p style="font-style: italic; font-size: 0.78rem; color: var(--text-secondary);">Selecciona un alumno para ver sus incidencias.</p>
++                      </div>
++                    </div>
+ 
+-            <!-- TAB 1: Modify School Details -->
+-            <div class="drawer-tab-content active" id="tabSchoolDetails">
+-              <form id="modifySchoolForm" class="chubby-form">
+-                
+-                <div class="form-group">
+-                  <label for="modSchoolName">Nombre de la Escuela</label>
+-                  <input type="text" id="modSchoolName" placeholder="Ej: Colegio San Marcos" autocomplete="off">
+-                </div>
++                    <!-- Widget 5: Novelty Reports -->
++                    <div class="widget-box novelties-widget" style="grid-column: span 2;">
++                      <h5><span class="icon">📝</span> Informe de Novedades del Aula</h5>
++                      <div id="adminStudentNoveltiesReport" style="font-size: 0.8rem; line-height: 1.4; color: var(--text-main); background: var(--color-bg-light); border: 1.5px solid var(--text-main); border-radius: 12px; padding: 10px; margin-top: 8px;">
++                        <p style="font-style: italic; font-size: 0.78rem; color: var(--text-secondary);">Selecciona un alumno para ver sus novedades.</p>
++                      </div>
++                    </div>
+ 
+-                <div class="form-group">
+-                  <label for="modSchoolAddress">Dirección de la Escuela</label>
+-                  <input type="text" id="modSchoolAddress" placeholder="Ej: Calle 50, Ciudad de Panamá" autocomplete="off">
+-                </div>
++                  </div>
+ 
+-                <div class="form-group">
+-                  <label for="modAdminName">Nombre del Administrador</label>
+-                  <input type="text" id="modAdminName" placeholder="Ej: Juan Pérez" autocomplete="off">
+-                </div>
++                  <!-- Admin Edit Student & Generate Bulletin Buttons -->
++                  <div style="padding: 0 16px 16px 16px; display: flex; gap: 10px;">
++                    <button type="button" class="chubby-btn primary" id="adminEditStudentBtn" style="flex: 1; height: 42px; display: flex; justify-content: center; align-items: center; cursor: pointer;">
++                      <span>✏️ Editar Datos</span>
++                    </button>
++                    <button type="button" class="chubby-btn secondary" id="adminGenerateBulletinBtn" style="flex: 1; height: 42px; display: flex; justify-content: center; align-items: center; cursor: pointer; border-color: var(--text-main);">
++                      <span>📄 Generar Boletín</span>
++                    </button>
++                  </div>
+ 
+-                <div class="form-group">
+-                  <label for="modSchoolLogo">Logo de la Escuela</label>
+-                  <div class="file-upload-wrapper">
+-                    <input type="file" id="modSchoolLogo" accept="image/*" class="chubby-file-input">
+-                    <div class="file-upload-preview" id="modSchoolLogoPreview">
+-                      <span>Subir Nuevo Logo (PNG/JPG)</span>
++                  <!-- Database Flow Connection -->
++                  <div class="database-connection-footer">
++                    <div class="flow-line-vertical">
++                      <div class="pulse-dot"></div>
++                    </div>
++                    <div class="db-node-3d" id="databaseNode">
++                      <div class="db-cylinder">
++                        <div class="db-face db-top">EduLink Base de Datos</div>
++                        <div class="db-face db-side"></div>
++                      </div>
++                      <div class="db-lights">
++                        <span class="light active"></span>
++                        <span class="light"></span>
++                        <span class="light active"></span>
++                      </div>
+                     </div>
+                   </div>
+                 </div>
++              </div>
+ 
+-                <button type="submit" class="chubby-btn primary full-width">
+-                  <span>💾 Guardar Cambios</span>
+-                </button>
+-              </form>
+-            </div>
++            </section>
+ 
+-            <!-- TAB 2: Create Users -->
+-            <div class="drawer-tab-content" id="tabCreateUser">
+-              <form id="createUserForm" class="chubby-form">
+-                
+-                <div class="form-group">
+-                  <label for="createUserName" id="createUserNameLabel">Nombre Completo</label>
+-                  <input type="text" id="createUserName" placeholder="Ej: Lic. Ana Reyes" autocomplete="off">
+-                  <select id="createUserTeacherSelect" style="display: none; width: 100%; border: 2px solid var(--text-main); border-radius: 12px; padding: 10px; font-family: 'Outfit'; font-weight: bold; background: var(--card-bg); color: var(--text-main);">
+-                    <!-- populated dynamically in JS -->
+-                  </select>
++            <!-- RIGHT COLUMN: Integrated ERP Sections -->
++            <section class="dashboard-col erp-col">
++              
++              <!-- Widget 4: Accounting & Finance Panel -->
++              <div class="chubby-card finance-card effect-3d" id="financeNode" style="display: none;">
++                <div class="card-glow-bg"></div>
++                <div class="card-header collapsible-header">
++                  <h4><span class="icon">💰</span> Contabilidad & Finanzas</h4>
++                  <div style="display: flex; align-items: center; gap: 8px;">
++                    <span class="badge badge-yellow">Presupuesto Escolar</span>
++                    <span class="card-collapse-arrow">▲</span>
++                  </div>
+                 </div>
++                
++                <div class="card-body-collapse">
++                  <div class="finance-body">
++                    <div class="finance-illustration">
++                      <img src="assets/finance_icons.png" alt="Finanzas">
++                    </div>
++                    
++                    <div class="finance-indicators">
++                      <div class="finance-row">
++                        <div class="finance-info">
++                          <strong>Presupuesto FECE</strong>
++                          <p>Fondo de Equidad y Calidad</p>
++                        </div>
++                        <div class="finance-value finance-fece-value">$12,450.00 <span class="val-total">/ $15k</span></div>
++                      </div>
++                      <!-- Progress Bar -->
++                      <div class="progress-bar-chubby">
++                        <div class="progress-fill" style="width: 83%;"></div>
++                      </div>
+ 
+-                <div class="form-row">
+-                  <div class="form-group">
+-                    <label for="createUserRole">Rol de Usuario</label>
+-                    <select id="createUserRole">
+-                      <option value="secretaria">📝 Secretaria</option>
+-                      <option value="profesores">👨‍🏫 Profesor</option>
+-                      <option value="sub administrador">🔑 Sub Administrador</option>
+-                    </select>
+-                  </div>
+-                  <div class="form-group">
+-                    <label for="createUserPhone">Número de Teléfono</label>
+-                    <input type="text" id="createUserPhone" placeholder="Ej: +507 6200-0000" autocomplete="off">
++                      <div class="finance-row mt-3">
++                        <div class="finance-info">
++                          <strong>Caja Menuda</strong>
++                          <p>Gastos operativos rápidos</p>
++                        </div>
++                        <div class="finance-value positive finance-petty-cash-value">$320.50</div>
++                      </div>
++                    </div>
+                   </div>
+-                </div>
+ 
+-                <div class="form-group">
+-                  <label for="createUserEmail">Correo Electrónico</label>
+-                  <input type="email" id="createUserEmail" placeholder="Ej: ana.reyes@escuela.edu" autocomplete="off">
++                  <div class="finance-actions">
++                    <button class="chubby-btn primary full-width" id="btnDispense">
++                      <span>💸 Dispensa Rápida</span>
++                    </button>
++                  </div>
+                 </div>
++              </div>
+ 
+-                <div class="form-group">
+-                  <label for="createUserPassword">Contraseña de Acceso</label>
+-                  <input type="password" id="createUserPassword" placeholder="Mínimo 6 caracteres" autocomplete="off">
++              <!-- Widget 5: Parent-Teacher Communication -->
++              <div class="chubby-card communication-card effect-3d">
++                <div class="card-header collapsible-header">
++                  <h4><span class="icon">💬</span> Mensajería</h4>
++                  <div style="display: flex; align-items: center; gap: 8px;">
++                    <span class="badge badge-orange animate-pulse" id="liveBadge">En Vivo</span>
++                    <span class="card-collapse-arrow">▲</span>
++                  </div>
+                 </div>
++                
++                <div class="card-body-collapse">
++                  <div class="chat-display-area" id="chatArea">
++                    <!-- Chat bubbles populate dynamically -->
++                    <p class="chat-placeholder">Cargando mensajes del ecosistema...</p>
++                  </div>
+ 
+-                <button type="submit" class="chubby-btn primary full-width">
+-                  <span>➕ Crear Usuario</span>
+-                </button>
+-              </form>
+-            </div>
+-
+-            <!-- TAB 3: List of Created Users -->
+-            <div class="drawer-tab-content" id="tabUsersList">
+-              <div class="users-list-wrapper">
+-                <p class="helper-text">Listado de cuentas y accesos del personal creado:</p>
+-                <div class="created-users-list" id="createdUsersList">
+-                  <!-- Dynamically populated by JS -->
++                  <!-- Chat Input -->
++                  <div class="chat-input-bar">
++                    <input type="text" id="chatInputField" placeholder="Escribe un mensaje al tutor..." autocomplete="off">
++                    <button class="chubby-btn primary round-btn" id="chatSendBtn">
++                      <span>➔</span>
++                    </button>
++                  </div>
+                 </div>
+               </div>
+-            </div>
++
++              <!-- Widget 6: Credentials widget removed as requested -->
++
++            </section>
++
+           </div>
+         </div>
++      </div>
++    </div>
+ 
+-        <!-- Sliding Drawer for Accounting & Finance -->
+-        <div class="finance-drawer hidden" id="financeDrawer">
+-          <div class="drawer-header">
+-            <h3>💰 Contabilidad & Finanzas</h3>
+-            <button class="close-drawer-btn" id="closeFinanceDrawerBtn">×</button>
++    <!-- Supabase Script Installation Modal -->
++    <div class="modal-overlay hidden" id="sqlModal">
++      <div class="chubby-card modal-card effect-3d">
++        <div class="modal-header">
++          <h3>⚡ Configurar Supabase Database</h3>
++          <button class="close-btn" id="closeModalBtn">×</button>
++        </div>
++        <div class="modal-body">
++          <p class="modal-desc">Copia el siguiente código SQL y ejecútalo en la pestaña <strong>SQL Editor</strong> en tu panel de Supabase para inicializar las tablas necesarias de la demo:</p>
++          <div class="code-box-wrapper">
++            <pre><code id="sqlCode">-- Cargando setup.sql...</code></pre>
++            <button class="chubby-btn primary copy-btn" id="copySqlBtn">📋 Copiar Script SQL</button>
+           </div>
+-          <div class="drawer-body">
+-            <p class="helper-text" style="margin-bottom: 20px;">Administración presupuestaria y caja menuda de la institución (Fondo FECE):</p>
+-            
+-            <div class="finance-indicators" style="background: var(--color-bg-light); border: 2px solid var(--text-main); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);">
+-              <div class="finance-row" style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+-                <div class="finance-info">
+-                  <strong style="display: block; font-family: 'Outfit', sans-serif; font-size: 1.05rem; color: var(--text-main);">Presupuesto FECE</strong>
+-                  <p style="margin: 0; font-size: 0.8rem; opacity: 0.7;">Fondo de Equidad y Calidad</p>
+-                </div>
+-                <div class="finance-value finance-fece-value" style="font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.25rem; color: var(--text-main);">$12,450.00 <span class="val-total" style="font-size: 0.8rem; font-weight: normal; opacity: 0.6;">/ $15k</span></div>
+-              </div>
+-              
+-              <!-- Progress Bar -->
+-              <div class="progress-bar-chubby" style="width: 100%; height: 12px; background: rgba(0, 0, 0, 0.05); border: 2px solid var(--text-main); border-radius: 8px; overflow: hidden; position: relative;">
+-                <div class="progress-fill" style="width: 83%; height: 100%; background: linear-gradient(90deg, var(--color-lime), var(--color-cyan)); transition: width 0.4s ease;"></div>
+-              </div>
+-
+-              <div class="finance-row mt-3" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; border-top: 1.5px dashed var(--text-main); padding-top: 16px; margin-top: 4px;">
+-                <div class="finance-info">
+-                  <strong style="display: block; font-family: 'Outfit', sans-serif; font-size: 1.05rem; color: var(--text-main);">Caja Menuda</strong>
+-                  <p style="margin: 0; font-size: 0.8rem; opacity: 0.7;">Gastos operativos rápidos</p>
+-                </div>
+-                <div class="finance-value positive finance-petty-cash-value" style="font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.25rem; color: var(--color-lime);">$320.50</div>
+-              </div>
+-            </div>
++          <p class="modal-help">Una vez ejecutado en Supabase, <strong>recarga esta página</strong>. El banner desaparecerá y estarás conectado a tu base de datos Supabase real en tiempo real.</p>
++        </div>
++      </div>
++    </div>
++  </div>
+ 
+-            <div class="chubby-form">
+-              <div class="form-group" style="margin-bottom: 16px;">
+-                <label style="display: block; font-family: 'Outfit', sans-serif; font-weight: 700; margin-bottom: 8px;">💸 Dispensa de Fondos Rápida</label>
+-                <p style="font-size: 0.8rem; opacity: 0.7; margin-top: -4px; margin-bottom: 16px; line-height: 1.4;">
+-                  Realiza transferencias rápidas de $500 desde el Presupuesto FECE hacia la Caja Menuda para gastos operativos inmediatos.
+-                </p>
+-              </div>
+-              <button class="chubby-btn primary full-width" id="btnDrawerDispense">
+-                <span>💸 Dispensa Rápida</span>
+-              </button>
+-            </div>
++  <!-- ==========================================================================
++     VISTA 3: PORTAL/DASHBOARD DE PROFESORES
++     ========================================================================== -->
++  <div class="dashboard-view hidden" id="teacherDashboardView">
++    <!-- Main Simulator Wrapper -->
++    <div class="simulator-wrapper" id="teacherSimulatorWrapper">
++      
++      <!-- Teacher Header -->
++      <header class="app-header">
++        <div class="header-left">
++          <div class="logo-container" id="teacherDashboardSchoolLogoContainer">
++            <img src="assets/logoedulink.png" alt="School Logo" class="brand-logo brand-logo-dashboard" id="teacherDashboardSchoolLogo">
++          </div>
++          <div class="school-admin-details">
++            <h2 class="school-name-text" id="teacherDashboardSchoolName">EduLink Academia</h2>
++            <p class="admin-name-text" id="teacherDashboardTeacherName">👤 Docente: --</p>
+           </div>
+         </div>
+         
+-        <div class="screen-content" id="screenContent">
++        <div class="header-center">
++          <span class="connection-status" id="teacherPortalGradeInfo" style="font-family: 'Outfit'; font-weight: 800; font-size: 1.1rem; color: var(--text-main); background: var(--color-bg-light); border: 2px solid var(--text-main); padding: 6px 16px; border-radius: 12px;">Grado: --</span>
++        </div>
+ 
+-          <!-- Supabase Schema Warning Banner -->
+-          <div class="supabase-banner hidden" id="supabaseBanner">
+-            <div class="banner-content">
+-              <span class="banner-icon">⚠️</span>
+-              <span class="banner-text">Supabase conectado, pero <strong>faltan las tablas en tu base de datos</strong>. Haz clic para obtener el script SQL de configuración.</span>
++        <div class="header-right">
++          <!-- Theme Switcher -->
++          <button id="teacherThemeToggle" class="chubby-btn secondary" title="Cambiar Tema">
++            <span class="icon">🌓</span>
++            <span class="btn-text">Tema</span>
++          </button>
++          <!-- Cerrar Sesión -->
++          <button id="teacherLogoutBtn" class="chubby-btn logout-btn" title="Cerrar Sesión">
++            <span class="icon">🔒</span>
++            <span class="btn-text">Cerrar Sesión</span>
++          </button>
++        </div>
++      </header>
++
++      <!-- Navigation Bar for Teacher Portal -->
++      <div class="teacher-nav-bar" style="display: flex; gap: 16px; margin: 0 24px 16px 24px; padding-bottom: 8px; border-bottom: 2px dashed rgba(0,0,0,0.15);">
++        <button id="navTeacherAlumnos" class="chubby-btn primary" style="padding: 8px 18px; font-size: 0.95rem; border-radius: 12px; font-family: 'Outfit'; font-weight: 800; display: flex; align-items: center; gap: 8px; cursor: pointer;">
++          <span>👥 Alumnos y Comunicaciones</span>
++        </button>
++        <button id="navTeacherPlanificacion" class="chubby-btn secondary" style="padding: 8px 18px; font-size: 0.95rem; border-radius: 12px; font-family: 'Outfit'; font-weight: 800; display: flex; align-items: center; gap: 8px; cursor: pointer;">
++          <span>📚 Planificación y Materias</span>
++        </button>
++      </div>
++
++      <!-- App Container for Teacher Dashboard: Alumnos Screen -->
++      <div class="app-screen" id="teacherAppScreen" style="display: flex; gap: 20px; flex: 1; min-height: 0; box-sizing: border-box; overflow: hidden; padding-bottom: 8px;">
++        
++        <!-- LEFT COLUMN: Student List with Attendance and Grades Accordions -->
++        <section class="dashboard-col" style="flex: 1; display: flex; flex-direction: column; gap: 16px; min-width: 0; background: var(--card-bg); border: 2px solid var(--text-main); border-radius: 24px; padding: 24px; box-shadow: var(--shadow-chubby); overflow: hidden;">
++          
++          <h3 style="font-family: 'Outfit', sans-serif; font-weight: 800; color: var(--text-main); margin: 0 0 4px 0; display: flex; align-items: center; gap: 8px;"><span class="icon">👥</span> Control de Alumnos</h3>
++          <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 0 0 10px 0; line-height: 1.4;">
++            Haz clic en el <strong>nombre del estudiante</strong> para calificar por materias o chatear. Haz clic en la <strong>foto</strong> para ampliarla. Marca su <strong>asistencia</strong> en el checkbox (vacío representa ausencia).
++          </p>
++          <div id="teacherPortalStudentsList" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 4px;">
++            <!-- Alphabetical student rows dynamically loaded -->
++          </div>
++
++        </section>
++      </div>
++
++      <!-- App Container for Teacher Dashboard: Planificación Screen -->
++      <div class="app-screen hidden" id="teacherPlanningScreen" style="display: flex; gap: 20px; flex: 1; min-height: 0; box-sizing: border-box; overflow: hidden; padding-bottom: 8px;">
++        
++        <!-- LEFT COLUMN: Add Subject -->
++        <section class="dashboard-col" style="flex: 1; display: flex; flex-direction: column; gap: 16px; min-width: 0; background: var(--card-bg); border: 2px solid var(--text-main); border-radius: 24px; padding: 24px; box-shadow: var(--shadow-chubby); overflow-y: auto;">
++          <div class="chubby-form">
++            <h3 style="font-family: 'Outfit', sans-serif; font-weight: 800; color: var(--text-main); margin: 0 0 8px 0; display: flex; align-items: center; gap: 8px;"><span class="icon">📚</span> Carga de Asignaturas</h3>
++            <p style="font-size: 0.85rem; opacity: 0.7; margin-bottom: 20px; line-height: 1.4;">Agrega nuevas materias a tu carga académica para poder configurar sus contenidos académicos y tareas.</p>
++            
++            <div class="form-group" style="margin-bottom: 20px;">
++              <label for="teacherNewSubjectInput" style="font-weight: 800; font-size: 0.9rem; margin-bottom: 8px; display: block;">Nombre de la Asignatura:</label>
++              <input type="text" id="teacherNewSubjectInput" placeholder="Ej: Ciencias Naturales" style="width: 100%; border: 2px solid var(--text-main); border-radius: 12px; padding: 12px; font-family: 'Outfit'; font-weight: bold; box-sizing: border-box; background: var(--card-bg); color: var(--text-main);">
+             </div>
+-            <button class="chubby-btn primary banner-action-btn" id="openSqlModalBtn">Ver SQL</button>
++            <button class="chubby-btn primary full-width" id="teacherAddSubjectBtn" style="height: 48px;">
++              <span>➕ Añadir Asignatura</span>
++            </button>
+           </div>
++        </section>
+ 
+-          <!-- Main Dashboard Layout -->
+-          <div class="dashboard-grid">
++        <!-- RIGHT COLUMN: Syllabus & Tasks planning -->
++        <section class="dashboard-col" style="flex: 1.5; display: flex; flex-direction: column; gap: 16px; min-width: 0; background: var(--card-bg); border: 2px solid var(--text-main); border-radius: 24px; padding: 24px; box-shadow: var(--shadow-chubby); overflow-y: auto;">
++          <div class="chubby-form">
++            <h3 style="font-family: 'Outfit', sans-serif; font-weight: 800; color: var(--text-main); margin: 0 0 8px 0; display: flex; align-items: center; gap: 8px;"><span class="icon">📑</span> Temarios y Trabajos</h3>
++            <p style="font-size: 0.85rem; opacity: 0.7; margin-bottom: 20px; line-height: 1.4;">Configura el temario académico y añade hasta 7 trabajos o tareas evaluables por materia.</p>
+             
+-            <!-- LEFT COLUMN: The Cascade Flow -->
+-            <section class="dashboard-col cascade-col">
+-              
+-              <!-- NODE A: Teacher Profile Badge -->
+-              <div class="chubby-card teacher-badge effect-3d" id="teacherNode">
+-                <div class="card-glow-bg"></div>
+-                <div class="card-header collapsible-header">
+-                  <h4><span class="icon">👨‍🏫</span> Perfil Docente</h4>
+-                  <span class="card-collapse-arrow">▲</span>
+-                </div>
+-                
+-                <div class="card-body-collapse">
+-                  <div class="teacher-header">
+-                    <div class="avatar-container avatar-3d">
+-                      <img src="assets/prof_egnis.png" alt="Prof. Egnis Cano" id="teacherAvatar">
+-                    </div>
+-                    <div class="teacher-info">
+-                      <span class="badge badge-cyan">Profesor Líder</span>
+-                      <h3 id="teacherNameDisplay">Prof. Egnis Cano</h3>
+-                      <p class="teacher-meta" id="teacherSubjectsDisplay"><span class="meta-icon">📐</span> Matemáticas | Aula 2B</p>
+-                      <p class="teacher-meta-id" id="teacherEmpIdDisplay"><span class="meta-icon">🆔</span> ID: ED-90210</p>
+-                    </div>
+-                  </div>
+-                  <div class="teacher-footer">
+-                    <div class="stat-pill">
+-                      <span class="stat-num" id="teacherAgeDisplay">32</span>
+-                      <span class="stat-lbl">Edad</span>
+-                    </div>
+-                    <div class="stat-pill">
+-                      <span class="stat-num" id="teacherStudentsCount">32</span>
+-                      <span class="stat-lbl">Alumnos</span>
+-                    </div>
+-                    <div class="stat-pill highlight">
+-                      <span class="stat-num" id="teacherGradeDisplay">2B</span>
+-                      <span class="stat-lbl">Salón</span>
+-                    </div>
+-                  </div>
+-                </div>
+-              </div>
++            <div class="form-group" style="margin-bottom: 16px;">
++              <label for="teacherSubjectSelect" style="font-weight: 800; font-size: 0.9rem; margin-bottom: 8px; display: block;">Seleccionar Materia:</label>
++              <select id="teacherSubjectSelect" style="width: 100%; border: 2px solid var(--text-main); border-radius: 12px; padding: 12px; font-family: 'Outfit'; font-weight: bold; background: var(--card-bg); color: var(--text-main);">
++                <!-- Options filled dynamically -->
++              </select>
++            </div>
+ 
+-              <!-- NODE C: Mid Node - Class List -->
+-              <div class="chubby-card class-list-card effect-3d" id="classListNode">
+-                <div class="card-header collapsible-header">
+-                  <h4><span class="icon">👥</span> Lista de Clases (<span id="activeClassLabel">Aula 2B</span>)</h4>
+-                  <div style="display: flex; align-items: center; gap: 8px;">
+-                    <span class="student-count" id="activeClassCount">3 Activos</span>
+-                    <span class="card-collapse-arrow">▲</span>
+-                  </div>
+-                </div>
+-                
+-                <div class="card-body-collapse">
+-                  <p class="helper-text">Selecciona un estudiante para expandir su ecosistema de datos:</p>
+-                  <div class="students-list" id="studentsList">
+-                    <!-- Dynamically populated via JS -->
+-                  </div>
+-                </div>
++            <div class="form-group" style="margin-bottom: 20px;">
++              <label style="font-weight: 800; font-size: 0.9rem; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
++                <span>Temarios / Temas Académicos (Máx. 7):</span>
++                <button type="button" class="chubby-btn primary" id="teacherAddSyllabusTopicBtn" style="padding: 6px 12px; font-size: 0.75rem; border-radius: 8px; height: auto; cursor: pointer;">➕ Añadir Tema</button>
++              </label>
++              <div id="teacherSyllabusContainer" style="display: flex; flex-direction: column; gap: 10px;">
++                <!-- Dynamically populated topic input fields -->
+               </div>
++            </div>
+ 
+-            </section>
++            <!-- Dynamic Activities Configuration -->
++            <div class="form-group" style="margin-bottom: 20px;">
++              <label style="font-weight: 800; font-size: 0.9rem; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
++                <span>Trabajos / Tareas Evaluables (Máx. 7):</span>
++                <button type="button" class="chubby-btn primary" id="teacherAddActivityBtn" style="padding: 6px 12px; font-size: 0.75rem; border-radius: 8px; height: auto; cursor: pointer;">➕ Añadir Actividad</button>
++              </label>
++              <div id="teacherActivitiesContainer" style="display: flex; flex-direction: column; gap: 10px;">
++                <!-- Dynamically populated activity input fields -->
++              </div>
++            </div>
+ 
+-            <!-- MIDDLE COLUMN: Expanded Details Panel (Node D) -->
+-            <section class="dashboard-col detail-col" id="detailPanel">
+-              
+-              <div class="chubby-card student-detail-card effect-3d active" id="studentDetailCard">
+-                <div class="card-glow-bg"></div>
+-                <div class="card-header collapsible-header">
+-                  <h4><span class="icon">📊</span> Ficha del Estudiante</h4>
+-                  <span class="card-collapse-arrow">▲</span>
++            <button class="chubby-btn primary full-width" id="teacherSavePlanningBtn" style="height: 48px;">
++              <span>💾 Guardar Planificación de Materia</span>
++            </button>
++          </div>
++        </section>
++    </div>
++  </div>
++
++  <!-- FLOATING OVERLAY: Sliding Teacher Chat Sidebar -->
++  <div id="teacherChatOverlay" class="chat-overlay hidden">
++    <div class="chat-sidebar-card" id="teacherChatSidebar">
++      <div class="chubby-card communication-card effect-3d" style="flex: 1; height: 100%; display: flex; flex-direction: column; margin: 0; border: none; border-radius: 0; background: var(--card-bg);">
++        <div class="card-header" style="position: relative;">
++          <h4><span class="icon">💬</span> Mensajería Docente</h4>
++          <div style="display: flex; align-items: center; gap: 8px; margin-right: 28px;">
++            <span class="badge badge-orange animate-pulse">En Vivo</span>
++          </div>
++          <button id="closeTeacherChatBtn" style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 1.5rem; font-weight: bold; color: var(--text-main); cursor: pointer; padding: 0; line-height: 1;">✖</button>
++        </div>
++        
++        <div style="flex: 1; display: flex; flex-direction: column; min-height: 0; padding: 16px; background: var(--card-bg);">
++          <div class="chat-display-area" id="teacherChatArea" style="flex: 1; overflow-y: auto; padding: 12px; margin-bottom: 12px; background: var(--color-bg-light); border: 2px solid var(--text-main); border-radius: 16px;">
++            <!-- Chat bubbles populate dynamically -->
++            <p class="chat-placeholder">Selecciona un alumno para chatear con su acudiente...</p>
++          </div>
++
++          <!-- Chat Input with Attachment clip -->
++          <div class="chat-input-bar" style="display: flex; gap: 8px; align-items: center;">
++            <input type="file" id="teacherChatFileInput" accept=".pdf,.jpg,.jpeg,.png" style="display: none;">
++            <button class="chubby-btn secondary round-btn" id="teacherChatAttachBtn" type="button" style="padding: 0; width: 40px; height: 40px; min-width: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">
++              <span>📎</span>
++            </button>
++            <input type="text" id="teacherChatInputField" placeholder="Escribe un mensaje al tutor..." autocomplete="off" style="flex: 1;">
++            <button class="chubby-btn primary" id="teacherChatSendBtn" style="min-width: 40px; width: 40px; height: 40px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center;">
++              <span>➔</span>
++            </button>
++          </div>
++        </div>
++      </div>
++    </div>
++  </div>
++
++  <!-- SIACE Sync Modal -->
++  <div class="modal-overlay hidden" id="siaceModal">
++    <div class="chubby-card modal-card effect-3d" style="max-width: 500px;">
++      <div class="modal-header no-print">
++        <h3>⚡ Sincronización MEDUCA SIACE</h3>
++        <button class="close-btn" id="closeSiaceModalBtn">×</button>
++      </div>
++      <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px;">
++        <div class="siace-student-info" style="background: var(--bg-app); border: 2px solid var(--text-main); padding: 12px; border-radius: 16px;">
++          <div style="font-weight: 800; font-size: 1.05rem;" id="siaceModalStudentName">Estudiante: --</div>
++          <div style="font-size: 0.8rem; color: var(--text-sub);" id="siaceModalStudentId">Cédula: --</div>
++        </div>
++        
++        <div class="siace-progress-container">
++          <div style="display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: bold; margin-bottom: 6px; color: var(--text-main);">
++            <span id="siaceProgressStatus">Iniciando...</span>
++            <span id="siaceProgressPercent">0%</span>
++          </div>
++          <div class="progress-bar-chubby" style="height: 14px; background: rgba(0,0,0,0.05); border-radius: 7px; overflow: hidden; border: 2px solid var(--text-main);">
++            <div id="siaceProgressFill" class="progress-fill" style="width: 0%; height: 100%; background: var(--color-purple); transition: width 0.2s;"></div>
++          </div>
++        </div>
++
++        <div class="siace-log-box" style="height: 150px; overflow-y: auto; background: #1e1e24; color: #a9ffb4; font-family: monospace; font-size: 0.75rem; padding: 10px; border-radius: 12px; border: 2px solid var(--text-main); line-height: 1.4; text-align: left;">
++          <!-- Log messages populated dynamically -->
++        </div>
++
++        <div class="siace-summary-box hidden" id="siaceSummaryBox" style="border: 2px dashed var(--color-purple); padding: 12px; border-radius: 16px; background: rgba(168, 85, 247, 0.05); display: flex; flex-direction: column; gap: 6px; text-align: left;">
++          <h4 style="margin: 0; font-family: 'Outfit'; font-weight: 800; color: var(--color-purple); font-size: 0.95rem;">Resumen de Sincronización</h4>
++          <div id="siaceSummaryGrades" style="font-size: 0.8rem; color: var(--text-main); display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
++            <!-- Calificaciones sync lists -->
++          </div>
++          <div style="border-top: 1px dashed var(--text-sub); padding-top: 6px; margin-top: 4px; font-size: 0.78rem; font-weight: bold; display: flex; justify-content: space-between; color: var(--text-main);">
++            <span>Código de Transacción:</span>
++            <span id="siaceTransactionCode" style="color: var(--color-purple);">SIACE-2025-XXXXXX</span>
++          </div>
++        </div>
++
++        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px;">
++          <button class="chubby-btn primary" id="siaceModalConfirmBtn" style="height: 38px; font-size: 0.85rem; padding: 0 20px;">
++            <span>Comenzar Sincronización</span>
++          </button>
++          <button class="chubby-btn secondary" id="siaceModalCloseBtn" style="height: 38px; font-size: 0.85rem; padding: 0 20px;">
++            <span>Cerrar</span>
++          </button>
++        </div>
++      </div>
++    </div>
++  </div>
++
++  <!-- Bulletin Report Card Modal -->
++  <div class="modal-overlay hidden" id="bulletinModal">
++    <div class="chubby-card modal-card effect-3d" style="max-width: 900px; width: 95%; max-height: 90vh; overflow-y: auto; padding: 20px;">
++      <div class="modal-header no-print">
++        <h3>📄 Generar Boletín Oficial de Calificaciones</h3>
++        <div style="display: flex; gap: 8px;">
++          <button class="chubby-btn primary" id="printBulletinBtn" style="height: 36px; padding: 0 16px; font-size: 0.8rem;">
++            <span>🖨️ Imprimir Boletín</span>
++          </button>
++          <button class="close-btn" id="closeBulletinModalBtn">×</button>
++        </div>
++      </div>
++      <div class="modal-body print-area" id="bulletinPrintArea" style="background: white; color: black; padding: 30px; border-radius: 12px; border: 2.5px solid #000; box-shadow: none; font-family: 'Outfit', 'Inter', sans-serif;">
++        <!-- Bulletin Content populated dynamically -->
++      </div>
++    </div>
++  </div>
++
++        <!-- Sliding Drawer for Teacher Management -->
++        <div class="teachers-drawer hidden" id="teachersDrawer">
++          <div class="drawer-header">
++            <h3>👨‍🏫 Gestión de Docentes</h3>
++            <button class="close-drawer-btn" id="closeDrawerBtn">×</button>
++          </div>
++          
++          <div class="drawer-body">
++            <!-- Toggle between List and Form -->
++            <div class="drawer-tabs">
++              <button class="tab-btn active" id="btnListTab">Lista</button>
++              <button class="tab-btn" id="btnFormTab">+ Registrar</button>
++            </div>
++
++            <!-- TAB 1: Teachers List -->
++            <div class="drawer-tab-content active" id="tabTeachersList">
++              <div class="teachers-container-list" id="teachersContainerList">
++                <!-- Dynamic teacher cards with accordions go here -->
++              </div>
++            </div>
++
++            <!-- TAB 2: Add Teacher Form -->
++            <div class="drawer-tab-content" id="tabAddTeacher">
++              <form id="addTeacherForm" class="chubby-form">
++                
++                <div class="form-group">
++                  <label for="regTeacherName">Nombre del Docente</label>
++                  <input type="text" id="regTeacherName" placeholder="Ej: Prof. María Delgado" required autocomplete="off">
+                 </div>
+                 
+-                <div class="card-body-collapse">
+-                  <!-- Selected Student Header -->
+-                  <div class="detail-header">
+-                    <div class="detail-avatar-container">
+-                      <img src="assets/student_juan.png" alt="Detalle Estudiante" id="detailStudentImg">
+-                    </div>
+-                    <div class="detail-title">
+-                      <span class="badge badge-lime" id="detailStudentRole">Estudiante Destacado</span>
+-                      <h3 id="detailStudentName">Juan Pérez</h3>
+-                      <p class="detail-subtext">Expediente: <strong id="detailStudentId">#EL-20412</strong></p>
+-                    </div>
++                <div class="form-row">
++                  <div class="form-group">
++                    <label for="regTeacherEmpId">N° Empleado</label>
++                    <input type="text" id="regTeacherEmpId" placeholder="Ej: ED-40812" required autocomplete="off">
++                  </div>
++                  <div class="form-group">
++                    <label for="regTeacherCedula">N° Cédula</label>
++                    <input type="text" id="regTeacherCedula" placeholder="Ej: 4-780-5543" required autocomplete="off">
+                   </div>
++                </div>
+ 
+-                  <!-- Widgets Grid -->
+-                  <div class="detail-widgets">
+-                    
+-                    <!-- Widget 1: Academic Grades by Subject -->
+-                    <div class="widget-box grades-widget">
+-                      <h5><span class="icon">📊</span> Calificaciones Académicas</h5>
+-                      <p class="widget-subtitle">Promedio por materia y período curricular</p>
+-                      
+-                      <div class="grades-table-container" id="gradesTableContainer">
+-                        <!-- Populated dynamically by JS -->
+-                        <p class="helper-text">Selecciona un alumno para ver sus calificaciones.</p>
+-                      </div>
+-                    </div>
++                <div class="form-row">
++                  <div class="form-group">
++                    <label for="regTeacherAge">Edad</label>
++                    <input type="number" id="regTeacherAge" placeholder="30" min="20" max="70" required>
++                  </div>
++                  <div class="form-group">
++                    <label for="regTeacherGrade">Grado Asignado</label>
++                    <select id="regTeacherGrade" required>
++                      <option value="2B">Aula 2B (Matemáticas)</option>
++                      <option value="3A">Aula 3A (Ciencias)</option>
++                      <option value="1A">Aula 1A (Inglés)</option>
++                    </select>
++                  </div>
++                </div>
+ 
+-                    <!-- Widget 2: Conduct (Emoji Matrix) -->
+-                    <div class="widget-box conduct-widget">
+-                      <h5><span class="icon">🎭</span> Conducta Escolar</h5>
+-                      <p class="widget-subtitle">Historial de comportamiento e interacción</p>
+-                      
+-                      <div class="emoji-matrix" id="conductMatrix">
+-                        <div class="emoji-btn active" data-conduct="excelente" title="Excelente">
+-                          <span class="emoji">🌟</span>
+-                          <span class="emoji-label">Brillante</span>
+-                        </div>
+-                        <div class="emoji-btn" data-conduct="participativo" title="Participativo">
+-                          <span class="emoji">🙋‍♂️</span>
+-                          <span class="emoji-label">Activo</span>
+-                        </div>
+-                        <div class="emoji-btn" data-conduct="enfocado" title="Enfocado">
+-                          <span class="emoji">🧠</span>
+-                          <span class="emoji-label">Enfocado</span>
+-                        </div>
+-                        <div class="emoji-btn" data-conduct="conversador" title="Conversador">
+-                          <span class="emoji">💬</span>
+-                          <span class="emoji-label">Platicador</span>
+-                        </div>
+-                      </div>
+-                      <div class="conduct-status-box">
+-                        <p id="conductDescription">Juan demuestra gran liderazgo y participación constante. ¡Sigue así!</p>
+-                      </div>
++                <div class="form-group">
++                  <label for="regTeacherPhoto">Foto de Perfil</label>
++                  <div class="file-upload-wrapper">
++                    <input type="file" id="regTeacherPhoto" accept="image/*" class="chubby-file-input">
++                    <div class="file-upload-preview" id="teacherPhotoPreview">
++                      <span>Subir Foto (PNG/JPG)</span>
+                     </div>
++                  </div>
++                </div>
+ 
+-                    <!-- Widget 3: Personal & Parent Data -->
+-                    <div class="widget-box parents-widget">
+-                      <h5><span class="icon">👪</span> Datos de Tutor & Contacto</h5>
+-                      <div class="parent-info-card">
+-                        <div class="parent-avatar">👨‍👩‍👦</div>
+-                        <div class="parent-meta">
+-                          <strong id="parentName">Carlos Pérez (Padre)</strong>
+-                          <span id="parentPhone">📞 +507 6890-4432</span>
+-                        </div>
+-                      </div>
+-                      <div class="contact-actions-grid">
+-                        <a href="tel:+50768904432" class="contact-icon-btn btn-3d call" title="Llamar">
+-                          <span>📞</span>
+-                        </a>
+-                        <button class="contact-icon-btn btn-3d chat" id="triggerDirectChat" title="Enviar Mensaje">
+-                          <span>💬</span>
+-                        </button>
+-                        <a href="mailto:carlos.perez@email.com" class="contact-icon-btn btn-3d email" title="Correo">
+-                          <span>✉️</span>
+-                        </a>
+-                      </div>
+-                    </div>
++                <div class="form-group">
++                  <label for="regTeacherSpecs">Especializaciones / Cursos (Separados por comas)</label>
++                  <input type="text" id="regTeacherSpecs" placeholder="Ej: Lic. en Educación, Diplomado en Robótica" required autocomplete="off">
++                </div>
+ 
+-                     <!-- Widget 6: Student Technical & Medical Data -->
+-                     <div class="widget-box technical-widget">
+-                       <h5><span class="icon">📋</span> Información General & Médica</h5>
+-                       <div class="technical-info-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.78rem; margin-top: 10px; color: var(--text-main);">
+-                         <div><strong>Cédula:</strong> <span id="detailStudentCedula">-</span></div>
+-                         <div><strong>Edad:</strong> <span id="detailStudentAge">-</span></div>
+-                         <div><strong>Año Nac.:</strong> <span id="detailStudentBirthYear">-</span></div>
+-                         <div><strong>Tipo Sangre:</strong> <span id="detailStudentBloodType">-</span></div>
+-                         <div style="grid-column: span 2;"><strong>Condición:</strong> <span id="detailStudentStatus">-</span> | <strong>Asistencia:</strong> <span id="detailStudentAttendance" style="font-weight: bold;">-</span></div>
+-                         <div style="grid-column: span 2;"><strong>Dirección:</strong> <span id="detailStudentAddress">-</span></div>
+-                         <div style="grid-column: span 2;"><strong>Cond. Médicas:</strong> <span id="detailStudentMedicalConditions">-</span></div>
+-                         <div style="grid-column: span 2; border-top: 1px dashed var(--text-main); padding-top: 6px; margin-top: 4px;">
+-                           <strong>Tutor 2:</strong> <span id="detailStudentTutor2Name">-</span> 
+-                           (<span id="detailStudentTutor2Phone">-</span>)
+-                         </div>
+-                       </div>
+-                     </div>
++                <div class="form-group">
++                  <label for="regTeacherSubjects">Asignaturas (Separadas por comas)</label>
++                  <input type="text" id="regTeacherSubjects" placeholder="Ej: Ciencias Naturales, Física, Química" required autocomplete="off">
++                </div>
+ 
+-                    <!-- Widget 4: Teacher Incidents Feed -->
+-                    <div class="widget-box incidents-widget" style="grid-column: span 2;">
+-                      <h5><span class="icon">⚠️</span> Registro de Incidencias (Docente)</h5>
+-                      <div class="incident-feed" id="adminStudentIncidentsFeed" style="max-height: 140px; margin-top: 8px;">
+-                        <p style="font-style: italic; font-size: 0.78rem; color: var(--text-secondary);">Selecciona un alumno para ver sus incidencias.</p>
+-                      </div>
+-                    </div>
++                <button type="submit" class="chubby-btn primary full-width">
++                  <span>💾 Registrar Docente</span>
++                </button>
++              </form>
++            </div>
++          </div>
++        </div>
+ 
+-                    <!-- Widget 5: Novelty Reports -->
+-                    <div class="widget-box novelties-widget" style="grid-column: span 2;">
+-                      <h5><span class="icon">📝</span> Informe de Novedades del Aula</h5>
+-                      <div id="adminStudentNoveltiesReport" style="font-size: 0.8rem; line-height: 1.4; color: var(--text-main); background: var(--color-bg-light); border: 1.5px solid var(--text-main); border-radius: 12px; padding: 10px; margin-top: 8px;">
+-                        <p style="font-style: italic; font-size: 0.78rem; color: var(--text-secondary);">Selecciona un alumno para ver sus novedades.</p>
+-                      </div>
+-                    </div>
++        <!-- Sliding Drawer for Student Management -->
++        <div class="students-drawer hidden" id="studentsDrawer">
++          <div class="drawer-header">
++            <h3>👥 Gestión de Estudiantes</h3>
++            <button class="close-drawer-btn" id="closeStudentsDrawerBtn">×</button>
++          </div>
++          
++          <div class="drawer-body">
++            <!-- Toggle between List and Form -->
++            <div class="drawer-tabs">
++              <button class="tab-btn active" id="btnStudentListTab">Lista</button>
++              <button class="tab-btn" id="btnStudentFormTab">+ Registrar</button>
++            </div>
++
++            <!-- TAB 1: Students List -->
++            <div class="drawer-tab-content active" id="tabStudentsList">
++              <div class="students-container-list" id="studentsContainerList">
++                <!-- Dynamic student cards go here -->
++              </div>
++            </div>
+ 
++            <!-- TAB 2: Add Student Form -->
++            <div class="drawer-tab-content" id="tabAddStudent">
++              <form id="addStudentForm" class="chubby-form">
++                
++                <div class="form-group">
++                  <label for="regStudentName">Nombre Completo</label>
++                  <input type="text" id="regStudentName" placeholder="Ej: Juan Pérez" required autocomplete="off">
++                </div>
++
++                <div class="form-row">
++                  <div class="form-group">
++                    <label for="regStudentCedula">Número de Cédula</label>
++                    <input type="text" id="regStudentCedula" placeholder="Ej: 8-990-1234" required autocomplete="off">
++                  </div>
++                  <div class="form-group">
++                    <label for="regStudentGrade">Grado Asignado</label>
++                    <select id="regStudentGrade" required>
++                      <option value="2B">Aula 2B</option>
++                      <option value="3A">Aula 3A</option>
++                      <option value="1A">Aula 1A</option>
++                    </select>
+                   </div>
++                </div>
+ 
+-                  <!-- Admin Edit Student & Generate Bulletin Buttons -->
+-                  <div style="padding: 0 16px 16px 16px; display: flex; gap: 10px;">
+-                    <button type="button" class="chubby-btn primary" id="adminEditStudentBtn" style="flex: 1; height: 42px; display: flex; justify-content: center; align-items: center; cursor: pointer;">
+-                      <span>✏️ Editar Datos</span>
+-                    </button>
+-                    <button type="button" class="chubby-btn secondary" id="adminGenerateBulletinBtn" style="flex: 1; height: 42px; display: flex; justify-content: center; align-items: center; cursor: pointer; border-color: var(--text-main);">
+-                      <span>📄 Generar Boletín</span>
+-                    </button>
++                <div class="form-row">
++                  <div class="form-group">
++                    <label for="regStudentAge">Edad</label>
++                    <input type="number" id="regStudentAge" placeholder="Ej: 8" required min="1" max="25">
++                  </div>
++                  <div class="form-group">
++                    <label for="regStudentBirthYear">Año de Nacimiento</label>
++                    <input type="number" id="regStudentBirthYear" placeholder="Ej: 2018" required min="1990" max="2026">
+                   </div>
++                </div>
+ 
+-                  <!-- Database Flow Connection -->
+-                  <div class="database-connection-footer">
+-                    <div class="flow-line-vertical">
+-                      <div class="pulse-dot"></div>
+-                    </div>
+-                    <div class="db-node-3d" id="databaseNode">
+-                      <div class="db-cylinder">
+-                        <div class="db-face db-top">EduLink Base de Datos</div>
+-                        <div class="db-face db-side"></div>
+-                      </div>
+-                      <div class="db-lights">
+-                        <span class="light active"></span>
+-                        <span class="light"></span>
+-                        <span class="light active"></span>
+-                      </div>
+-                    </div>
++                <div class="form-row">
++                  <div class="form-group">
++                    <label for="regStudentBloodType">Tipo de Sangre</label>
++                    <input type="text" id="regStudentBloodType" placeholder="Ej: O+" autocomplete="off">
++                  </div>
++                  <div class="form-group">
++                    <label for="regStudentStatus">Condición del Estudiante</label>
++                    <select id="regStudentStatus" required>
++                      <option value="Nuevo">Nuevo Ingreso</option>
++                      <option value="Traslado">Traslado</option>
++                    </select>
+                   </div>
+                 </div>
+-              </div>
+ 
+-            </section>
++                <div class="form-group">
++                  <label for="regStudentAddress">Dirección de Residencia</label>
++                  <input type="text" id="regStudentAddress" placeholder="Ej: Calle 50, Ciudad de Panamá" required autocomplete="off">
++                </div>
+ 
+-            <!-- RIGHT COLUMN: Integrated ERP Sections -->
+-            <section class="dashboard-col erp-col">
+-              
+-              <!-- Widget 4: Accounting & Finance Panel -->
+-              <div class="chubby-card finance-card effect-3d" id="financeNode" style="display: none;">
+-                <div class="card-glow-bg"></div>
+-                <div class="card-header collapsible-header">
+-                  <h4><span class="icon">💰</span> Contabilidad & Finanzas</h4>
+-                  <div style="display: flex; align-items: center; gap: 8px;">
+-                    <span class="badge badge-yellow">Presupuesto Escolar</span>
+-                    <span class="card-collapse-arrow">▲</span>
+-                  </div>
++                <div class="form-group">
++                  <label for="regStudentMedicalConditions">Condiciones Médicas / Alergias</label>
++                  <input type="text" id="regStudentMedicalConditions" placeholder="Ej: Alergia a la penicilina, asma, ninguna" autocomplete="off">
+                 </div>
+-                
+-                <div class="card-body-collapse">
+-                  <div class="finance-body">
+-                    <div class="finance-illustration">
+-                      <img src="assets/finance_icons.png" alt="Finanzas">
+-                    </div>
+-                    
+-                    <div class="finance-indicators">
+-                      <div class="finance-row">
+-                        <div class="finance-info">
+-                          <strong>Presupuesto FECE</strong>
+-                          <p>Fondo de Equidad y Calidad</p>
+-                        </div>
+-                        <div class="finance-value finance-fece-value">$12,450.00 <span class="val-total">/ $15k</span></div>
+-                      </div>
+-                      <!-- Progress Bar -->
+-                      <div class="progress-bar-chubby">
+-                        <div class="progress-fill" style="width: 83%;"></div>
+-                      </div>
+ 
+-                      <div class="finance-row mt-3">
+-                        <div class="finance-info">
+-                          <strong>Caja Menuda</strong>
+-                          <p>Gastos operativos rápidos</p>
+-                        </div>
+-                        <div class="finance-value positive finance-petty-cash-value">$320.50</div>
+-                      </div>
++                <div class="form-group">
++                  <label for="regStudentPhoto">Foto de Perfil</label>
++                  <div class="file-upload-wrapper">
++                    <input type="file" id="regStudentPhoto" accept="image/*" class="chubby-file-input">
++                    <div class="file-upload-preview" id="studentPhotoPreview">
++                      <span>Subir Foto (PNG/JPG)</span>
+                     </div>
+                   </div>
+-
+-                  <div class="finance-actions">
+-                    <button class="chubby-btn primary full-width" id="btnDispense">
+-                      <span>💸 Dispensa Rápida</span>
+-                    </button>
+-                  </div>
+                 </div>
+-              </div>
+ 
+-              <!-- Widget 5: Parent-Teacher Communication -->
+-              <div class="chubby-card communication-card effect-3d">
+-                <div class="card-header collapsible-header">
+-                  <h4><span class="icon">💬</span> Mensajería</h4>
+-                  <div style="display: flex; align-items: center; gap: 8px;">
+-                    <span class="badge badge-orange animate-pulse" id="liveBadge">En Vivo</span>
+-                    <span class="card-collapse-arrow">▲</span>
++                <div class="form-row">
++                  <div class="form-group">
++                    <label for="regStudentParentName">Nombre de Tutor 1</label>
++                    <input type="text" id="regStudentParentName" placeholder="Ej: Carlos Pérez" required autocomplete="off">
+                   </div>
+-                </div>
+-                
+-                <div class="card-body-collapse">
+-                  <div class="chat-display-area" id="chatArea">
+-                    <!-- Chat bubbles populate dynamically -->
+-                    <p class="chat-placeholder">Cargando mensajes del ecosistema...</p>
++                  <div class="form-group">
++                    <label for="regStudentParentPhone">Teléfono de Tutor 1</label>
++                    <input type="text" id="regStudentParentPhone" placeholder="Ej: +507 6890-4432" required autocomplete="off">
+                   </div>
++                </div>
+ 
+-                  <!-- Chat Input -->
+-                  <div class="chat-input-bar">
+-                    <input type="text" id="chatInputField" placeholder="Escribe un mensaje al tutor..." autocomplete="off">
+-                    <button class="chubby-btn primary round-btn" id="chatSendBtn">
+-                      <span>➔</span>
+-                    </button>
++                <div class="form-row">
++                  <div class="form-group">
++                    <label for="regStudentTutor2Name">Nombre de Tutor 2</label>
++                    <input type="text" id="regStudentTutor2Name" placeholder="Ej: Marta Gómez" autocomplete="off">
++                  </div>
++                  <div class="form-group">
++                    <label for="regStudentTutor2Phone">Teléfono de Tutor 2</label>
++                    <input type="text" id="regStudentTutor2Phone" placeholder="Ej: +507 6221-5589" autocomplete="off">
+                   </div>
+                 </div>
+-              </div>
+-
+-              <!-- Widget 6: Credentials widget removed as requested -->
+ 
+-            </section>
+-
+-          </div>
+-        </div>
+-      </div>
+-    </div>
++                <div class="form-group">
++                  <label for="regStudentParentEmail">Correo de Contacto (Opcional)</label>
++                  <input type="email" id="regStudentParentEmail" placeholder="Ej: tutor@email.com" autocomplete="off">
++                </div>
+ 
+-    <!-- Supabase Script Installation Modal -->
+-    <div class="modal-overlay hidden" id="sqlModal">
+-      <div class="chubby-card modal-card effect-3d">
+-        <div class="modal-header">
+-          <h3>⚡ Configurar Supabase Database</h3>
+-          <button class="close-btn" id="closeModalBtn">×</button>
+-        </div>
+-        <div class="modal-body">
+-          <p class="modal-desc">Copia el siguiente código SQL y ejecútalo en la pestaña <strong>SQL Editor</strong> en tu panel de Supabase para inicializar las tablas necesarias de la demo:</p>
+-          <div class="code-box-wrapper">
+-            <pre><code id="sqlCode">-- Cargando setup.sql...</code></pre>
+-            <button class="chubby-btn primary copy-btn" id="copySqlBtn">📋 Copiar Script SQL</button>
++                <button type="submit" class="chubby-btn primary full-width">
++                  <span>💾 Registrar Estudiante</span>
++                </button>
++              </form>
++            </div>
+           </div>
+-          <p class="modal-help">Una vez ejecutado en Supabase, <strong>recarga esta página</strong>. El banner desaparecerá y estarás conectado a tu base de datos Supabase real en tiempo real.</p>
+         </div>
+-      </div>
+-    </div>
+-  </div>
+ 
+-  <!-- ==========================================================================
+-     VISTA 3: PORTAL/DASHBOARD DE PROFESORES
+-     ========================================================================== -->
+-  <div class="dashboard-view hidden" id="teacherDashboardView">
+-    <!-- Main Simulator Wrapper -->
+-    <div class="simulator-wrapper" id="teacherSimulatorWrapper">
+-      
+-      <!-- Teacher Header -->
+-      <header class="app-header">
+-        <div class="header-left">
+-          <div class="logo-container" id="teacherDashboardSchoolLogoContainer">
+-            <img src="assets/logoedulink.png" alt="School Logo" class="brand-logo brand-logo-dashboard" id="teacherDashboardSchoolLogo">
+-          </div>
+-          <div class="school-admin-details">
+-            <h2 class="school-name-text" id="teacherDashboardSchoolName">EduLink Academia</h2>
+-            <p class="admin-name-text" id="teacherDashboardTeacherName">👤 Docente: --</p>
++        <!-- Sliding Drawer for Admin Settings & Users Creation -->
++        <div class="settings-drawer hidden" id="settingsDrawer">
++          <div class="drawer-header">
++            <h3>⚙️ Configuración & Usuarios</h3>
++            <button class="close-drawer-btn" id="closeSettingsDrawerBtn">×</button>
+           </div>
+-        </div>
+-        
+-        <div class="header-center">
+-          <span class="connection-status" id="teacherPortalGradeInfo" style="font-family: 'Outfit'; font-weight: 800; font-size: 1.1rem; color: var(--text-main); background: var(--color-bg-light); border: 2px solid var(--text-main); padding: 6px 16px; border-radius: 12px;">Grado: --</span>
+-        </div>
+-
+-        <div class="header-right">
+-          <!-- Theme Switcher -->
+-          <button id="teacherThemeToggle" class="chubby-btn secondary" title="Cambiar Tema">
+-            <span class="icon">🌓</span>
+-            <span class="btn-text">Tema</span>
+-          </button>
+-          <!-- Cerrar Sesión -->
+-          <button id="teacherLogoutBtn" class="chubby-btn logout-btn" title="Cerrar Sesión">
+-            <span class="icon">🔒</span>
+-            <span class="btn-text">Cerrar Sesión</span>
+-          </button>
+-        </div>
+-      </header>
++          
++          <div class="drawer-body">
++            <!-- Toggle between School Details Form, Create User Form, and Users List -->
++            <div class="drawer-tabs">
++              <button class="tab-btn active" id="btnSchoolDetailsTab">Datos Escuela</button>
++              <button class="tab-btn" id="btnCreateUserTab">+ Crear Usuario</button>
++              <button class="tab-btn" id="btnUsersListTab">👥 Usuarios</button>
++            </div>
+ 
+-      <!-- Navigation Bar for Teacher Portal -->
+-      <div class="teacher-nav-bar" style="display: flex; gap: 16px; margin: 0 24px 16px 24px; padding-bottom: 8px; border-bottom: 2px dashed rgba(0,0,0,0.15);">
+-        <button id="navTeacherAlumnos" class="chubby-btn primary" style="padding: 8px 18px; font-size: 0.95rem; border-radius: 12px; font-family: 'Outfit'; font-weight: 800; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+-          <span>👥 Alumnos y Comunicaciones</span>
+-        </button>
+-        <button id="navTeacherPlanificacion" class="chubby-btn secondary" style="padding: 8px 18px; font-size: 0.95rem; border-radius: 12px; font-family: 'Outfit'; font-weight: 800; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+-          <span>📚 Planificación y Materias</span>
+-        </button>
+-      </div>
++            <!-- TAB 1: Modify School Details -->
++            <div class="drawer-tab-content active" id="tabSchoolDetails">
++              <form id="modifySchoolForm" class="chubby-form">
++                
++                <div class="form-group">
++                  <label for="modSchoolName">Nombre de la Escuela</label>
++                  <input type="text" id="modSchoolName" placeholder="Ej: Colegio San Marcos" autocomplete="off">
++                </div>
+ 
+-      <!-- App Container for Teacher Dashboard: Alumnos Screen -->
+-      <div class="app-screen" id="teacherAppScreen" style="display: flex; gap: 20px; flex: 1; min-height: 0; box-sizing: border-box; overflow: hidden; padding-bottom: 8px;">
+-        
+-        <!-- LEFT COLUMN: Student List with Attendance and Grades Accordions -->
+-        <section class="dashboard-col" style="flex: 1; display: flex; flex-direction: column; gap: 16px; min-width: 0; background: var(--card-bg); border: 2px solid var(--text-main); border-radius: 24px; padding: 24px; box-shadow: var(--shadow-chubby); overflow: hidden;">
+-          
+-          <h3 style="font-family: 'Outfit', sans-serif; font-weight: 800; color: var(--text-main); margin: 0 0 4px 0; display: flex; align-items: center; gap: 8px;"><span class="icon">👥</span> Control de Alumnos</h3>
+-          <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 0 0 10px 0; line-height: 1.4;">
+-            Haz clic en el <strong>nombre del estudiante</strong> para calificar por materias o chatear. Haz clic en la <strong>foto</strong> para ampliarla. Marca su <strong>asistencia</strong> en el checkbox (vacío representa ausencia).
+-          </p>
+-          <div id="teacherPortalStudentsList" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 4px;">
+-            <!-- Alphabetical student rows dynamically loaded -->
+-          </div>
++                <div class="form-group">
++                  <label for="modSchoolAddress">Dirección de la Escuela</label>
++                  <input type="text" id="modSchoolAddress" placeholder="Ej: Calle 50, Ciudad de Panamá" autocomplete="off">
++                </div>
+ 
+-        </section>
+-      </div>
++                <div class="form-group">
++                  <label for="modAdminName">Nombre del Administrador</label>
++                  <input type="text" id="modAdminName" placeholder="Ej: Juan Pérez" autocomplete="off">
++                </div>
+ 
+-      <!-- App Container for Teacher Dashboard: Planificación Screen -->
+-      <div class="app-screen hidden" id="teacherPlanningScreen" style="display: flex; gap: 20px; flex: 1; min-height: 0; box-sizing: border-box; overflow: hidden; padding-bottom: 8px;">
+-        
+-        <!-- LEFT COLUMN: Add Subject -->
+-        <section class="dashboard-col" style="flex: 1; display: flex; flex-direction: column; gap: 16px; min-width: 0; background: var(--card-bg); border: 2px solid var(--text-main); border-radius: 24px; padding: 24px; box-shadow: var(--shadow-chubby); overflow-y: auto;">
+-          <div class="chubby-form">
+-            <h3 style="font-family: 'Outfit', sans-serif; font-weight: 800; color: var(--text-main); margin: 0 0 8px 0; display: flex; align-items: center; gap: 8px;"><span class="icon">📚</span> Carga de Asignaturas</h3>
+-            <p style="font-size: 0.85rem; opacity: 0.7; margin-bottom: 20px; line-height: 1.4;">Agrega nuevas materias a tu carga académica para poder configurar sus contenidos académicos y tareas.</p>
+-            
+-            <div class="form-group" style="margin-bottom: 20px;">
+-              <label for="teacherNewSubjectInput" style="font-weight: 800; font-size: 0.9rem; margin-bottom: 8px; display: block;">Nombre de la Asignatura:</label>
+-              <input type="text" id="teacherNewSubjectInput" placeholder="Ej: Ciencias Naturales" style="width: 100%; border: 2px solid var(--text-main); border-radius: 12px; padding: 12px; font-family: 'Outfit'; font-weight: bold; box-sizing: border-box; background: var(--card-bg); color: var(--text-main);">
+-            </div>
+-            <button class="chubby-btn primary full-width" id="teacherAddSubjectBtn" style="height: 48px;">
+-              <span>➕ Añadir Asignatura</span>
+-            </button>
+-          </div>
+-        </section>
++                <div class="form-group">
++                  <label for="modSchoolLogo">Logo de la Escuela</label>
++                  <div class="file-upload-wrapper">
++                    <input type="file" id="modSchoolLogo" accept="image/*" class="chubby-file-input">
++                    <div class="file-upload-preview" id="modSchoolLogoPreview">
++                      <span>Subir Nuevo Logo (PNG/JPG)</span>
++                    </div>
++                  </div>
++                </div>
+ 
+-        <!-- RIGHT COLUMN: Syllabus & Tasks planning -->
+-        <section class="dashboard-col" style="flex: 1.5; display: flex; flex-direction: column; gap: 16px; min-width: 0; background: var(--card-bg); border: 2px solid var(--text-main); border-radius: 24px; padding: 24px; box-shadow: var(--shadow-chubby); overflow-y: auto;">
+-          <div class="chubby-form">
+-            <h3 style="font-family: 'Outfit', sans-serif; font-weight: 800; color: var(--text-main); margin: 0 0 8px 0; display: flex; align-items: center; gap: 8px;"><span class="icon">📑</span> Temarios y Trabajos</h3>
+-            <p style="font-size: 0.85rem; opacity: 0.7; margin-bottom: 20px; line-height: 1.4;">Configura el temario académico y añade hasta 7 trabajos o tareas evaluables por materia.</p>
+-            
+-            <div class="form-group" style="margin-bottom: 16px;">
+-              <label for="teacherSubjectSelect" style="font-weight: 800; font-size: 0.9rem; margin-bottom: 8px; display: block;">Seleccionar Materia:</label>
+-              <select id="teacherSubjectSelect" style="width: 100%; border: 2px solid var(--text-main); border-radius: 12px; padding: 12px; font-family: 'Outfit'; font-weight: bold; background: var(--card-bg); color: var(--text-main);">
+-                <!-- Options filled dynamically -->
+-              </select>
++                <button type="submit" class="chubby-btn primary full-width">
++                  <span>💾 Guardar Cambios</span>
++                </button>
++              </form>
+             </div>
+ 
+-            <div class="form-group" style="margin-bottom: 20px;">
+-              <label style="font-weight: 800; font-size: 0.9rem; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+-                <span>Temarios / Temas Académicos (Máx. 7):</span>
+-                <button type="button" class="chubby-btn primary" id="teacherAddSyllabusTopicBtn" style="padding: 6px 12px; font-size: 0.75rem; border-radius: 8px; height: auto; cursor: pointer;">➕ Añadir Tema</button>
+-              </label>
+-              <div id="teacherSyllabusContainer" style="display: flex; flex-direction: column; gap: 10px;">
+-                <!-- Dynamically populated topic input fields -->
+-              </div>
+-            </div>
++            <!-- TAB 2: Create Users -->
++            <div class="drawer-tab-content" id="tabCreateUser">
++              <form id="createUserForm" class="chubby-form">
++                
++                <div class="form-group">
++                  <label for="createUserName" id="createUserNameLabel">Nombre Completo</label>
++                  <input type="text" id="createUserName" placeholder="Ej: Lic. Ana Reyes" autocomplete="off">
++                  <select id="createUserTeacherSelect" style="display: none; width: 100%; border: 2px solid var(--text-main); border-radius: 12px; padding: 10px; font-family: 'Outfit'; font-weight: bold; background: var(--card-bg); color: var(--text-main);">
++                    <!-- populated dynamically in JS -->
++                  </select>
++                </div>
+ 
+-            <!-- Dynamic Activities Configuration -->
+-            <div class="form-group" style="margin-bottom: 20px;">
+-              <label style="font-weight: 800; font-size: 0.9rem; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+-                <span>Trabajos / Tareas Evaluables (Máx. 7):</span>
+-                <button type="button" class="chubby-btn primary" id="teacherAddActivityBtn" style="padding: 6px 12px; font-size: 0.75rem; border-radius: 8px; height: auto; cursor: pointer;">➕ Añadir Actividad</button>
+-              </label>
+-              <div id="teacherActivitiesContainer" style="display: flex; flex-direction: column; gap: 10px;">
+-                <!-- Dynamically populated activity input fields -->
+-              </div>
+-            </div>
++                <div class="form-row">
++                  <div class="form-group">
++                    <label for="createUserRole">Rol de Usuario</label>
++                    <select id="createUserRole">
++                      <option value="secretaria">📝 Secretaria</option>
++                      <option value="profesores">👨‍🏫 Profesor</option>
++                      <option value="sub administrador">🔑 Sub Administrador</option>
++                    </select>
++                  </div>
++                  <div class="form-group">
++                    <label for="createUserPhone">Número de Teléfono</label>
++                    <input type="text" id="createUserPhone" placeholder="Ej: +507 6200-0000" autocomplete="off">
++                  </div>
++                </div>
+ 
+-            <button class="chubby-btn primary full-width" id="teacherSavePlanningBtn" style="height: 48px;">
+-              <span>💾 Guardar Planificación de Materia</span>
+-            </button>
+-          </div>
+-        </section>
+-    </div>
+-  </div>
++                <div class="form-group">
++                  <label for="createUserEmail">Correo Electrónico</label>
++                  <input type="email" id="createUserEmail" placeholder="Ej: ana.reyes@escuela.edu" autocomplete="off">
++                </div>
+ 
+-  <!-- FLOATING OVERLAY: Sliding Teacher Chat Sidebar -->
+-  <div id="teacherChatOverlay" class="chat-overlay hidden">
+-    <div class="chat-sidebar-card" id="teacherChatSidebar">
+-      <div class="chubby-card communication-card effect-3d" style="flex: 1; height: 100%; display: flex; flex-direction: column; margin: 0; border: none; border-radius: 0; background: var(--card-bg);">
+-        <div class="card-header" style="position: relative;">
+-          <h4><span class="icon">💬</span> Mensajería Docente</h4>
+-          <div style="display: flex; align-items: center; gap: 8px; margin-right: 28px;">
+-            <span class="badge badge-orange animate-pulse">En Vivo</span>
+-          </div>
+-          <button id="closeTeacherChatBtn" style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 1.5rem; font-weight: bold; color: var(--text-main); cursor: pointer; padding: 0; line-height: 1;">✖</button>
+-        </div>
+-        
+-        <div style="flex: 1; display: flex; flex-direction: column; min-height: 0; padding: 16px; background: var(--card-bg);">
+-          <div class="chat-display-area" id="teacherChatArea" style="flex: 1; overflow-y: auto; padding: 12px; margin-bottom: 12px; background: var(--color-bg-light); border: 2px solid var(--text-main); border-radius: 16px;">
+-            <!-- Chat bubbles populate dynamically -->
+-            <p class="chat-placeholder">Selecciona un alumno para chatear con su acudiente...</p>
+-          </div>
++                <div class="form-group">
++                  <label for="createUserPassword">Contraseña de Acceso</label>
++                  <input type="password" id="createUserPassword" placeholder="Mínimo 6 caracteres" autocomplete="off">
++                </div>
+ 
+-          <!-- Chat Input with Attachment clip -->
+-          <div class="chat-input-bar" style="display: flex; gap: 8px; align-items: center;">
+-            <input type="file" id="teacherChatFileInput" accept=".pdf,.jpg,.jpeg,.png" style="display: none;">
+-            <button class="chubby-btn secondary round-btn" id="teacherChatAttachBtn" type="button" style="padding: 0; width: 40px; height: 40px; min-width: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+-              <span>📎</span>
+-            </button>
+-            <input type="text" id="teacherChatInputField" placeholder="Escribe un mensaje al tutor..." autocomplete="off" style="flex: 1;">
+-            <button class="chubby-btn primary" id="teacherChatSendBtn" style="min-width: 40px; width: 40px; height: 40px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center;">
+-              <span>➔</span>
+-            </button>
+-          </div>
+-        </div>
+-      </div>
+-    </div>
+-  </div>
++                <button type="submit" class="chubby-btn primary full-width">
++                  <span>➕ Crear Usuario</span>
++                </button>
++              </form>
++            </div>
+ 
+-  <!-- SIACE Sync Modal -->
+-  <div class="modal-overlay hidden" id="siaceModal">
+-    <div class="chubby-card modal-card effect-3d" style="max-width: 500px;">
+-      <div class="modal-header no-print">
+-        <h3>⚡ Sincronización MEDUCA SIACE</h3>
+-        <button class="close-btn" id="closeSiaceModalBtn">×</button>
+-      </div>
+-      <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px;">
+-        <div class="siace-student-info" style="background: var(--bg-app); border: 2px solid var(--text-main); padding: 12px; border-radius: 16px;">
+-          <div style="font-weight: 800; font-size: 1.05rem;" id="siaceModalStudentName">Estudiante: --</div>
+-          <div style="font-size: 0.8rem; color: var(--text-sub);" id="siaceModalStudentId">Cédula: --</div>
+-        </div>
+-        
+-        <div class="siace-progress-container">
+-          <div style="display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: bold; margin-bottom: 6px; color: var(--text-main);">
+-            <span id="siaceProgressStatus">Iniciando...</span>
+-            <span id="siaceProgressPercent">0%</span>
+-          </div>
+-          <div class="progress-bar-chubby" style="height: 14px; background: rgba(0,0,0,0.05); border-radius: 7px; overflow: hidden; border: 2px solid var(--text-main);">
+-            <div id="siaceProgressFill" class="progress-fill" style="width: 0%; height: 100%; background: var(--color-purple); transition: width 0.2s;"></div>
++            <!-- TAB 3: List of Created Users -->
++            <div class="drawer-tab-content" id="tabUsersList">
++              <div class="users-list-wrapper">
++                <p class="helper-text">Listado de cuentas y accesos del personal creado:</p>
++                <div class="created-users-list" id="createdUsersList">
++                  <!-- Dynamically populated by JS -->
++                </div>
++              </div>
++            </div>
+           </div>
+         </div>
+ 
+-        <div class="siace-log-box" style="height: 150px; overflow-y: auto; background: #1e1e24; color: #a9ffb4; font-family: monospace; font-size: 0.75rem; padding: 10px; border-radius: 12px; border: 2px solid var(--text-main); line-height: 1.4; text-align: left;">
+-          <!-- Log messages populated dynamically -->
+-        </div>
+-
+-        <div class="siace-summary-box hidden" id="siaceSummaryBox" style="border: 2px dashed var(--color-purple); padding: 12px; border-radius: 16px; background: rgba(168, 85, 247, 0.05); display: flex; flex-direction: column; gap: 6px; text-align: left;">
+-          <h4 style="margin: 0; font-family: 'Outfit'; font-weight: 800; color: var(--color-purple); font-size: 0.95rem;">Resumen de Sincronización</h4>
+-          <div id="siaceSummaryGrades" style="font-size: 0.8rem; color: var(--text-main); display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
+-            <!-- Calificaciones sync lists -->
+-          </div>
+-          <div style="border-top: 1px dashed var(--text-sub); padding-top: 6px; margin-top: 4px; font-size: 0.78rem; font-weight: bold; display: flex; justify-content: space-between; color: var(--text-main);">
+-            <span>Código de Transacción:</span>
+-            <span id="siaceTransactionCode" style="color: var(--color-purple);">SIACE-2025-XXXXXX</span>
++        <!-- Sliding Drawer for Accounting & Finance -->
++        <div class="finance-drawer hidden" id="financeDrawer">
++          <div class="drawer-header">
++            <h3>💰 Contabilidad & Finanzas</h3>
++            <button class="close-drawer-btn" id="closeFinanceDrawerBtn">×</button>
+           </div>
+-        </div>
++          <div class="drawer-body">
++            <p class="helper-text" style="margin-bottom: 20px;">Administración presupuestaria y caja menuda de la institución (Fondo FECE):</p>
++            
++            <div class="finance-indicators" style="background: var(--color-bg-light); border: 2px solid var(--text-main); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);">
++              <div class="finance-row" style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
++                <div class="finance-info">
++                  <strong style="display: block; font-family: 'Outfit', sans-serif; font-size: 1.05rem; color: var(--text-main);">Presupuesto FECE</strong>
++                  <p style="margin: 0; font-size: 0.8rem; opacity: 0.7;">Fondo de Equidad y Calidad</p>
++                </div>
++                <div class="finance-value finance-fece-value" style="font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.25rem; color: var(--text-main);">$12,450.00 <span class="val-total" style="font-size: 0.8rem; font-weight: normal; opacity: 0.6;">/ $15k</span></div>
++              </div>
++              
++              <!-- Progress Bar -->
++              <div class="progress-bar-chubby" style="width: 100%; height: 12px; background: rgba(0, 0, 0, 0.05); border: 2px solid var(--text-main); border-radius: 8px; overflow: hidden; position: relative;">
++                <div class="progress-fill" style="width: 83%; height: 100%; background: linear-gradient(90deg, var(--color-lime), var(--color-cyan)); transition: width 0.4s ease;"></div>
++              </div>
+ 
+-        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px;">
+-          <button class="chubby-btn primary" id="siaceModalConfirmBtn" style="height: 38px; font-size: 0.85rem; padding: 0 20px;">
+-            <span>Comenzar Sincronización</span>
+-          </button>
+-          <button class="chubby-btn secondary" id="siaceModalCloseBtn" style="height: 38px; font-size: 0.85rem; padding: 0 20px;">
+-            <span>Cerrar</span>
+-          </button>
+-        </div>
+-      </div>
+-    </div>
+-  </div>
++              <div class="finance-row mt-3" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; border-top: 1.5px dashed var(--text-main); padding-top: 16px; margin-top: 4px;">
++                <div class="finance-info">
++                  <strong style="display: block; font-family: 'Outfit', sans-serif; font-size: 1.05rem; color: var(--text-main);">Caja Menuda</strong>
++                  <p style="margin: 0; font-size: 0.8rem; opacity: 0.7;">Gastos operativos rápidos</p>
++                </div>
++                <div class="finance-value positive finance-petty-cash-value" style="font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.25rem; color: var(--color-lime);">$320.50</div>
++              </div>
++            </div>
+ 
+-  <!-- Bulletin Report Card Modal -->
+-  <div class="modal-overlay hidden" id="bulletinModal">
+-    <div class="chubby-card modal-card effect-3d" style="max-width: 900px; width: 95%; max-height: 90vh; overflow-y: auto; padding: 20px;">
+-      <div class="modal-header no-print">
+-        <h3>📄 Generar Boletín Oficial de Calificaciones</h3>
+-        <div style="display: flex; gap: 8px;">
+-          <button class="chubby-btn primary" id="printBulletinBtn" style="height: 36px; padding: 0 16px; font-size: 0.8rem;">
+-            <span>🖨️ Imprimir Boletín</span>
+-          </button>
+-          <button class="close-btn" id="closeBulletinModalBtn">×</button>
++            <div class="chubby-form">
++              <div class="form-group" style="margin-bottom: 16px;">
++                <label style="display: block; font-family: 'Outfit', sans-serif; font-weight: 700; margin-bottom: 8px;">💸 Dispensa de Fondos Rápida</label>
++                <p style="font-size: 0.8rem; opacity: 0.7; margin-top: -4px; margin-bottom: 16px; line-height: 1.4;">
++                  Realiza transferencias rápidas de $500 desde el Presupuesto FECE hacia la Caja Menuda para gastos operativos inmediatos.
++                </p>
++              </div>
++              <button class="chubby-btn primary full-width" id="btnDrawerDispense">
++                <span>💸 Dispensa Rápida</span>
++              </button>
++            </div>
++          </div>
+         </div>
+-      </div>
+-      <div class="modal-body print-area" id="bulletinPrintArea" style="background: white; color: black; padding: 30px; border-radius: 12px; border: 2.5px solid #000; box-shadow: none; font-family: 'Outfit', 'Inter', sans-serif;">
+-        <!-- Bulletin Content populated dynamically -->
+-      </div>
+-    </div>
+-  </div>
++        
+ 
+   <!-- Toast Notification System -->
+   <div class="toast-container" id="toastContainer"></div>
+@@ -1550,6 +1594,6 @@
+   <!-- Supabase JS Client SDK -->
+   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+   <!-- Local Application Script -->
+-  <script src="app.js?v=1.0.4"></script>
++  <script src="app.js?v=1.0.11"></script>
+ </body>
+ </html>
