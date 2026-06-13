@@ -6195,13 +6195,13 @@ body.dark-theme .chat-active-header {
 
 /* ── 5. DASHBOARD VIEW – OVERFLOW SAFE ───────────────────── */
 @media (max-width: 1024px) {
-  .dashboard-view {
+  .dashboard-view:not(.hidden) {
     height: 100dvh !important;
     overflow: hidden !important;
     display: flex !important;
     flex-direction: column !important;
   }
-  .dashboard-view .main-content {
+  .dashboard-view:not(.hidden) .main-content {
     flex: 1 1 auto !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
@@ -6276,14 +6276,38 @@ body.dark-theme .chat-active-header {
 }
 
 @media (max-width: 768px) {
+  #parentDashboardView:not(.hidden) {
+    height: auto !important;
+    min-height: 100vh !important;
+    min-height: 100dvh !important;
+    overflow-y: auto !important;
+    display: block !important;
+  }
+  #parentDashboardView:not(.hidden) .main-content {
+    height: auto !important;
+    overflow: visible !important;
+    display: block !important;
+    padding: 10px !important;
+  }
+  #parentDashboardView:not(.hidden) .parent-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    overflow: visible !important;
+    gap: 16px !important;
+  }
+  #parentDashboardView:not(.hidden) .parent-grid > section {
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+  }
   #parentDashboardView .top-bar { flex-wrap: wrap; height: auto !important; padding: 8px 12px !important; gap: 6px; }
-  #parentDashboardView .main-content { padding: 10px !important; overflow-y: auto !important; }
   #parentStudentAvatar { width: 54px !important; height: 54px !important; border-radius: 10px !important; }
   #parentStudentName { font-size: 1.4rem !important; }
   #parentStudentGrade { font-size: 0.88rem !important; }
   .accordion-card-header { padding: 10px 14px !important; }
   .accordion-card-header h4 { font-size: 0.94rem !important; }
-  #parentDashboardView .chat-section { height: 300px !important; }
+  #parentDashboardView .chat-section { height: 300px !important; overflow: hidden !important; display: flex !important; flex-direction: column !important; }
 }
 
 @media (max-width: 480px) {
@@ -6297,22 +6321,29 @@ body.dark-theme .chat-active-header {
 
 /* ── 8. AUTH MODAL ───────────────────────────────────────── */
 @media (max-width: 768px) {
-  .modal-overlay { padding: 10px; align-items: flex-end; }
-  #authSection .chubby-card.modal-card {
+  .auth-section.active {
+    display: block !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 16px 12px !important;
+  }
+  #authSection .auth-container {
     width: 100% !important;
     max-width: 100% !important;
+    margin: 20px auto !important;
     padding: 18px !important;
-    border-radius: 24px 24px 0 0 !important;
-    max-height: 96vh !important;
-    overflow-y: auto !important;
+    border-radius: 24px !important;
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
   }
   .auth-tabs { gap: 4px !important; }
-  .auth-tab-btn { font-size: 0.78rem !important; padding: 8px 10px !important; }
+  .auth-tab { font-size: 0.78rem !important; padding: 8px 10px !important; }
 }
 
 @media (max-width: 480px) {
-  #authSection .chubby-card.modal-card { padding: 14px !important; }
-  .auth-tab-btn { font-size: 0.72rem !important; padding: 6px 8px !important; }
+  #authSection .auth-container { padding: 14px !important; }
+  .auth-tab { font-size: 0.72rem !important; padding: 6px 8px !important; }
 }
 
 /* ── 9. OTHER MODALS (SIACE, BULLETIN) ───────────────────── */
