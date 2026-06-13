@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=1.0.4">
+  <link rel="stylesheet" href="style.css?v=1.0.11">
 </head>
 <body class="light-theme">
 
@@ -577,6 +577,12 @@
         </div>
 
         <div class="header-right">
+          <!-- Alumnos Drawer Toggle Button -->
+          <button id="studentPanelToggle" class="chubby-btn primary" title="Gestión de Estudiantes">
+            <span class="icon">👥</span>
+            <span class="btn-text">Alumnos</span>
+          </button>
+
           <!-- Dropdown Menu for Admin Operations -->
           <div class="admin-dropdown-wrapper">
             <button id="adminDropdownMenuBtn" class="chubby-btn primary" title="Menú Administrativo">
@@ -585,14 +591,14 @@
               <span class="chevron" style="display: inline-block; margin-left: 6px; transition: transform 0.2s ease;">▼</span>
             </button>
             <div class="admin-dropdown-content hidden" id="adminDropdownMenu">
+              <button id="adminLandingToggle" class="admin-dropdown-item" title="Vista General">
+                <span class="icon">🏛️</span> Vista General
+              </button>
               <button id="adminSettingsPanelToggle" class="admin-dropdown-item" title="Configuración de Escuela">
                 <span class="icon">⚙️</span> Configuración
               </button>
               <button id="teacherPanelToggle" class="admin-dropdown-item" title="Gestión de Profesores">
                 <span class="icon">👨‍🏫</span> Docentes
-              </button>
-              <button id="studentPanelToggle" class="admin-dropdown-item" title="Gestión de Estudiantes">
-                <span class="icon">👥</span> Alumnos
               </button>
               <button id="financePanelToggle" class="admin-dropdown-item" title="Contabilidad & Finanzas">
                 <span class="icon">💰</span> Finanzas FECE
@@ -994,7 +1000,45 @@
           </div>
 
           <!-- Main Dashboard Layout -->
-          <div class="dashboard-grid">
+          
+          <!-- Admin Landing Page: Vista General -->
+          <div class="admin-landing-view" id="adminLandingView">
+            <!-- Title -->
+            <div class="landing-title-block">
+              <h2>Vista General</h2>
+              <p>Resumen y administración rápida del colegio</p>
+            </div>
+
+            <div class="landing-accordion-container">
+              <!-- Accordion 1: Docentes -->
+              <div class="chubby-card accordion-card" id="landingDocentesCard">
+                <div class="accordion-card-header" style="display:flex; justify-content:space-between; align-items:center; padding:18px 22px; cursor:pointer;">
+                  <h4 style="margin:0;"><span class="icon">👨‍🏫</span> Lista de Docentes (<span id="landingDocentesCount">0</span>)</h4>
+                  <span class="accordion-arrow" style="transition: transform 0.3s; font-size: 0.8rem; color: var(--text-muted); display: inline-block;">▼</span>
+                </div>
+                <div class="accordion-card-content" id="landingDocentesContent">
+                  <div class="accordion-card-content-inner">
+                    <div id="landingDocentesList"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Accordion 2: Aulas -->
+              <div class="chubby-card accordion-card" id="landingAulasCard">
+                <div class="accordion-card-header" style="display:flex; justify-content:space-between; align-items:center; padding:18px 22px; cursor:pointer;">
+                  <h4 style="margin:0;"><span class="icon">🏫</span> Lista de Aulas (<span id="landingAulasCount">0</span>)</h4>
+                  <span class="accordion-arrow" style="transition: transform 0.3s; font-size: 0.8rem; color: var(--text-muted); display: inline-block;">▼</span>
+                </div>
+                <div class="accordion-card-content" id="landingAulasContent">
+                  <div class="accordion-card-content-inner">
+                    <div id="landingAulasList"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="dashboard-grid hidden" id="dashboardGrid">
             
             <!-- LEFT COLUMN: The Cascade Flow -->
             <section class="dashboard-col cascade-col">
@@ -1032,6 +1076,11 @@
                       <span class="stat-num" id="teacherGradeDisplay">2B</span>
                       <span class="stat-lbl">Salón</span>
                     </div>
+                  </div>
+                  <div style="padding-top: 14px; display: flex; gap: 10px;">
+                    <button type="button" class="chubby-btn primary full-width" id="adminEditTeacherBtn" style="height: 38px; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 0.85rem;">
+                      <span>✏️ Editar Docente</span>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -1274,17 +1323,32 @@
                 </div>
                 
                 <div class="card-body-collapse">
-                  <div class="chat-display-area" id="chatArea">
-                    <!-- Chat bubbles populate dynamically -->
-                    <p class="chat-placeholder">Cargando mensajes del ecosistema...</p>
+                  <!-- Area 1: Staff Selection List -->
+                  <div id="adminStaffListArea" class="staff-list-container">
+                    <p class="chat-placeholder">Cargando personal escolar...</p>
                   </div>
 
-                  <!-- Chat Input -->
-                  <div class="chat-input-bar">
-                    <input type="text" id="chatInputField" placeholder="Escribe un mensaje al tutor..." autocomplete="off">
-                    <button class="chubby-btn primary round-btn" id="chatSendBtn">
-                      <span>➔</span>
-                    </button>
+                  <!-- Area 2: Direct Chat Box (Hidden by default) -->
+                  <div id="adminDirectChatArea" class="hidden" style="display: flex; flex-direction: column; height: 100%;">
+                    <div class="chat-active-header">
+                      <button class="chat-back-btn" id="adminChatBackBtn">⬅ Volver</button>
+                      <div class="chat-partner-info" id="adminChatPartnerInfo">
+                        <!-- Loaded dynamically -->
+                      </div>
+                    </div>
+
+                    <div class="chat-display-area" id="chatArea">
+                      <!-- Chat bubbles populate dynamically -->
+                      <p class="chat-placeholder">Selecciona un miembro del personal para chatear...</p>
+                    </div>
+
+                    <!-- Chat Input -->
+                    <div class="chat-input-bar">
+                      <input type="text" id="chatInputField" placeholder="Escribe un mensaje..." autocomplete="off">
+                      <button class="chubby-btn primary round-btn" id="chatSendBtn">
+                        <span>➔</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1361,6 +1425,9 @@
         </button>
         <button id="navTeacherPlanificacion" class="chubby-btn secondary" style="padding: 8px 18px; font-size: 0.95rem; border-radius: 12px; font-family: 'Outfit'; font-weight: 800; display: flex; align-items: center; gap: 8px; cursor: pointer;">
           <span>📚 Planificación y Materias</span>
+        </button>
+        <button id="navTeacherChat" class="chubby-btn secondary" style="padding: 8px 18px; font-size: 0.95rem; border-radius: 12px; font-family: 'Outfit'; font-weight: 800; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+          <span>💬 Mensajería</span>
         </button>
       </div>
 
@@ -1440,39 +1507,75 @@
           </div>
         </section>
     </div>
-  </div>
 
-  <!-- FLOATING OVERLAY: Sliding Teacher Chat Sidebar -->
-  <div id="teacherChatOverlay" class="chat-overlay hidden">
-    <div class="chat-sidebar-card" id="teacherChatSidebar">
-      <div class="chubby-card communication-card effect-3d" style="flex: 1; height: 100%; display: flex; flex-direction: column; margin: 0; border: none; border-radius: 0; background: var(--card-bg);">
-        <div class="card-header" style="position: relative;">
-          <h4><span class="icon">💬</span> Mensajería Docente</h4>
-          <div style="display: flex; align-items: center; gap: 8px; margin-right: 28px;">
-            <span class="badge badge-orange animate-pulse">En Vivo</span>
-          </div>
-          <button id="closeTeacherChatBtn" style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 1.5rem; font-weight: bold; color: var(--text-main); cursor: pointer; padding: 0; line-height: 1;">✖</button>
-        </div>
-        
-        <div style="flex: 1; display: flex; flex-direction: column; min-height: 0; padding: 16px; background: var(--card-bg);">
-          <div class="chat-display-area" id="teacherChatArea" style="flex: 1; overflow-y: auto; padding: 12px; margin-bottom: 12px; background: var(--color-bg-light); border: 2px solid var(--text-main); border-radius: 16px;">
-            <!-- Chat bubbles populate dynamically -->
-            <p class="chat-placeholder">Selecciona un alumno para chatear con su acudiente...</p>
-          </div>
+      <!-- App Container for Teacher Dashboard: Mensajería Screen -->
+      <div class="app-screen hidden" id="teacherChatScreen" style="display: flex; gap: 20px; flex: 1; min-height: 0; box-sizing: border-box; overflow: hidden; padding-bottom: 8px;">
 
-          <!-- Chat Input with Attachment clip -->
-          <div class="chat-input-bar" style="display: flex; gap: 8px; align-items: center;">
+        <!-- LEFT COLUMN: Contact Selector -->
+        <section style="flex: 0 0 280px; display: flex; flex-direction: column; gap: 0; min-width: 0; background: var(--card-bg); border: 2px solid var(--text-main); border-radius: 24px; box-shadow: var(--shadow-chubby); overflow: hidden;">
+          <!-- Chat Tabs -->
+          <div style="padding: 16px 16px 0 16px;">
+            <h3 style="font-family: 'Outfit', sans-serif; font-weight: 800; color: var(--text-main); margin: 0 0 12px 0; display: flex; align-items: center; gap: 8px;">
+              <span>💬</span> Mensajería
+              <span class="badge badge-orange animate-pulse" style="margin-left: auto; font-size: 0.65rem;">En Vivo</span>
+            </h3>
+            <div class="chat-tabs" style="margin-bottom: 0;">
+              <button class="chat-tab active" id="teacherBtnChatTutor" data-chat-type="tutor">👪 Tutor</button>
+              <button class="chat-tab" id="teacherBtnChatStaff" data-chat-type="staff">🏫 Personal</button>
+            </div>
+          </div>
+          <!-- Tutor contact list -->
+          <div id="teacherTutorContactsList" style="flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px;">
+            <p class="chat-placeholder">Selecciona la pestaña Tutor para ver a tus alumnos...</p>
+          </div>
+          <!-- Staff contact list (hidden by default) -->
+          <div id="teacherStaffListArea" class="staff-list-container hidden" style="flex: 1; overflow-y: auto; padding: 12px;">
+            <p class="chat-placeholder">Cargando personal escolar...</p>
+          </div>
+        </section>
+
+        <!-- RIGHT COLUMN: Chat Area -->
+        <section style="flex: 1; display: flex; flex-direction: column; gap: 0; min-width: 0; background: var(--card-bg); border: 2px solid var(--text-main); border-radius: 24px; box-shadow: var(--shadow-chubby); overflow: hidden;">
+          <!-- Chat header (shown when a chat is active) -->
+          <div id="teacherActiveChatHeader" class="chat-active-header" style="display: none;">
+            <div class="chat-partner-info" id="teacherChatPartnerInfo">
+              <!-- Partner info loaded dynamically -->
+            </div>
+          </div>
+          <!-- Placeholder when no chat selected -->
+          <div id="teacherChatPlaceholder" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; text-align: center;">
+            <div>
+              <div style="font-size: 3rem; margin-bottom: 12px;">💬</div>
+              <p style="color: var(--text-secondary); font-family: 'Outfit'; font-size: 0.9rem; font-weight: 600;">Selecciona un contacto de la lista de la izquierda para comenzar a chatear.</p>
+            </div>
+          </div>
+          <!-- Tutor Chat Area -->
+          <div id="teacherTutorChatArea" style="flex: 1; display: none; flex-direction: column; min-height: 0; padding: 0;">
+            <div class="chat-display-area" id="teacherChatArea" style="flex: 1; overflow-y: auto; padding: 16px; background: var(--color-bg-light); margin: 12px; border: 2px solid var(--text-main); border-radius: 16px;">
+              <p class="chat-placeholder">Selecciona un alumno para chatear con su acudiente...</p>
+            </div>
+          </div>
+          <!-- Staff Chat Area -->
+          <div id="teacherDirectChatBox" class="hidden" style="flex: 1; display: flex; flex-direction: column; min-height: 0; padding: 0;">
+            <div class="chat-display-area" id="teacherStaffChatArea" style="flex: 1; overflow-y: auto; padding: 16px; background: var(--color-bg-light); margin: 12px; border: 2px solid var(--text-main); border-radius: 16px;">
+              <p class="chat-placeholder">Selecciona un miembro del personal para chatear...</p>
+            </div>
+          </div>
+          <!-- Chat Input Bar (shared) -->
+          <div class="chat-input-bar" id="teacherChatInputBar" style="display: none; gap: 8px; align-items: center; padding: 12px; border-top: 2px solid var(--text-main);">
             <input type="file" id="teacherChatFileInput" accept=".pdf,.jpg,.jpeg,.png" style="display: none;">
             <button class="chubby-btn secondary round-btn" id="teacherChatAttachBtn" type="button" style="padding: 0; width: 40px; height: 40px; min-width: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">
               <span>📎</span>
             </button>
-            <input type="text" id="teacherChatInputField" placeholder="Escribe un mensaje al tutor..." autocomplete="off" style="flex: 1;">
+            <input type="text" id="teacherChatInputField" placeholder="Escribe un mensaje..." autocomplete="off" style="flex: 1;">
             <button class="chubby-btn primary" id="teacherChatSendBtn" style="min-width: 40px; width: 40px; height: 40px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center;">
               <span>➔</span>
             </button>
           </div>
-        </div>
+        </section>
+
       </div>
+
     </div>
   </div>
 
@@ -1550,6 +1653,6 @@
   <!-- Supabase JS Client SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- Local Application Script -->
-  <script src="app.js?v=1.0.4"></script>
+  <script src="app.js?v=1.0.12"></script>
 </body>
 </html>

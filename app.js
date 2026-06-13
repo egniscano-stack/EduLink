@@ -24,134 +24,61 @@ if (typeof supabase !== 'undefined') {
 
 // 2. Mock Data Cache (Fallback Local)
 let teachersData = {
-  egnis: {
-    id: "egnis",
-    name: "Prof. Egnis Cano",
-    employee_id: "ED-90210",
-    cedula: "8-990-1234",
-    profile_pic: "assets/prof_egnis.png",
+  ariacniesp59: {
+    id: "ariacniesp59",
+    name: "Ariacni Espinoza",
+    employee_id: "156342",
+    cedula: "1-716-1071",
+    profile_pic: "https://awwrasdjitrbkbyyrhzz.supabase.co/storage/v1/object/public/school-assets/teachers/1781305042226-evfhvhsipyr.jpg",
     isImgPath: true,
-    age: 32,
-    specializations: ["Lic. en Educación Matemática", "MSc. en Docencia Superior", "Curso Superior de Álgebra"],
-    subjects: ["Matemáticas", "Geometría", "Álgebra"],
+    age: 39,
+    specializations: ["Licenciatura en educacion prescolar"],
+    subjects: ["español", "religion", "ciencias", "ingles", "expresion artistica", "matematicas", "ciencias sociales", "educacion fisica"],
     assigned_grade: "2B"
   },
-  maria: {
-    id: "maria",
-    name: "Prof. María Delgado",
-    employee_id: "ED-40812",
-    cedula: "4-780-5543",
-    profile_pic: "MD",
-    isImgPath: false,
-    age: 28,
-    specializations: ["Lic. en Ciencias de la Educación", "Diplomado en Robótica Educativa", "Curso de Física Teórica"],
-    subjects: ["Ciencias Naturales", "Física"],
+  egniscano36: {
+    id: "egniscano36",
+    name: "egnis cano",
+    employee_id: "123659",
+    cedula: "8-772-2232",
+    profile_pic: "https://awwrasdjitrbkbyyrhzz.supabase.co/storage/v1/object/public/school-assets/teachers/1781306432087-kk6tvufqdno.JPG",
+    isImgPath: true,
+    age: 42,
+    specializations: ["licenciatura en educacion primaria", "licenciatura en religion etica y moral"],
+    subjects: ["Español", "Religión", "Ciencias", "Inglés", "Expresión Artística", "Matemáticas", "Ciencias Sociales", "Educación Física"],
     assigned_grade: "3A"
+  },
+  mariaperez52: {
+    id: "mariaperez52",
+    name: "maria perez",
+    employee_id: "125364",
+    cedula: "1-963-785",
+    profile_pic: "https://awwrasdjitrbkbyyrhzz.supabase.co/storage/v1/object/public/school-assets/teachers/1781306599178-87sg0y855e.JPG",
+    isImgPath: true,
+    age: 36,
+    specializations: ["licenciatura en educacion prescolar"],
+    subjects: ["Español", "Religión", "Inglés", "Expresión Artística"],
+    assigned_grade: "kinder A"
   }
 };
 
 let studentsData = {
-  juan: {
-    id: "juan",
-    name: "Juan Pérez",
-    role: "Estudiante Destacado",
+  eimycano68: {
+    id: "eimycano68",
+    name: "eimy cano",
+    role: "Estudiante",
     roleClass: "badge-lime",
     accentClass: "accent-lime",
-    student_id: "#EL-20412",
-    img: "assets/student_juan.png",
+    student_id: "#EL-78937",
+    img: "https://awwrasdjitrbkbyyrhzz.supabase.co/storage/v1/object/public/school-assets/students/1781304829268-gj2cuj0cz56.jpg",
     isImgPath: true,
-    grades: [4.5, 4.8, 4.6],
-    conduct: "excelente",
-    parentName: "Carlos Pérez (Padre)",
-    parentPhone: "+507 6890-4432",
-    parentEmail: "carlos.perez@email.com",
-    conductText: "Juan demuestra gran liderazgo y participación constante. ¡Sigue así!",
+    grades: [0, 0, 0, 0],
+    conduct: "sin_evaluar",
+    parentName: "egnis cano",
+    parentPhone: "62856279",
+    parentEmail: "egniscano@gmail.com",
+    conductText: "El docente aún no ha registrado observaciones de conducta.",
     grade: "2B"
-  },
-  sofia: {
-    id: "sofia",
-    name: "Sofía Gómez",
-    role: "Ayudante de Clase",
-    roleClass: "badge-cyan",
-    accentClass: "accent-purple",
-    student_id: "#EL-20413",
-    img: "SG",
-    isImgPath: false,
-    grades: [4.5, 4.2, 4.4],
-    conduct: "enfocado",
-    parentName: "Marta Gómez (Madre)",
-    parentPhone: "+507 6221-5589",
-    parentEmail: "marta.gomez@email.com",
-    conductText: "Sofía es sumamente disciplinada, atenta y siempre apoya a sus compañeros.",
-    grade: "2B"
-  },
-  mateo: {
-    id: "mateo",
-    name: "Mateo Díaz",
-    role: "En Crecimiento",
-    roleClass: "badge-orange",
-    accentClass: "accent-orange",
-    student_id: "#EL-20414",
-    img: "MD",
-    isImgPath: false,
-    grades: [3.5, 3.2, 3.8],
-    conduct: "conversador",
-    parentName: "Felipe Díaz (Tutor)",
-    parentPhone: "+507 6445-1290",
-    parentEmail: "felipe.diaz@email.com",
-    conductText: "Mateo es muy creativo, pero se distrae conversando. Necesita apoyo adicional.",
-    grade: "3A"
-  },
-  valentina: {
-    id: "valentina",
-    name: "Valentina Torres",
-    role: "Excelencia Académica",
-    roleClass: "badge-yellow",
-    accentClass: "accent-cyan",
-    student_id: "#EL-20415",
-    img: "VT",
-    isImgPath: false,
-    grades: [4.8, 4.9, 5.0],
-    conduct: "participativo",
-    parentName: "Ana Torres (Madre)",
-    parentPhone: "+507 6112-9876",
-    parentEmail: "ana.torres@email.com",
-    conductText: "Valentina mantiene el promedio más alto. Participa activamente en todas las clases.",
-    grade: "2B"
-  },
-  diego: {
-    id: "diego",
-    name: "Diego Rojas",
-    role: "Ayudante de Laboratorio",
-    roleClass: "badge-cyan",
-    accentClass: "accent-lime",
-    student_id: "#EL-20416",
-    img: "DR",
-    isImgPath: false,
-    grades: [4.0, 4.1, 4.2],
-    conduct: "enfocado",
-    parentName: "Julia Rojas (Madre)",
-    parentPhone: "+507 6332-9011",
-    parentEmail: "julia.rojas@email.com",
-    conductText: "Diego demuestra gran interés en experimentos prácticos y apoyo técnico.",
-    grade: "3A"
-  },
-  camila: {
-    id: "camila",
-    name: "Camila Vega",
-    role: "Líder de Proyecto",
-    roleClass: "badge-yellow",
-    accentClass: "accent-cyan",
-    student_id: "#EL-20417",
-    img: "CV",
-    isImgPath: false,
-    grades: [4.6, 4.7, 4.8],
-    conduct: "excelente",
-    parentName: "Oscar Vega (Padre)",
-    parentPhone: "+507 6554-3210",
-    parentEmail: "oscar.vega@email.com",
-    conductText: "Camila es muy proactiva y dirige las dinámicas de grupo de manera sobresaliente.",
-    grade: "3A"
   }
 };
 
@@ -160,7 +87,7 @@ try {
   const storedStudents = localStorage.getItem("eduStudentsData");
   if (storedStudents) {
     const parsed = JSON.parse(storedStudents);
-    if (parsed && typeof parsed === 'object') {
+    if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
       studentsData = parsed;
     }
   }
@@ -172,7 +99,7 @@ try {
   const storedTeachers = localStorage.getItem("eduTeachersData");
   if (storedTeachers) {
     const parsed = JSON.parse(storedTeachers);
-    if (parsed && typeof parsed === 'object') {
+    if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
       teachersData = parsed;
     }
   }
@@ -181,32 +108,22 @@ try {
 }
 
 let mockMessages = {
-  juan: [
-    { sender: "Carlos Pérez (Padre)", content: "Buenos días Prof. Egnis, ¿cómo va el progreso de Juan en matemáticas?", is_sent_by_prof: false, created_at: new Date(Date.now() - 1000 * 60 * 10).toISOString() },
-    { sender: "Prof. Egnis Cano", content: "¡Hola Carlos! Juan va excelente. Hoy sacó 4.8 en su examen práctico.", is_sent_by_prof: true, created_at: new Date(Date.now() - 1000 * 60 * 5).toISOString() }
-  ],
-  sofia: [
-    { sender: "Marta Gómez (Madre)", content: "Estimado profesor, Sofía me comentó que tiene una duda con el proyecto final.", is_sent_by_prof: false, created_at: new Date(Date.now() - 1000 * 60 * 60).toISOString() },
-    { sender: "Prof. Egnis Cano", content: "Hola Marta. Sí, que me busque en el aula al terminar el recreo y lo resolvemos.", is_sent_by_prof: true, created_at: new Date(Date.now() - 1000 * 60 * 50).toISOString() }
-  ],
-  mateo: [
-    { sender: "Felipe Díaz (Tutor)", content: "Hola profesor, ¿ha mejorado la concentración de Mateo en el aula?", is_sent_by_prof: false, created_at: new Date(Date.now() - 1000 * 60 * 120).toISOString() }
-  ],
-  valentina: [
-    { sender: "Ana Torres (Madre)", content: "Buenos días. Agradecida por la mención de excelencia de Valentina.", is_sent_by_prof: false, created_at: new Date(Date.now() - 1000 * 60 * 200).toISOString() }
-  ],
-  diego: [
-    { sender: "Julia Rojas (Madre)", content: "Hola, me gustaría saber qué materiales necesita Diego para la feria de robótica.", is_sent_by_prof: false, created_at: new Date(Date.now() - 1000 * 60 * 10).toISOString() }
-  ],
-  camila: [
-    { sender: "Oscar Vega (Padre)", content: "Buenos días, excelente liderazgo de Camila en la feria escolar.", is_sent_by_prof: false, created_at: new Date(Date.now() - 1000 * 60 * 30).toISOString() }
+  eimycano68: [
+    { sender: "egnis cano (Tutor)", content: "Buenos días Prof. Ariacni, ¿cómo va el progreso de Eimy en preescolar?", is_sent_by_prof: false, created_at: new Date(Date.now() - 1000 * 60 * 10).toISOString() },
+    { sender: "Ariacni Espinoza", content: "¡Hola Egnis! Eimy va excelente. Participa con mucho entusiasmo en todas las actividades.", is_sent_by_prof: true, created_at: new Date(Date.now() - 1000 * 60 * 5).toISOString() }
   ]
 };
 
 // State trackers
-let activeTeacher = "egnis";
-let activeStudent = "juan";
+let activeTeacher = "egniscano36";
+let activeAdminUser = { name: "Egnis Cano", role: "admin", roleName: "🔑 Administrador" };
+let adminActiveChatType = "staff"; // Default to staff chat since Admin has no tutor option
+let teacherActiveChatType = "tutor";
+let activeAdminChatPartner = null;
+let activeTeacherChatPartner = null;
+let activeStudent = "eimycano68";
 let editingStudentId = null;
+let editingTeacherId = null;
 let budgetFece = 12450.00;
 let pettyCash = 320.50;
 let realtimeChannel = null;
@@ -301,6 +218,12 @@ const studentsContainerList = document.getElementById("studentsContainerList");
 async function initSupabaseConnection() {
   if (!supabaseClient) {
     setupDemoMode("Supabase SDK no cargado");
+    renderTeachersList();
+    populateStudentGradeDropdown();
+    renderStudentsList();
+    renderLandingDocentesList();
+    renderLandingAulasList();
+    switchActiveTeacher(activeTeacher);
     return;
   }
 
@@ -321,9 +244,89 @@ async function initSupabaseConnection() {
       supabaseConnectionStatus.textContent = "Supabase: En Vivo 🟢";
       supabaseBanner.classList.add("hidden");
 
+      let finalTeachers = teachers;
+      let finalStudents = students;
+
+      if (teachers.length === 0) {
+        console.log("La tabla de profesores está vacía. Poblando semillas por defecto...");
+        const defaultTeachers = [
+          {
+            id: "ariacniesp59",
+            name: "Ariacni Espinoza",
+            employee_id: "156342",
+            cedula: "1-716-1071",
+            profile_pic: "https://awwrasdjitrbkbyyrhzz.supabase.co/storage/v1/object/public/school-assets/teachers/1781305042226-evfhvhsipyr.jpg",
+            age: 39,
+            specializations: ["Licenciatura en educacion prescolar"],
+            subjects: ["español", "religion", "ciencias", "ingles", "expresion artistica", "matematicas", "ciencias sociales", "educacion fisica"],
+            assigned_grade: "2B"
+          },
+          {
+            id: "egniscano36",
+            name: "egnis cano",
+            employee_id: "123659",
+            cedula: "8-772-2232",
+            profile_pic: "https://awwrasdjitrbkbyyrhzz.supabase.co/storage/v1/object/public/school-assets/teachers/1781306432087-kk6tvufqdno.JPG",
+            age: 42,
+            specializations: ["licenciatura en educacion primaria", "licenciatura en religion etica y moral"],
+            subjects: ["Español", "Religión", "Ciencias", "Inglés", "Expresión Artística", "Matemáticas", "Ciencias Sociales", "Educación Física"],
+            assigned_grade: "3A"
+          },
+          {
+            id: "mariaperez52",
+            name: "maria perez",
+            employee_id: "125364",
+            cedula: "1-963-785",
+            profile_pic: "https://awwrasdjitrbkbyyrhzz.supabase.co/storage/v1/object/public/school-assets/teachers/1781306599178-87sg0y855e.JPG",
+            age: 36,
+            specializations: ["licenciatura en educacion prescolar"],
+            subjects: ["Español", "Religión", "Inglés", "Expresión Artística"],
+            assigned_grade: "kinder A"
+          }
+        ];
+        const { data: insertedT, error: insTErr } = await supabaseClient.from('teachers').insert(defaultTeachers).select();
+        if (!insTErr && insertedT) {
+          finalTeachers = insertedT;
+        } else {
+          console.error("Error al poblar profesores por defecto:", insTErr);
+          finalTeachers = defaultTeachers;
+        }
+      }
+
+      if (students.length === 0) {
+        console.log("La tabla de estudiantes está vacía. Poblando semillas por defecto...");
+        const defaultStudents = [
+          {
+            id: "eimycano68",
+            name: "eimy cano",
+            role: "Estudiante",
+            role_class: "badge-lime",
+            accent_class: "accent-lime",
+            student_id: "#EL-78937",
+            img: "https://awwrasdjitrbkbyyrhzz.supabase.co/storage/v1/object/public/school-assets/students/1781304829268-gj2cuj0cz56.jpg",
+            is_img_path: true,
+            grades: [0, 0, 0, 0],
+            conduct: "sin_evaluar",
+            parent_name: "egnis cano",
+            parent_phone: "62856279",
+            parent_email: "egniscano@gmail.com",
+            conduct_text: "El docente aún no ha registrado observaciones de conducta.",
+            grade: "2B",
+            attendance: true
+          }
+        ];
+        const { data: insertedS, error: insSErr } = await supabaseClient.from('students').insert(defaultStudents).select();
+        if (!insSErr && insertedS) {
+          finalStudents = insertedS;
+        } else {
+          console.error("Error al poblar estudiantes por defecto:", insSErr);
+          finalStudents = defaultStudents;
+        }
+      }
+
       // Cargar profesores
       teachersData = {};
-      teachers.forEach(t => {
+      finalTeachers.forEach(t => {
         teachersData[t.id] = {
           id: t.id,
           name: t.name,
@@ -340,34 +343,34 @@ async function initSupabaseConnection() {
 
       // Cargar estudiantes
       studentsData = {};
-      students.forEach(s => {
+      finalStudents.forEach(s => {
         studentsData[s.id] = {
           id: s.id,
           name: s.name,
           role: s.role,
-          roleClass: s.role_class,
-          accentClass: s.accent_class,
+          roleClass: s.role_class || s.roleClass,
+          accentClass: s.accent_class || s.accentClass,
           student_id: s.student_id,
           img: s.img,
-          isImgPath: s.is_img_path,
+          isImgPath: s.is_img_path !== undefined ? s.is_img_path : s.isImgPath,
           grades: s.grades,
           conduct: s.conduct,
-          parentName: s.parent_name,
-          parentPhone: s.parent_phone,
-          parentEmail: s.parent_email,
-          conductText: s.conduct_text,
+          parentName: s.parent_name || s.parentName,
+          parentPhone: s.parent_phone || s.parentPhone,
+          parentEmail: s.parent_email || s.parentEmail,
+          conductText: s.conduct_text || s.conductText,
           grade: s.grade,
           incidents: s.incidents || [],
-          noveltyReport: s.novelty_report || {},
-          subject_grades: s.subject_grades || {},
+          noveltyReport: s.novelty_report || s.noveltyReport || {},
+          subject_grades: s.subject_grades || s.subject_grades || {},
           cedula: s.cedula || "",
           age: s.age || "",
           address: s.address || "",
-          birth_year: s.birth_year || "",
-          blood_type: s.blood_type || "",
-          medical_conditions: s.medical_conditions || "",
-          tutor2_name: s.tutor2_name || "",
-          tutor2_phone: s.tutor2_phone || "",
+          birth_year: s.birth_year || s.birthYear || "",
+          blood_type: s.blood_type || s.bloodType || "",
+          medical_conditions: s.medical_conditions || s.medicalConditions || "",
+          tutor2_name: s.tutor2_name || s.tutor2Name || "",
+          tutor2_phone: s.tutor2_phone || s.tutor2Phone || "",
           status: s.status || "Nuevo",
           attendance: s.attendance !== null && s.attendance !== undefined ? s.attendance : true
         };
@@ -387,8 +390,12 @@ async function initSupabaseConnection() {
 
   // Generar lista en el drawer y cargar docente inicial
   renderTeachersList();
+  populateStudentGradeDropdown();
   renderStudentsList();
+  renderLandingDocentesList();
+  renderLandingAulasList();
   switchActiveTeacher(activeTeacher);
+  renderStaffList("adminStaffListArea", false);
 }
 
 function setupDemoMode(reason) {
@@ -396,6 +403,7 @@ function setupDemoMode(reason) {
   supabaseConnectionStatus.textContent = "Supabase: Modo Demo 🟡";
   console.info(`Ejecutando en Modo Demo Local. Razón: ${reason}`);
   showToast("Ejecutando en Modo Demo Local", "⚠️");
+  renderStaffList("adminStaffListArea", false);
 }
 
 async function uploadFileToBucket(file, bucketName, folderName = "") {
@@ -477,117 +485,142 @@ function updateFinanceUI() {
 // 5. TEACHER NODE MANAGEMENT & GRADED CLASS LISTS
 // ==========================================================================
 
-function switchActiveTeacher(teacherKey) {
-  const teacher = teachersData[teacherKey];
-  if (!teacher) return;
-  
-  activeTeacher = teacherKey;
-  
+function switchActiveTeacher(teacherKey, forceGrade = null) {
+  const teacher = (teachersData || {})[teacherKey];
+  const gradeToShow = teacher ? teacher.assigned_grade : forceGrade;
+
   // Asegurar que el recuadro del perfil del docente se vea completo (no colapsado)
   const teacherNode = document.getElementById("teacherNode");
   if (teacherNode) {
     teacherNode.classList.remove("card-collapsed");
   }
 
-  // 1. Actualizar el nodo principal de profesor en el Dashboard
-  const avatarContainer = document.querySelector("#teacherNode .avatar-container");
-  avatarContainer.innerHTML = "";
-  if (teacher.isImgPath) {
-    const img = document.createElement("img");
-    img.src = teacher.profile_pic;
-    img.alt = teacher.name;
-    img.id = "teacherAvatar";
-    avatarContainer.appendChild(img);
+  if (!teacher) {
+    // Si no hay docente pero se pasa un grado forzado
+    activeTeacher = null;
+    document.getElementById("teacherNameDisplay").textContent = "Sin Docente";
+    document.getElementById("teacherSubjectsDisplay").innerHTML = `<span class="meta-icon">📐</span> Sin asignaturas | Aula ${gradeToShow}`;
+    document.getElementById("teacherEmpIdDisplay").innerHTML = `<span class="meta-icon">🆔</span> ID: --`;
+    document.getElementById("teacherAgeDisplay").textContent = "--";
+    document.getElementById("teacherGradeDisplay").textContent = gradeToShow || "--";
+    document.getElementById("activeClassLabel").textContent = `Aula ${gradeToShow || '--'}`;
+
+    const avatarContainer = document.querySelector("#teacherNode .avatar-container");
+    if (avatarContainer) {
+      avatarContainer.innerHTML = `<div class="avatar-fallback gradient-purple" style="width:100%;height:100%;color:white;font-size:1.5rem;font-weight:800;display:flex;align-items:center;justify-content:center;" id="teacherAvatar">--</div>`;
+    }
   } else {
-    const fallback = document.createElement("div");
-    fallback.className = "avatar-fallback gradient-purple";
-    fallback.textContent = teacher.profile_pic;
-    fallback.style.width = "100%";
-    fallback.style.height = "100%";
-    fallback.style.color = "white";
-    fallback.style.fontSize = "1.8rem";
-    fallback.style.fontWeight = "800";
-    fallback.style.display = "flex";
-    fallback.style.alignItems = "center";
-    fallback.style.justifyContent = "center";
-    fallback.id = "teacherAvatar";
-    avatarContainer.appendChild(fallback);
+    activeTeacher = teacherKey;
+    
+    // 1. Actualizar el nodo principal de profesor en el Dashboard
+    const avatarContainer = document.querySelector("#teacherNode .avatar-container");
+    if (avatarContainer) {
+      avatarContainer.innerHTML = "";
+      if (teacher.isImgPath) {
+        const img = document.createElement("img");
+        img.src = teacher.profile_pic;
+        img.alt = teacher.name;
+        img.id = "teacherAvatar";
+        avatarContainer.appendChild(img);
+      } else {
+        const fallback = document.createElement("div");
+        fallback.className = "avatar-fallback gradient-purple";
+        fallback.textContent = teacher.profile_pic;
+        fallback.style.width = "100%";
+        fallback.style.height = "100%";
+        fallback.style.color = "white";
+        fallback.style.fontSize = "1.8rem";
+        fallback.style.fontWeight = "800";
+        fallback.style.display = "flex";
+        fallback.style.alignItems = "center";
+        fallback.style.justifyContent = "center";
+        fallback.id = "teacherAvatar";
+        avatarContainer.appendChild(fallback);
+      }
+    }
+
+    document.getElementById("teacherNameDisplay").textContent = teacher.name;
+    document.getElementById("teacherSubjectsDisplay").innerHTML = `<span class="meta-icon">📐</span> ${teacher.subjects.join(", ")} | Aula ${teacher.assigned_grade}`;
+    document.getElementById("teacherEmpIdDisplay").innerHTML = `<span class="meta-icon">🆔</span> ID: ${teacher.employee_id}`;
+    document.getElementById("teacherAgeDisplay").textContent = teacher.age;
+    document.getElementById("teacherGradeDisplay").textContent = teacher.assigned_grade;
+    document.getElementById("activeClassLabel").textContent = `Aula ${teacher.assigned_grade}`;
   }
 
-  document.getElementById("teacherNameDisplay").textContent = teacher.name;
-  document.getElementById("teacherSubjectsDisplay").innerHTML = `<span class="meta-icon">📐</span> ${teacher.subjects.join(", ")} | Aula ${teacher.assigned_grade}`;
-  document.getElementById("teacherEmpIdDisplay").innerHTML = `<span class="meta-icon">🆔</span> ID: ${teacher.employee_id}`;
-  document.getElementById("teacherAgeDisplay").textContent = teacher.age;
-  document.getElementById("teacherGradeDisplay").textContent = teacher.assigned_grade;
-  document.getElementById("activeClassLabel").textContent = `Aula ${teacher.assigned_grade}`;
-
   // 2. Filtrar y cargar la lista de alumnos según el salón asignado
-  const filteredStudents = Object.values(studentsData).filter(s => s.grade === teacher.assigned_grade);
+  const filteredStudents = Object.values(studentsData || {}).filter(s => s.grade === gradeToShow);
   document.getElementById("teacherStudentsCount").textContent = filteredStudents.length;
   document.getElementById("activeClassCount").textContent = `${filteredStudents.length} Activos`;
 
   // Renderizar la lista de alumnos
   const studentsListEl = document.getElementById("studentsList");
-  studentsListEl.innerHTML = "";
+  if (studentsListEl) {
+    studentsListEl.innerHTML = "";
 
-  if (filteredStudents.length === 0) {
-    studentsListEl.innerHTML = `<p class="helper-text">No hay alumnos asignados a este salón.</p>`;
-    // Clear student detail view
-    studentDetailCard.style.opacity = "0.3";
-    connectionPath.setAttribute("d", "");
-    pulsePath.setAttribute("d", "");
-    return;
-  }
-
-  studentDetailCard.style.opacity = "1";
-
-  filteredStudents.forEach((student, idx) => {
-    const isActive = idx === 0; // Select first automatically
-    if (isActive) activeStudent = student.id;
-
-    const row = document.createElement("div");
-    row.className = `student-row ${isActive ? 'active' : ''}`;
-    row.setAttribute("data-student", student.id);
-    row.id = `studentRow-${student.id}`;
-
-    // Avatar ring content
-    let avatarHTML = "";
-    if (student.isImgPath) {
-      avatarHTML = `<img src="${student.img}" alt="${student.name}">`;
-    } else {
-      const fallbackGrad = getRandomGradientClass(student.id);
-      avatarHTML = `<div class="avatar-fallback ${fallbackGrad}">${student.img}</div>`;
+    if (filteredStudents.length === 0) {
+      studentsListEl.innerHTML = `<p class="helper-text">No hay alumnos asignados a este salón.</p>`;
+      // Clear student detail view
+      if (typeof studentDetailCard !== 'undefined' && studentDetailCard) {
+        studentDetailCard.style.opacity = "0.3";
+      }
+      if (connectionPath) connectionPath.setAttribute("d", "");
+      if (pulsePath) pulsePath.setAttribute("d", "");
+      return;
     }
 
-    const isPresent = student.attendance !== false;
-    const indicatorClass = isPresent ? "online" : "offline";
-    const statusText = isPresent ? "En clase" : "Ausente";
-    const lastGrade = student.grades && student.grades.length > 0 ? parseFloat(student.grades[student.grades.length - 1]).toFixed(1) : "0.0";
+    if (typeof studentDetailCard !== 'undefined' && studentDetailCard) {
+      studentDetailCard.style.opacity = "1";
+    }
 
-    row.innerHTML = `
-      <div class="student-main">
-        <div class="student-avatar-ring">
-          ${avatarHTML}
-        </div>
-        <div class="student-meta">
-          <h5>${student.name}</h5>
-          <span class="status-indicator ${indicatorClass}">${statusText}</span>
-        </div>
-      </div>
-      <div class="student-badge-score">${lastGrade}</div>
-      <div class="select-indicator">✦</div>
-    `;
+    const preservedStudentExists = filteredStudents.some(s => s.id === activeStudent);
+    filteredStudents.forEach((student, idx) => {
+      const isActive = preservedStudentExists ? (student.id === activeStudent) : (idx === 0);
+      if (isActive) activeStudent = student.id;
 
-    // Row Click Listener
-    row.addEventListener("click", () => {
-      document.querySelectorAll(".student-row").forEach(r => r.classList.remove("active"));
-      row.classList.add("active");
-      activeStudent = student.id;
-      updateStudentDetails(student.id);
+      const row = document.createElement("div");
+      row.className = `student-row ${isActive ? 'active' : ''}`;
+      row.setAttribute("data-student", student.id);
+      row.id = `studentRow-${student.id}`;
+
+      // Avatar ring content
+      let avatarHTML = "";
+      if (student.isImgPath || student.is_img_path) {
+        avatarHTML = `<img src="${student.img}" alt="${student.name}">`;
+      } else {
+        const fallbackGrad = getRandomGradientClass(student.id);
+        avatarHTML = `<div class="avatar-fallback ${fallbackGrad}">${student.img}</div>`;
+      }
+
+      const isPresent = student.attendance !== false;
+      const indicatorClass = isPresent ? "online" : "offline";
+      const statusText = isPresent ? "En clase" : "Ausente";
+      const lastGrade = student.grades && student.grades.length > 0 ? parseFloat(student.grades[student.grades.length - 1]).toFixed(1) : "0.0";
+
+      row.innerHTML = `
+        <div class="student-main">
+          <div class="student-avatar-ring">
+            ${avatarHTML}
+          </div>
+          <div class="student-meta">
+            <h5>${student.name}</h5>
+            <span class="status-indicator ${indicatorClass}">${statusText}</span>
+          </div>
+        </div>
+        <div class="student-badge-score">${lastGrade}</div>
+        <div class="select-indicator">✦</div>
+      `;
+
+      // Row Click Listener
+      row.addEventListener("click", () => {
+        document.querySelectorAll(".student-row").forEach(r => r.classList.remove("active"));
+        row.classList.add("active");
+        activeStudent = student.id;
+        updateStudentDetails(student.id);
+      });
+
+      studentsListEl.appendChild(row);
     });
-
-    studentsListEl.appendChild(row);
-  });
+  }
 
   // Actualizar detalles del alumno seleccionado
   updateStudentDetails(activeStudent);
@@ -609,7 +642,7 @@ function switchActiveTeacher(teacherKey) {
 function renderTeachersList() {
   teachersContainerList.innerHTML = "";
   
-  Object.values(teachersData).forEach(t => {
+  Object.values(teachersData || {}).forEach(t => {
     const card = document.createElement("div");
     card.className = `teacher-item-card ${t.id === activeTeacher ? 'active' : ''}`;
     card.setAttribute("data-teacher", t.id);
@@ -721,6 +754,7 @@ async function handleRegisterTeacher(e) {
   const photoInput = document.getElementById("regTeacherPhoto");
   let profilePic = "";
   let isImgPath = false;
+  let hasNewPhoto = false;
 
   if (photoInput && photoInput.files && photoInput.files[0]) {
     const file = photoInput.files[0];
@@ -728,6 +762,7 @@ async function handleRegisterTeacher(e) {
     if (uploadUrl) {
       profilePic = uploadUrl;
       isImgPath = true;
+      hasNewPhoto = true;
     } else {
       profilePic = "MD";
       isImgPath = false;
@@ -743,6 +778,83 @@ async function handleRegisterTeacher(e) {
   // Arrays
   const specializations = specsRaw.split(",").map(s => s.trim()).filter(Boolean);
   const subjects = subjectsRaw.split(",").map(s => s.trim()).filter(Boolean);
+
+  if (editingTeacherId) {
+    const teacher = (teachersData || {})[editingTeacherId];
+    if (!teacher) {
+      showToast("Error: No se encontró el docente a editar", "❌");
+      return;
+    }
+
+    const updatedPayload = {
+      ...teacher,
+      name: name,
+      employee_id: empId,
+      cedula: cedula,
+      age: age,
+      specializations: specializations,
+      subjects: subjects,
+      assigned_grade: grade
+    };
+
+    if (hasNewPhoto) {
+      updatedPayload.profile_pic = profilePic;
+      updatedPayload.isImgPath = isImgPath;
+    }
+
+    // Guardar localmente
+    teachersData[editingTeacherId] = updatedPayload;
+    try {
+      localStorage.setItem("eduTeachersData", JSON.stringify(teachersData));
+    } catch(e) {}
+
+    // Sincronizar con Supabase
+    if (useSupabaseDb && supabaseClient) {
+      try {
+        const updateObj = {
+          name: name,
+          employee_id: empId,
+          cedula: cedula,
+          age: age,
+          specializations: specializations,
+          subjects: subjects,
+          assigned_grade: grade
+        };
+        if (hasNewPhoto) {
+          updateObj.profile_pic = profilePic;
+        }
+
+        const { error } = await supabaseClient
+          .from('teachers')
+          .update(updateObj)
+          .eq('id', editingTeacherId);
+
+        if (error) {
+          console.error("Fallo al actualizar docente en Supabase:", error);
+          showToast("Guardado localmente. Falló sincronización Supabase", "⚠️");
+        } else {
+          showToast(`Datos de ${name} actualizados con éxito`, "✏️");
+        }
+      } catch(err) {
+        console.error(err);
+        showToast("Error de red al actualizar en Supabase", "⚠️");
+      }
+    } else {
+      showToast(`Datos de ${name} actualizados localmente`, "✏️");
+    }
+
+    resetTeacherFormEditMode();
+    renderTeachersList();
+    renderLandingDocentesList();
+    renderLandingAulasList();
+    populateStudentGradeDropdown();
+
+    if (activeTeacher === editingTeacherId) {
+      switchActiveTeacher(editingTeacherId);
+    }
+    btnListTab.click();
+    return;
+  }
 
   // Id único
   const id = name.toLowerCase().replace(/[^a-z]/g, "").substring(0, 10) + Math.floor(Math.random()*100);
@@ -803,6 +915,9 @@ async function handleRegisterTeacher(e) {
   
   // Actualizar lista en drawer
   renderTeachersList();
+  populateStudentGradeDropdown();
+  renderLandingDocentesList();
+  renderLandingAulasList();
 
   // Cambiar a pestaña Lista
   btnListTab.click();
@@ -827,7 +942,7 @@ function renderStudentsList() {
   });
 
   // Distribuir estudiantes en sus respectivas aulas
-  Object.values(studentsData).forEach(s => {
+  Object.values(studentsData || {}).forEach(s => {
     const grade = s.grade || "Sin Asignar";
     if (!grouped[grade]) {
       grouped[grade] = [];
@@ -858,7 +973,7 @@ function renderStudentsList() {
       </div>
     `;
 
-    const contentDiv = groupDiv.querySelector(`#group-content-${grade}`);
+    const contentDiv = groupDiv.querySelector(".classroom-group-content");
 
     if (studentsInClass.length === 0) {
       contentDiv.innerHTML = `<p class="helper-text" style="padding: 10px 14px; margin: 0;">No hay alumnos registrados en esta aula.</p>`;
@@ -1027,6 +1142,22 @@ async function handleRegisterStudent(e) {
       profilePic = uploadUrl;
       isImgPath = true;
       hasNewPhoto = true;
+    } else {
+      // Fallback a Base64 local si falla la subida a Supabase o estamos en demo
+      try {
+        profilePic = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (e) => resolve(e.target.result);
+          reader.onerror = (err) => reject(err);
+          reader.readAsDataURL(file);
+        });
+        isImgPath = true;
+        hasNewPhoto = true;
+      } catch (err) {
+        profilePic = registeredStudentPhotoDataUrl || "";
+        isImgPath = !!profilePic;
+        hasNewPhoto = !!profilePic;
+      }
     }
   } else if (registeredStudentPhotoDataUrl) {
     profilePic = registeredStudentPhotoDataUrl;
@@ -1117,6 +1248,8 @@ async function handleRegisterStudent(e) {
     const currentEditingId = editingStudentId;
     resetStudentFormEditMode();
     renderStudentsList();
+    renderLandingAulasList();
+    renderLandingDocentesList();
 
     if (activeTeacher && teachersData[activeTeacher]) {
       switchActiveTeacher(activeTeacher);
@@ -1251,6 +1384,8 @@ async function handleRegisterStudent(e) {
 
   // Re-renderizar listas
   renderStudentsList();
+  renderLandingAulasList();
+  renderLandingDocentesList();
   
   // Refrescar grids del dashboard
   if (activeTeacher && teachersData[activeTeacher]) {
@@ -1283,25 +1418,74 @@ function setupRealtimeChatListener() {
   }
 
   realtimeChannel = supabaseClient.channel('public:db_changes')
-    // 1. Chat Messages
+    // 1. Chat Messages (Tutor Chat)
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, payload => {
       const msg = payload.new;
+
+      // Play double-beep notification sound if message is received (not sent by us)
+      if (!msg.is_sent_by_prof) {
+        playChatNotificationSound();
+      }
+
       if (msg.student_key === activeStudent) {
         const teacherView = document.getElementById("teacherDashboardView");
-        if (teacherView && !teacherView.classList.contains("hidden")) {
-          appendTeacherSingleMessageToUI({
-            sender: msg.sender,
-            content: msg.content,
-            is_sent_by_prof: msg.is_sent_by_prof,
-            created_at: msg.created_at
-          });
+        const isTeacher = teacherView && !teacherView.classList.contains("hidden");
+        const tArea = document.getElementById("teacherChatArea");
+        if (isTeacher) {
+          if (teacherActiveChatType === "tutor") {
+            appendMessageToArea(msg, tArea, false);
+          }
         } else {
-          appendSingleMessageToUI({
-            sender: msg.sender,
-            content: msg.content,
-            is_sent_by_prof: msg.is_sent_by_prof,
-            created_at: msg.created_at
-          });
+          if (adminActiveChatType === "tutor") {
+            appendMessageToArea(msg, chatArea, false);
+          }
+        }
+      } else if (!msg.is_sent_by_prof) {
+        // Notification for another student
+        const student = studentsData[msg.student_key];
+        const studentName = student ? student.name : "un estudiante";
+        showToast(`Mensaje del tutor de ${studentName}: ${msg.content}`, "💬");
+      }
+    })
+    // 1b. Staff Messages (Personal Chat)
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'staff_messages' }, payload => {
+      const msg = payload.new;
+      const myId = getCurrentUserId();
+
+      // Only process messages involving current user
+      if (msg.receiver !== myId && msg.sender !== myId) return;
+
+      const teacherView = document.getElementById("teacherDashboardView");
+      const isTeacher = teacherView && !teacherView.classList.contains("hidden");
+
+      // Play notification sound only for messages received from others
+      if (msg.sender !== myId) {
+        playChatNotificationSound();
+      }
+
+      if (isTeacher) {
+        // Determine the active partner for the teacher's conversation
+        const isActiveConversation = teacherActiveChatType === "staff" && (
+          activeTeacherChatPartner === msg.sender ||
+          activeTeacherChatPartner === msg.receiver
+        );
+        if (isActiveConversation) {
+          appendMessageToArea(msg, document.getElementById("teacherStaffChatArea"), true);
+        } else if (msg.sender !== myId) {
+          const name = getStaffName(msg.sender) || msg.sender;
+          showToast(`Nuevo mensaje de ${name}: ${msg.content}`, "🏫");
+        }
+      } else {
+        // Determine the active partner for the admin's conversation
+        const isActiveConversation = adminActiveChatType === "staff" && (
+          activeAdminChatPartner === msg.sender ||
+          activeAdminChatPartner === msg.receiver
+        );
+        if (isActiveConversation) {
+          appendMessageToArea(msg, document.getElementById("chatArea"), true);
+        } else if (msg.sender !== myId) {
+          const name = getStaffName(msg.sender) || msg.sender;
+          showToast(`Nuevo mensaje de ${name}: ${msg.content}`, "🏫");
         }
       }
     })
@@ -1316,33 +1500,37 @@ function setupRealtimeChatListener() {
       if (eventType === 'DELETE') {
         delete studentsData[updatedStudent.id];
       } else {
-        // Update global studentsData
+        const prev = studentsData[updatedStudent.id] || {};
+        // Defensive merge: only overwrite if the new value is not null/undefined
+        const def = (newVal, fallback) => (newVal !== null && newVal !== undefined) ? newVal : fallback;
         studentsData[updatedStudent.id] = {
-          ...studentsData[updatedStudent.id],
-          name: updatedStudent.name,
-          student_id: updatedStudent.student_id,
-          img: updatedStudent.img,
-          isImgPath: updatedStudent.is_img_path,
-          grades: updatedStudent.grades,
-          conduct: updatedStudent.conduct,
-          conductText: updatedStudent.conduct_text,
-          parentName: updatedStudent.parent_name,
-          parentPhone: updatedStudent.parent_phone,
-          parentEmail: updatedStudent.parent_email,
-          grade: updatedStudent.grade,
-          incidents: updatedStudent.incidents || [],
-          noveltyReport: updatedStudent.novelty_report || {},
-          subject_grades: updatedStudent.subject_grades || {},
-          cedula: updatedStudent.cedula || "",
-          age: updatedStudent.age || "",
-          address: updatedStudent.address || "",
-          birth_year: updatedStudent.birth_year || "",
-          blood_type: updatedStudent.blood_type || "",
-          medical_conditions: updatedStudent.medical_conditions || "",
-          tutor2_name: updatedStudent.tutor2_name || "",
-          tutor2_phone: updatedStudent.tutor2_phone || "",
-          status: updatedStudent.status || "Nuevo",
-          attendance: updatedStudent.attendance !== null && updatedStudent.attendance !== undefined ? updatedStudent.attendance : true
+          ...prev,
+          name: def(updatedStudent.name, prev.name),
+          student_id: def(updatedStudent.student_id, prev.student_id),
+          img: def(updatedStudent.img, prev.img),
+          isImgPath: def(updatedStudent.is_img_path, prev.isImgPath),
+          grades: def(updatedStudent.grades, prev.grades),
+          conduct: def(updatedStudent.conduct, prev.conduct),
+          conductText: def(updatedStudent.conduct_text, prev.conductText),
+          parentName: def(updatedStudent.parent_name, prev.parentName),
+          parentPhone: def(updatedStudent.parent_phone, prev.parentPhone),
+          parentEmail: def(updatedStudent.parent_email, prev.parentEmail),
+          grade: def(updatedStudent.grade, prev.grade),
+          incidents: def(updatedStudent.incidents, prev.incidents) || [],
+          noveltyReport: def(updatedStudent.novelty_report, prev.noveltyReport) || {},
+          subject_grades: def(updatedStudent.subject_grades, prev.subject_grades) || {},
+          cedula: def(updatedStudent.cedula, prev.cedula) || "",
+          age: def(updatedStudent.age, prev.age) || "",
+          address: def(updatedStudent.address, prev.address) || "",
+          birth_year: def(updatedStudent.birth_year, prev.birth_year) || "",
+          blood_type: def(updatedStudent.blood_type, prev.blood_type) || "",
+          medical_conditions: def(updatedStudent.medical_conditions, prev.medical_conditions) || "",
+          tutor2_name: def(updatedStudent.tutor2_name, prev.tutor2_name) || "",
+          tutor2_phone: def(updatedStudent.tutor2_phone, prev.tutor2_phone) || "",
+          status: def(updatedStudent.status, prev.status) || "Nuevo",
+          attendance: (updatedStudent.attendance !== null && updatedStudent.attendance !== undefined)
+            ? updatedStudent.attendance
+            : (prev.attendance !== undefined ? prev.attendance : true)
         };
       }
 
@@ -1369,6 +1557,8 @@ function setupRealtimeChatListener() {
 
       // Refresh admin students list drawer
       renderStudentsList();
+      renderLandingAulasList();
+      renderLandingDocentesList();
       if (typeof renderDashboardStats === 'function') {
         renderDashboardStats();
       }
@@ -1404,56 +1594,180 @@ function setupRealtimeChatListener() {
     .subscribe();
 }
 
-async function loadChatMessagesFromSupabase(studentKey) {
-  if (!useSupabaseDb) {
-    renderChatMessages(mockMessages[studentKey] || []);
-    return;
+function isSenderMe(senderName) {
+  const teacherView = document.getElementById("teacherDashboardView");
+  const isTeacher = teacherView && !teacherView.classList.contains("hidden");
+  if (isTeacher) {
+    const name = teachersData[activeTeacher]?.name;
+    return name && senderName.includes(name);
+  } else {
+    const name = activeAdminUser ? activeAdminUser.name : "Egnis Cano";
+    return name && senderName.includes(name);
   }
+}
 
-  try {
-    const { data, error } = await supabaseClient
-      .from('chat_messages')
-      .select('*')
-      .eq('student_key', studentKey)
-      .order('created_at', { ascending: true });
-
-    if (!error && data) {
-      renderChatMessages(data);
+function getMsgContentHTML(contentStr) {
+  let contentHtml = escapeHTML(contentStr);
+  if (contentStr.trim().startsWith("{") && contentStr.trim().endsWith("}")) {
+    try {
+      const parsed = JSON.parse(contentStr);
+      if (parsed.file) {
+        const file = parsed.file;
+        const isImg = file.type.startsWith("image/") || file.name.endsWith(".jpg") || file.name.endsWith(".png") || file.name.endsWith(".jpeg");
+        if (isImg) {
+          contentHtml = `
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <div style="font-size: 0.75rem; font-style: italic; opacity: 0.7;">🖼️ Imagen: ${escapeHTML(file.name)}</div>
+              <img src="${file.data}" alt="${escapeHTML(file.name)}" style="max-width: 200px; max-height: 150px; border-radius: 8px; cursor: pointer; border: 1.5px solid var(--text-main);" onclick="window.openImageModal('${file.data}')">
+            </div>
+          `;
+        } else {
+          contentHtml = `
+            <div style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.05); padding: 8px 12px; border-radius: 8px; border: 1.5px solid var(--text-main);">
+              <span style="font-size: 1.5rem;">📄</span>
+              <div style="display: flex; flex-direction: column; min-width: 0;">
+                <span style="font-size: 0.8rem; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 140px;" title="${escapeHTML(file.name)}">${escapeHTML(file.name)}</span>
+                <a href="${file.data}" download="${escapeHTML(file.name)}" style="font-size: 0.7rem; color: var(--color-cyan); font-weight: bold; text-decoration: underline;">Descargar PDF</a>
+              </div>
+            </div>
+          `;
+        }
+      } else if (parsed.text) {
+        contentHtml = escapeHTML(parsed.text);
+      }
+    } catch(e) {
+      contentHtml = escapeHTML(contentStr);
     }
-  } catch (err) {
-    console.error("Fallo al recuperar historial de chat:", err);
   }
+  return contentHtml;
 }
 
-function renderChatMessages(msgList) {
-  chatArea.innerHTML = "";
-  if (msgList.length === 0) {
-    chatArea.innerHTML = `<p class="chat-placeholder">No hay mensajes previos. Envía uno para iniciar la conversación.</p>`;
-    return;
-  }
-
-  msgList.forEach(msg => {
-    appendSingleMessageToUI(msg);
-  });
-}
-
-function appendSingleMessageToUI(msg) {
-  const placeholder = chatArea.querySelector(".chat-placeholder");
+function appendMessageToArea(msg, area, isStaffChat) {
+  if (!area) return;
+  const placeholder = area.querySelector(".chat-placeholder");
   if (placeholder) placeholder.remove();
 
   const time = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  const bubbleClass = msg.is_sent_by_prof ? "sent" : "received";
-  const senderColor = msg.is_sent_by_prof ? "var(--color-cyan)" : "var(--color-orange)";
+  let bubbleClass = "received";
+  let senderColor = "var(--color-orange)";
 
+  if (isStaffChat) {
+    const isMe = isSenderMe(msg.sender);
+    bubbleClass = isMe ? "sent" : "received";
+    senderColor = isMe ? "var(--color-cyan)" : "var(--color-orange)";
+  } else {
+    bubbleClass = msg.is_sent_by_prof ? "sent" : "received";
+    senderColor = msg.is_sent_by_prof ? "var(--color-cyan)" : "var(--color-orange)";
+  }
+
+  const contentHtml = getMsgContentHTML(msg.content);
   const msgHTML = `
     <div class="chat-bubble ${bubbleClass}">
       <div class="sender" style="color: ${senderColor}">${escapeHTML(msg.sender)}</div>
-      <div class="msg-content">${escapeHTML(msg.content)}</div>
+      <div class="msg-content">${contentHtml}</div>
       <div class="time">${time}</div>
     </div>
   `;
-  chatArea.insertAdjacentHTML("beforeend", msgHTML);
-  chatArea.scrollTop = chatArea.scrollHeight;
+  area.insertAdjacentHTML("beforeend", msgHTML);
+  area.scrollTop = area.scrollHeight;
+}
+
+async function loadChatHistory(chatType, studentKey, area) {
+  if (!area) return;
+  area.innerHTML = "";
+
+  if (chatType === "staff") {
+    // Determine current user and partner
+    const myId = getCurrentUserId();
+    const partnerIdAdmin = activeAdminChatPartner;
+    const partnerIdTeacher = activeTeacherChatPartner;
+    const partnerId = partnerIdAdmin || partnerIdTeacher || null;
+
+    if (!useSupabaseDb) {
+      let list = [];
+      try {
+        const stored = localStorage.getItem("eduStaffMessages");
+        if (stored) {
+          list = JSON.parse(stored);
+        } else {
+          list = [
+            { sender: myId, receiver: partnerId || "admin", content: "Bienvenidos al canal de mensajería interna del personal.", created_at: new Date(Date.now() - 1000 * 60 * 120).toISOString() }
+          ];
+          localStorage.setItem("eduStaffMessages", JSON.stringify(list));
+        }
+      } catch(e) {}
+
+      // Filter to only show messages between myId and partnerId
+      if (partnerId) {
+        list = list.filter(m =>
+          (m.sender === myId && m.receiver === partnerId) ||
+          (m.sender === partnerId && m.receiver === myId)
+        );
+      }
+      renderHistoryList(list, area, true);
+      return;
+    }
+
+    try {
+      let query = supabaseClient
+        .from('staff_messages')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (partnerId) {
+        // Filter to 1-to-1 conversation
+        query = query.or(
+          `and(sender.eq.${myId},receiver.eq.${partnerId}),and(sender.eq.${partnerId},receiver.eq.${myId})`
+        );
+      }
+
+      const { data, error } = await query;
+      if (!error && data) {
+        renderHistoryList(data, area, true);
+      }
+    } catch(err) {
+      console.error("Error al cargar mensajes del personal:", err);
+    }
+  } else {
+    if (!studentKey) {
+      area.innerHTML = `<p class="chat-placeholder">Selecciona un alumno para chatear con su acudiente...</p>`;
+      return;
+    }
+
+    if (!useSupabaseDb) {
+      const list = mockMessages[studentKey] || [];
+      renderHistoryList(list, area, false);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabaseClient
+        .from('chat_messages')
+        .select('*')
+        .eq('student_key', studentKey)
+        .order('created_at', { ascending: true });
+      if (!error && data) {
+        renderHistoryList(data, area, false);
+      }
+    } catch (err) {
+      console.error("Error al cargar mensajes del tutor:", err);
+    }
+  }
+}
+
+function renderHistoryList(msgList, area, isStaffChat) {
+  area.innerHTML = "";
+  if (msgList.length === 0) {
+    area.innerHTML = `<p class="chat-placeholder">No hay mensajes previos. Envía uno para iniciar la conversación.</p>`;
+    return;
+  }
+  msgList.forEach(msg => {
+    appendMessageToArea(msg, area, isStaffChat);
+  });
+}
+
+async function loadChatMessagesFromSupabase(studentKey) {
+  loadChatHistory(adminActiveChatType, studentKey, chatArea);
 }
 
 // ==========================================================================
@@ -1738,64 +2052,105 @@ async function sendMessage() {
   const text = chatInputField.value.trim();
   if (!text) return;
 
-  const msgPayload = {
-    sender: "Prof. Egnis Cano",
-    content: text,
-    is_sent_by_prof: true,
-    student_key: activeStudent,
-    created_at: new Date().toISOString()
-  };
+  if (adminActiveChatType === "staff") {
+    const myId = getCurrentUserId();
+    const partnerId = activeAdminChatPartner;
+    if (!partnerId) return;
 
-  chatInputField.value = "";
+    const msgPayload = {
+      sender: myId,
+      receiver: partnerId,
+      content: text,
+      created_at: new Date().toISOString()
+    };
 
-  if (useSupabaseDb) {
-    try {
-      const { error } = await supabaseClient.from('chat_messages').insert([msgPayload]);
-      if (error) {
-        console.error("Error al guardar mensaje en Supabase:", error);
-        showToast("Error de conexión al guardar mensaje", "❌");
+    chatInputField.value = "";
+
+    if (useSupabaseDb && supabaseClient) {
+      try {
+        const { error } = await supabaseClient.from('staff_messages').insert([msgPayload]);
+        if (error) {
+          console.error("Error al guardar mensaje de personal en Supabase:", error);
+          showToast("Error de conexión al guardar mensaje", "❌");
+        }
+      } catch (err) {
+        console.error(err);
       }
-    } catch (err) {
-      console.error(err);
+    } else {
+      let list = [];
+      try {
+        const stored = localStorage.getItem("eduStaffMessages");
+        if (stored) list = JSON.parse(stored);
+      } catch(e) {}
+      list.push(msgPayload);
+      localStorage.setItem("eduStaffMessages", JSON.stringify(list));
+      appendMessageToArea(msgPayload, chatArea, true);
     }
   } else {
-    mockMessages[activeStudent].push(msgPayload);
-    appendSingleMessageToUI(msgPayload);
-  }
-
-  // Simulación de respuesta tras 1.5s
-  setTimeout(async () => {
-    const data = studentsData[activeStudent];
-    const responses = [
-      `¡Entendido Profesor Cano! Muchas gracias por el aviso. Estaré al pendiente.`,
-      `Buenas tardes profesor. Sí, perfecto. Revisaremos la materia juntos hoy por la tarde.`,
-      `Excelente, agradezco mucho su dedicación y comunicación directa con la familia.`,
-      `Hola. Perfecto, me conectaré a la reunión de padres de la próxima semana.`
-    ];
-    const randomReplyText = responses[Math.floor(Math.random() * responses.length)];
-
-    const replyPayload = {
-      sender: data.parentName,
-      content: randomReplyText,
-      is_sent_by_prof: false,
+    const senderName = activeAdminUser ? `Prof. ${activeAdminUser.name}` : "Prof. Egnis Cano";
+    const msgPayload = {
+      sender: senderName,
+      content: text,
+      is_sent_by_prof: true,
       student_key: activeStudent,
       created_at: new Date().toISOString()
     };
 
-    if (useSupabaseDb) {
+    chatInputField.value = "";
+
+    if (useSupabaseDb && supabaseClient) {
       try {
-        await supabaseClient.from('chat_messages').insert([replyPayload]);
+        const { error } = await supabaseClient.from('chat_messages').insert([msgPayload]);
+        if (error) {
+          console.error("Error al guardar mensaje en Supabase:", error);
+          showToast("Error de conexión al guardar mensaje", "❌");
+        }
       } catch (err) {
-        console.warn("Fallo al escribir respuesta automatizada:", err);
+        console.error(err);
       }
     } else {
-      mockMessages[activeStudent].push(replyPayload);
-      if (activeStudent === data.id) {
-        appendSingleMessageToUI(replyPayload);
-        showToast("Mensaje entrante del tutor", "💬");
+      if (!mockMessages[activeStudent]) {
+        mockMessages[activeStudent] = [];
       }
+      mockMessages[activeStudent].push(msgPayload);
+      appendMessageToArea(msgPayload, chatArea, false);
+
+      // Simulación de respuesta tras 1.5s
+      setTimeout(async () => {
+        const data = studentsData[activeStudent];
+        if (!data) return;
+        const responses = [
+          `¡Entendido Profesor! Muchas gracias por el aviso. Estaré al pendiente.`,
+          `Buenas tardes profesor. Sí, perfecto. Revisaremos la materia juntos hoy por la tarde.`,
+          `Excelente, agradezco mucho su dedicación y comunicación directa con la familia.`,
+          `Hola. Perfecto, me conectaré a la reunión de padres de la próxima semana.`
+        ];
+        const randomReplyText = responses[Math.floor(Math.random() * responses.length)];
+
+        const replyPayload = {
+          sender: data.parentName,
+          content: randomReplyText,
+          is_sent_by_prof: false,
+          student_key: activeStudent,
+          created_at: new Date().toISOString()
+        };
+
+        if (useSupabaseDb) {
+          try {
+            await supabaseClient.from('chat_messages').insert([replyPayload]);
+          } catch (err) {
+            console.warn("Fallo al escribir respuesta automatizada:", err);
+          }
+        } else {
+          mockMessages[activeStudent].push(replyPayload);
+          if (activeStudent === data.id && adminActiveChatType === "tutor") {
+            appendMessageToArea(replyPayload, chatArea, false);
+            showToast("Mensaje entrante del tutor", "💬");
+          }
+        }
+      }, 1500);
     }
-  }, 1500);
+  }
 }
 
 async function dispenseBudget() {
@@ -2077,6 +2432,14 @@ btnFormTab.addEventListener("click", () => {
 
 // Student Drawer open/close toggles
 studentPanelToggle.addEventListener("click", () => {
+  // Close admin dropdown if open
+  if (adminDropdownMenu && !adminDropdownMenu.classList.contains("hidden")) {
+    adminDropdownMenu.classList.add("hidden");
+    const chevron = adminDropdownMenuBtn.querySelector(".chevron");
+    if (chevron) {
+      chevron.style.transform = "rotate(0deg)";
+    }
+  }
   // Close teacher drawer if open
   if (teachersDrawer && !teachersDrawer.classList.contains("hidden")) {
     teachersDrawer.classList.remove("open");
@@ -2383,6 +2746,17 @@ function triggerPageWipe(targetPage) {
       if (teacherDashboardView) teacherDashboardView.classList.add("hidden");
       dashboardView.classList.remove("hidden");
       document.body.classList.add("dashboard-mode");
+      
+      // Update and render all dashboard states to prevent desynchronizations
+      renderStudentsList();
+      renderLandingAulasList();
+      renderLandingDocentesList();
+      renderTeachersList();
+      populateStudentGradeDropdown();
+      if (activeTeacher) {
+        switchActiveTeacher(activeTeacher);
+      }
+
       // Recalculate SVG lines
       setTimeout(drawConnectionCurve, 150);
     } else if (targetPage === "teacher") {
@@ -2574,6 +2948,24 @@ function initMainApp() {
     });
   }
 
+  // Bind edit teacher button click
+  const adminEditTeacherBtn = document.getElementById("adminEditTeacherBtn");
+  if (adminEditTeacherBtn) {
+    adminEditTeacherBtn.addEventListener("click", () => {
+      if (activeTeacher) {
+        openAdminEditTeacherModal(activeTeacher);
+      } else {
+        showToast("Selecciona un docente para editar", "⚠️");
+      }
+    });
+  }
+
+  // Inicializar acordeones de la Vista General del Administrador
+  initAdminLandingAccordions();
+
+  // Inicializar pestañas de chat dual
+  initChatTabsListeners();
+
   setTimeout(() => {
     drawConnectionCurve();
   }, 400);
@@ -2719,27 +3111,48 @@ if (statsSection) {
         console.error("Error al leer usuarios creados:", err);
       }
 
-      // Check default users if not in localStorage yet
-      if (users.length === 0) {
-        users = [
-          {
-            name: "Lic. Ana Reyes",
-            role: "secretaria",
-            roleName: "📝 Secretaria",
-            phone: "+507 6200-1111",
-            email: "ana.reyes@escuela.edu"
-          },
-          {
-            name: "Ing. Carlos Mendoza",
-            role: "sub administrador",
-            roleName: "🔑 Sub Administrador",
-            phone: "+507 6200-2222",
-            email: "carlos.mendoza@escuela.edu"
-          }
-        ];
-      }
+      // Always include default users if they are not already in the list
+      const defaultUsers = [
+        {
+          name: "Lic. Ana Reyes",
+          role: "secretaria",
+          roleName: "📝 Secretaria",
+          phone: "+507 6200-1111",
+          email: "ana.reyes@escuela.edu"
+        },
+        {
+          name: "Ing. Carlos Mendoza",
+          role: "sub administrador",
+          roleName: "🔑 Sub Administrador",
+          phone: "+507 6200-2222",
+          email: "carlos.mendoza@escuela.edu"
+        }
+      ];
+      defaultUsers.forEach(defUser => {
+        if (!users.some(u => u.email && u.email.toLowerCase() === defUser.email.toLowerCase())) {
+          users.push(defUser);
+        }
+      });
 
-      const matchedUser = users.find(u => u.email && u.email.toLowerCase() === email.toLowerCase());
+      const removeAccents = (str) => {
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      };
+
+      const storedAdminEmail = localStorage.getItem("eduAdminEmail");
+      const storedAdminPassword = localStorage.getItem("eduAdminPassword");
+
+      let matchedUser = null;
+      if (storedAdminEmail && email.toLowerCase() === storedAdminEmail.toLowerCase()) {
+        matchedUser = {
+          name: localStorage.getItem("eduAdminName") || "Egnis Cano",
+          role: "admin",
+          roleName: "🔑 Administrador",
+          email: storedAdminEmail,
+          password: storedAdminPassword
+        };
+      } else {
+        matchedUser = users.find(u => u.email && u.email.toLowerCase() === email.toLowerCase());
+      }
 
       if (matchedUser) {
         // If password is stored and does not match, show error
@@ -2754,10 +3167,10 @@ if (statsSection) {
         if (matchedUser.role === "profesores") {
           // Find matching teacher key in teachersData
           let teacherKey = null;
-          const normalizedUserName = matchedUser.name.toLowerCase().trim();
+          const normalizedUserName = removeAccents(matchedUser.name.toLowerCase().trim());
           for (const key in teachersData) {
             const teacher = teachersData[key];
-            const normalizedTeacherName = teacher.name.toLowerCase().trim();
+            const normalizedTeacherName = removeAccents(teacher.name.toLowerCase().trim());
             const cleanUser = normalizedUserName.replace(/^(prof\.|profa\.|profesor\.|profesora\.)\s*/, '').trim();
             const cleanTeacher = normalizedTeacherName.replace(/^(prof\.|profa\.|profesor\.|profesora\.)\s*/, '').trim();
             if (cleanUser === cleanTeacher || cleanTeacher.includes(cleanUser) || cleanUser.includes(cleanTeacher)) {
@@ -2806,6 +3219,14 @@ if (statsSection) {
       }
 
       // Default Admin or other roles login
+      if (matchedUser) {
+        activeAdminUser = matchedUser;
+      } else {
+        const storedName = localStorage.getItem("eduAdminName") || "Egnis Cano";
+        activeAdminUser = { name: storedName, role: "admin", roleName: "🔑 Administrador" };
+      }
+      activeTeacher = null;
+
       showToast("¡Bienvenido! Ingresando al sistema...", "🚀");
       setTimeout(() => {
         const authSection = document.getElementById("authSection");
@@ -2856,6 +3277,10 @@ if (statsSection) {
       localStorage.setItem("eduSchoolName", schoolName);
       localStorage.setItem("eduSchoolAddress", address);
       localStorage.setItem("eduAdminName", adminName);
+      localStorage.setItem("eduAdminEmail", email);
+      localStorage.setItem("eduAdminPassword", pw);
+      activeAdminUser = { name: adminName, role: "admin", roleName: "🔑 Administrador" };
+      activeTeacher = null;
       if (schoolLogoUrl) {
         localStorage.setItem("eduSchoolLogo", schoolLogoUrl);
       } else {
@@ -3244,26 +3669,55 @@ function setupTeacherPortalStaticEvents() {
   const navTeacherPlanificacion = document.getElementById("navTeacherPlanificacion");
   const teacherAppScreen = document.getElementById("teacherAppScreen");
   const teacherPlanningScreen = document.getElementById("teacherPlanningScreen");
+  const teacherChatScreen = document.getElementById("teacherChatScreen");
 
-  if (navTeacherAlumnos && navTeacherPlanificacion && teacherAppScreen && teacherPlanningScreen) {
-    navTeacherAlumnos.addEventListener("click", () => {
-      navTeacherAlumnos.classList.add("primary");
-      navTeacherAlumnos.classList.remove("secondary");
-      navTeacherPlanificacion.classList.add("secondary");
-      navTeacherPlanificacion.classList.remove("primary");
-      
-      teacherAppScreen.classList.remove("hidden");
-      teacherPlanningScreen.classList.add("hidden");
+  function switchTeacherTab(active) {
+    // Manage btn styles
+    [navTeacherAlumnos, navTeacherPlanificacion, document.getElementById("navTeacherChat")].forEach(btn => {
+      if (!btn) return;
+      btn.classList.remove("primary");
+      btn.classList.add("secondary");
     });
+    if (active) { active.classList.remove("secondary"); active.classList.add("primary"); }
+    // Manage screen visibility
+    [teacherAppScreen, teacherPlanningScreen, teacherChatScreen].forEach(s => {
+      if (s) s.classList.add("hidden");
+    });
+  }
 
+  if (navTeacherAlumnos) {
+    navTeacherAlumnos.addEventListener("click", () => {
+      switchTeacherTab(navTeacherAlumnos);
+      if (teacherAppScreen) teacherAppScreen.classList.remove("hidden");
+    });
+  }
+
+  if (navTeacherPlanificacion) {
     navTeacherPlanificacion.addEventListener("click", () => {
-      navTeacherPlanificacion.classList.add("primary");
-      navTeacherPlanificacion.classList.remove("secondary");
-      navTeacherAlumnos.classList.add("secondary");
-      navTeacherAlumnos.classList.remove("primary");
-      
-      teacherPlanningScreen.classList.remove("hidden");
-      teacherAppScreen.classList.add("hidden");
+      switchTeacherTab(navTeacherPlanificacion);
+      if (teacherPlanningScreen) teacherPlanningScreen.classList.remove("hidden");
+    });
+  }
+
+  const navTeacherChat = document.getElementById("navTeacherChat");
+  if (navTeacherChat) {
+    navTeacherChat.addEventListener("click", () => {
+      switchTeacherTab(navTeacherChat);
+      if (teacherChatScreen) teacherChatScreen.classList.remove("hidden");
+      // Default to Tutor tab and render contacts list
+      teacherActiveChatType = "tutor";
+      const btnTutor = document.getElementById("teacherBtnChatTutor");
+      const btnStaff = document.getElementById("teacherBtnChatStaff");
+      if (btnTutor) { btnTutor.classList.add("active"); }
+      if (btnStaff) { btnStaff.classList.remove("active"); }
+      renderTutorContactsList(null);
+      // Hide staff area, show tutor contacts
+      const staffListArea = document.getElementById("teacherStaffListArea");
+      const tutorContactsList = document.getElementById("teacherTutorContactsList");
+      if (staffListArea) staffListArea.classList.add("hidden");
+      if (tutorContactsList) tutorContactsList.style.display = "flex";
+      // Reset right side to placeholder
+      resetTeacherChatRightPanel();
     });
   }
 
@@ -3305,22 +3759,6 @@ function setupTeacherPortalStaticEvents() {
     teacherChatSendBtn.addEventListener("click", sendTeacherMessage);
     teacherChatInputField.addEventListener("keypress", (e) => {
       if (e.key === "Enter") sendTeacherMessage();
-    });
-  }
-
-  // Close Chat Button listener
-  const closeTeacherChatBtn = document.getElementById("closeTeacherChatBtn");
-  if (closeTeacherChatBtn) {
-    closeTeacherChatBtn.addEventListener("click", closeTeacherChat);
-  }
-
-  // Click on background of overlay to close
-  const teacherChatOverlay = document.getElementById("teacherChatOverlay");
-  if (teacherChatOverlay) {
-    teacherChatOverlay.addEventListener("click", (e) => {
-      if (e.target === teacherChatOverlay) {
-        closeTeacherChat();
-      }
     });
   }
 
@@ -3666,7 +4104,7 @@ function loadTeacherStudents() {
 
   // Filter students by grade
   const grade = teacher.assigned_grade || "3A";
-  const filtered = Object.values(studentsData).filter(s => s.grade === grade);
+  const filtered = Object.values(studentsData || {}).filter(s => s.grade === grade);
 
   // Alphabetical sort
   filtered.sort((a, b) => a.name.localeCompare(b.name));
@@ -4357,6 +4795,12 @@ function renderTeacherPortalStudents(students) {
         if (activeStudent === student.id) {
           updateStudentDetails(student.id);
         }
+        renderStudentsList();
+        renderLandingAulasList();
+        renderLandingDocentesList();
+        if (typeof renderDashboardStats === 'function') {
+          renderDashboardStats();
+        }
       });
     }
 
@@ -4437,6 +4881,12 @@ function renderTeacherPortalStudents(students) {
         if (activeStudent === student.id) {
           updateStudentDetails(student.id);
         }
+        renderStudentsList();
+        renderLandingAulasList();
+        renderLandingDocentesList();
+        if (typeof renderDashboardStats === 'function') {
+          renderDashboardStats();
+        }
       });
     }
 
@@ -4483,6 +4933,12 @@ function renderTeacherPortalStudents(students) {
         // Update details in admin if it's the active student
         if (activeStudent === student.id) {
           updateStudentDetails(student.id);
+        }
+        renderStudentsList();
+        renderLandingAulasList();
+        renderLandingDocentesList();
+        if (typeof renderDashboardStats === 'function') {
+          renderDashboardStats();
         }
       });
     }
@@ -4536,6 +4992,12 @@ function renderTeacherPortalStudents(students) {
         if (activeStudent === student.id) {
           updateStudentDetails(student.id);
         }
+        renderStudentsList();
+        renderLandingAulasList();
+        renderLandingDocentesList();
+        if (typeof renderDashboardStats === 'function') {
+          renderDashboardStats();
+        }
       });
     }
 
@@ -4588,52 +5050,151 @@ function updateRealtimeUIForStudentSubject(studentId, subject) {
   updateTrimesterAverageForStudent(studentId);
 }
 
-function openTeacherChat(studentId) {
-  const overlay = document.getElementById("teacherChatOverlay");
-  const sidebar = document.getElementById("teacherChatSidebar");
-  if (!overlay || !sidebar) return;
+// ---- Teacher Chat: Helper functions for the integrated chat screen ----
 
+function resetTeacherChatRightPanel() {
+  const placeholder = document.getElementById("teacherChatPlaceholder");
+  const tutorArea = document.getElementById("teacherTutorChatArea");
+  const staffBox = document.getElementById("teacherDirectChatBox");
+  const inputBar = document.getElementById("teacherChatInputBar");
+  const header = document.getElementById("teacherActiveChatHeader");
+
+  if (placeholder) placeholder.style.display = "flex";
+  if (tutorArea) tutorArea.style.display = "none";
+  if (staffBox) staffBox.classList.add("hidden");
+  if (inputBar) inputBar.style.display = "none";
+  if (header) header.style.display = "none";
+}
+
+function renderTutorContactsList(activeStudentId) {
+  const container = document.getElementById("teacherTutorContactsList");
+  if (!container) return;
+  container.innerHTML = "";
+
+  const teacher = teachersData[activeTeacher];
+  if (!teacher) {
+    container.innerHTML = `<p class="chat-placeholder">No tienes un grado asignado.</p>`;
+    return;
+  }
+  const grade = teacher.assigned_grade;
+  const students = Object.values(studentsData || {})
+    .filter(s => s.grade === grade)
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  if (students.length === 0) {
+    container.innerHTML = `<p class="chat-placeholder">No hay alumnos en tu grado asignado.</p>`;
+    return;
+  }
+
+  students.forEach(student => {
+    const isActive = student.id === activeStudentId;
+    const item = document.createElement("div");
+    item.className = "staff-list-item" + (isActive ? " active-contact" : "");
+    item.style.cursor = "pointer";
+
+    let avatarHTML;
+    if (student.isImgPath || (student.img && (student.img.includes('/') || student.img.startsWith('data:image/')))) {
+      avatarHTML = `<img src="${student.img}" alt="${student.name}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid var(--text-main);">`;
+    } else {
+      const grad = getRandomGradientClass(student.id);
+      avatarHTML = `<div class="avatar-fallback ${grad}" style="width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:0.85rem;border:2px solid var(--text-main);flex-shrink:0;">${student.img || "?"}</div>`;
+    }
+
+    item.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;flex:1;">
+        ${avatarHTML}
+        <div style="display:flex;flex-direction:column;line-height:1.3;min-width:0;">
+          <strong style="color:var(--text-main);font-size:0.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHTML(student.name)}</strong>
+          <span style="font-size:0.72rem;color:var(--text-sub);font-weight:600;">👪 ${escapeHTML(student.parentName || "Tutor")}</span>
+        </div>
+      </div>
+      <span style="font-size:1rem;color:var(--text-main);font-weight:bold;">💬</span>
+    `;
+    item.addEventListener("click", () => {
+      showTeacherTutorChat(student.id);
+    });
+    container.appendChild(item);
+  });
+}
+
+function showTeacherTutorChat(studentId) {
   activeStudent = studentId;
   const student = studentsData[studentId];
   if (!student) return;
 
-  // Load parent name in communication title
-  const header = document.querySelector("#teacherChatOverlay .card-header h4");
-  if (header) {
-    header.innerHTML = `<span class="icon">💬</span> Mensajería: ${escapeHTML(student.parentName)}`;
+  // Navigate to Mensajería tab
+  const teacherChatScreen = document.getElementById("teacherChatScreen");
+  const navTeacherChat = document.getElementById("navTeacherChat");
+  if (teacherChatScreen) {
+    ["teacherAppScreen", "teacherPlanningScreen"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.add("hidden");
+    });
+    teacherChatScreen.classList.remove("hidden");
+  }
+  // Ensure Tutor tab is active
+  teacherActiveChatType = "tutor";
+  const btnTutor = document.getElementById("teacherBtnChatTutor");
+  const btnStaff = document.getElementById("teacherBtnChatStaff");
+  if (btnTutor) btnTutor.classList.add("active");
+  if (btnStaff) btnStaff.classList.remove("active");
+
+  // Switch left column to tutor contacts
+  const staffListArea = document.getElementById("teacherStaffListArea");
+  const tutorContactsList = document.getElementById("teacherTutorContactsList");
+  if (staffListArea) staffListArea.classList.add("hidden");
+  if (tutorContactsList) tutorContactsList.style.display = "flex";
+
+  // Highlight selected student
+  renderTutorContactsList(studentId);
+
+  // Show right panel: tutor chat
+  const placeholder = document.getElementById("teacherChatPlaceholder");
+  const tutorArea = document.getElementById("teacherTutorChatArea");
+  const staffBox = document.getElementById("teacherDirectChatBox");
+  const inputBar = document.getElementById("teacherChatInputBar");
+  const header = document.getElementById("teacherActiveChatHeader");
+  const partnerInfo = document.getElementById("teacherChatPartnerInfo");
+
+  if (placeholder) placeholder.style.display = "none";
+  if (staffBox) staffBox.classList.add("hidden");
+  if (tutorArea) tutorArea.style.display = "flex";
+  if (inputBar) { inputBar.style.display = "flex"; }
+  if (header) header.style.display = "flex";
+
+  if (partnerInfo) {
+    partnerInfo.innerHTML = `
+      <span style="font-size:1.1rem;">👪</span>
+      <div style="display:flex;flex-direction:column;line-height:1.2;">
+        <strong style="font-size:0.88rem;color:var(--text-main);">${escapeHTML(student.parentName || "Tutor")}</strong>
+        <span style="font-size:0.7rem;color:var(--text-sub);">Acudiente de ${escapeHTML(student.name)}</span>
+      </div>
+    `;
   }
 
-  // Load parent placeholder in chat input
+  // Update input placeholder
   const inputField = document.getElementById("teacherChatInputField");
-  if (inputField) {
-    inputField.placeholder = `Escribe un mensaje al tutor de ${student.name.split(" ")[0]}...`;
-  }
+  if (inputField) inputField.placeholder = `Escribe un mensaje al tutor de ${student.name.split(" ")[0]}...`;
 
-  // Reset file input
-  const fileInput = document.getElementById("teacherChatFileInput");
-  if (fileInput) fileInput.value = "";
+  // Update nav button styles
+  [document.getElementById("navTeacherAlumnos"), document.getElementById("navTeacherPlanificacion")].forEach(b => {
+    if (b) { b.classList.remove("primary"); b.classList.add("secondary"); }
+  });
+  if (navTeacherChat) { navTeacherChat.classList.remove("secondary"); navTeacherChat.classList.add("primary"); }
 
   // Load messages
   loadTeacherChatMessages(studentId);
+}
 
-  // Show overlay with sliding effect
-  overlay.classList.remove("hidden");
-  // Trigger layout reflow for animation
-  overlay.offsetWidth;
-  sidebar.style.transform = "translateX(0)";
-  
-  if (inputField) inputField.focus();
+function openTeacherChat(studentId) {
+  // Redirects to the integrated Mensajería screen instead of the old overlay
+  showTeacherTutorChat(studentId);
 }
 
 function closeTeacherChat() {
-  const overlay = document.getElementById("teacherChatOverlay");
-  const sidebar = document.getElementById("teacherChatSidebar");
-  if (!overlay || !sidebar) return;
-
-  sidebar.style.transform = "translateX(100%)";
-  setTimeout(() => {
-    overlay.classList.add("hidden");
-  }, 300);
+  // No-op: there is no overlay to close now. Navigate back to Alumnos tab.
+  const navAlumnos = document.getElementById("navTeacherAlumnos");
+  if (navAlumnos) navAlumnos.click();
 }
 
 async function handleTeacherChatFileSelection(e) {
@@ -4672,7 +5233,12 @@ async function handleTeacherChatFileSelection(e) {
       data: dataUrl
     };
 
-    const msgPayload = {
+    const isStaff = teacherActiveChatType === "staff";
+    const msgPayload = isStaff ? {
+      sender: `👨‍🏫 Docente: ${teacher.name}`,
+      content: JSON.stringify({ text: `Archivo: ${file.name}`, file: filePayload }),
+      created_at: new Date().toISOString()
+    } : {
       sender: teacher.name,
       content: JSON.stringify({ text: `Archivo: ${file.name}`, file: filePayload }),
       is_sent_by_prof: true,
@@ -4686,7 +5252,8 @@ async function handleTeacherChatFileSelection(e) {
     // Persist
     if (useSupabaseDb && supabaseClient) {
       try {
-        const { error } = await supabaseClient.from('chat_messages').insert([msgPayload]);
+        const targetTable = isStaff ? 'staff_messages' : 'chat_messages';
+        const { error } = await supabaseClient.from(targetTable).insert([msgPayload]);
         if (error) {
           console.error("Error sending file to Supabase:", error);
           showToast("Error de conexión al enviar archivo", "❌");
@@ -4698,33 +5265,45 @@ async function handleTeacherChatFileSelection(e) {
         console.error(err);
       }
     } else {
-      if (!mockMessages[activeStudent]) {
-        mockMessages[activeStudent] = [];
-      }
-      mockMessages[activeStudent].push(msgPayload);
-      appendTeacherSingleMessageToUI(msgPayload);
-      showToast("Archivo enviado con éxito", "✅");
-
-      // Simulate parents reply
-      setTimeout(() => {
-        const currentStudent = studentsData[activeStudent];
-        if (!currentStudent) return;
-
-        const replyPayload = {
-          sender: currentStudent.parentName,
-          content: `¡Recibido! Acabo de ver el archivo "${file.name}". Muchas gracias.`,
-          is_sent_by_prof: false,
-          student_key: activeStudent,
-          created_at: new Date().toISOString()
-        };
-
-        mockMessages[activeStudent].push(replyPayload);
-
-        if (activeStudent === currentStudent.id) {
-          appendTeacherSingleMessageToUI(replyPayload);
-          showToast("Mensaje entrante del tutor", "💬");
+      if (isStaff) {
+        let list = [];
+        try {
+          const stored = localStorage.getItem("eduStaffMessages");
+          if (stored) list = JSON.parse(stored);
+        } catch(e) {}
+        list.push(msgPayload);
+        localStorage.setItem("eduStaffMessages", JSON.stringify(list));
+        appendMessageToArea(msgPayload, document.getElementById("teacherChatArea"), true);
+        showToast("Archivo enviado con éxito", "✅");
+      } else {
+        if (!mockMessages[activeStudent]) {
+          mockMessages[activeStudent] = [];
         }
-      }, 1500);
+        mockMessages[activeStudent].push(msgPayload);
+        appendTeacherSingleMessageToUI(msgPayload);
+        showToast("Archivo enviado con éxito", "✅");
+
+        // Simulate parents reply
+        setTimeout(() => {
+          const currentStudent = studentsData[activeStudent];
+          if (!currentStudent) return;
+
+          const replyPayload = {
+            sender: currentStudent.parentName,
+            content: `¡Recibido! Acabo de ver el archivo "${file.name}". Muchas gracias.`,
+            is_sent_by_prof: false,
+            student_key: activeStudent,
+            created_at: new Date().toISOString()
+          };
+
+          mockMessages[activeStudent].push(replyPayload);
+
+          if (activeStudent === currentStudent.id && teacherActiveChatType === "tutor") {
+            appendMessageToArea(replyPayload, document.getElementById("teacherChatArea"), false);
+            showToast("Mensaje entrante del tutor", "💬");
+          }
+        }, 1500);
+      }
     }
   };
 
@@ -4755,99 +5334,17 @@ window.openImageModal = function(src) {
 
 async function loadTeacherChatMessages(studentKey) {
   const teacherChatArea = document.getElementById("teacherChatArea");
-  if (!teacherChatArea) return;
-
-  teacherChatArea.innerHTML = "";
-
-  if (!useSupabaseDb) {
-    const list = mockMessages[studentKey] || [];
-    renderTeacherChatMessages(list);
-    return;
-  }
-
-  try {
-    const { data, error } = await supabaseClient
-      .from('chat_messages')
-      .select('*')
-      .eq('student_key', studentKey)
-      .order('created_at', { ascending: true });
-
-    if (!error && data) {
-      renderTeacherChatMessages(data);
-    }
-  } catch (err) {
-    console.error("Error loading chat messages for teacher:", err);
-  }
+  loadChatHistory(teacherActiveChatType, studentKey, teacherChatArea);
 }
 
 function renderTeacherChatMessages(msgList) {
   const teacherChatArea = document.getElementById("teacherChatArea");
-  if (!teacherChatArea) return;
-
-  teacherChatArea.innerHTML = "";
-  if (msgList.length === 0) {
-    teacherChatArea.innerHTML = `<p class="chat-placeholder">No hay mensajes previos. Envía uno para iniciar la conversación.</p>`;
-    return;
-  }
-
-  msgList.forEach(msg => {
-    appendTeacherSingleMessageToUI(msg);
-  });
+  renderHistoryList(msgList, teacherChatArea, teacherActiveChatType === "staff");
 }
 
 function appendTeacherSingleMessageToUI(msg) {
   const teacherChatArea = document.getElementById("teacherChatArea");
-  if (!teacherChatArea) return;
-
-  const placeholder = teacherChatArea.querySelector(".chat-placeholder");
-  if (placeholder) placeholder.remove();
-
-  const time = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  const bubbleClass = msg.is_sent_by_prof ? "sent" : "received";
-  const senderColor = msg.is_sent_by_prof ? "var(--color-cyan)" : "var(--color-orange)";
-
-  let contentHtml = escapeHTML(msg.content);
-  if (msg.content.trim().startsWith("{") && msg.content.trim().endsWith("}")) {
-    try {
-      const parsed = JSON.parse(msg.content);
-      if (parsed.file) {
-        const file = parsed.file;
-        const isImg = file.type.startsWith("image/") || file.name.endsWith(".jpg") || file.name.endsWith(".png") || file.name.endsWith(".jpeg");
-        if (isImg) {
-          contentHtml = `
-            <div style="display: flex; flex-direction: column; gap: 6px;">
-              <div style="font-size: 0.75rem; font-style: italic; opacity: 0.7;">🖼️ Imagen: ${escapeHTML(file.name)}</div>
-              <img src="${file.data}" alt="${escapeHTML(file.name)}" style="max-width: 200px; max-height: 150px; border-radius: 8px; cursor: pointer; border: 1.5px solid var(--text-main);" onclick="window.openImageModal('${file.data}')">
-            </div>
-          `;
-        } else {
-          contentHtml = `
-            <div style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.05); padding: 8px 12px; border-radius: 8px; border: 1.5px solid var(--text-main);">
-              <span style="font-size: 1.5rem;">📄</span>
-              <div style="display: flex; flex-direction: column; min-width: 0;">
-                <span style="font-size: 0.8rem; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 140px;" title="${escapeHTML(file.name)}">${escapeHTML(file.name)}</span>
-                <a href="${file.data}" download="${escapeHTML(file.name)}" style="font-size: 0.7rem; color: var(--color-cyan); font-weight: bold; text-decoration: underline;">Descargar PDF</a>
-              </div>
-            </div>
-          `;
-        }
-      } else if (parsed.text) {
-        contentHtml = escapeHTML(parsed.text);
-      }
-    } catch(e) {
-      contentHtml = escapeHTML(msg.content);
-    }
-  }
-
-  const msgHTML = `
-    <div class="chat-bubble ${bubbleClass}">
-      <div class="sender" style="color: ${senderColor}">${escapeHTML(msg.sender)}</div>
-      <div class="msg-content">${contentHtml}</div>
-      <div class="time">${time}</div>
-    </div>
-  `;
-  teacherChatArea.insertAdjacentHTML("beforeend", msgHTML);
-  teacherChatArea.scrollTop = teacherChatArea.scrollHeight;
+  appendMessageToArea(msg, teacherChatArea, teacherActiveChatType === "staff");
 }
 
 async function sendTeacherMessage() {
@@ -4860,61 +5357,99 @@ async function sendTeacherMessage() {
   const teacher = teachersData[activeTeacher];
   if (!teacher) return;
 
-  const msgPayload = {
-    sender: teacher.name,
-    content: text,
-    is_sent_by_prof: true,
-    student_key: activeStudent,
-    created_at: new Date().toISOString()
-  };
+  const teacherChatArea = document.getElementById("teacherChatArea");
 
-  inputField.value = "";
+  if (teacherActiveChatType === "staff") {
+    const myId = getCurrentUserId();
+    const partnerId = activeTeacherChatPartner;
+    if (!partnerId) return;
 
-  if (useSupabaseDb && supabaseClient) {
-    try {
-      const { error } = await supabaseClient.from('chat_messages').insert([msgPayload]);
-      if (error) {
-        console.error("Error sending message to Supabase:", error);
-        showToast("Error de conexión al guardar mensaje", "❌");
+    const msgPayload = {
+      sender: myId,
+      receiver: partnerId,
+      content: text,
+      created_at: new Date().toISOString()
+    };
+
+    inputField.value = "";
+
+    if (useSupabaseDb && supabaseClient) {
+      try {
+        const { error } = await supabaseClient.from('staff_messages').insert([msgPayload]);
+        if (error) {
+          console.error("Error al guardar mensaje de personal en Supabase:", error);
+          showToast("Error de conexión al guardar mensaje", "❌");
+        }
+      } catch (err) {
+        console.error(err);
       }
-    } catch (err) {
-      console.error(err);
+    } else {
+      let list = [];
+      try {
+        const stored = localStorage.getItem("eduStaffMessages");
+        if (stored) list = JSON.parse(stored);
+      } catch(e) {}
+      list.push(msgPayload);
+      localStorage.setItem("eduStaffMessages", JSON.stringify(list));
+      appendMessageToArea(msgPayload, document.getElementById("teacherStaffChatArea"), true);
     }
   } else {
-    if (!mockMessages[activeStudent]) {
-      mockMessages[activeStudent] = [];
-    }
-    mockMessages[activeStudent].push(msgPayload);
-    appendTeacherSingleMessageToUI(msgPayload);
+    const msgPayload = {
+      sender: teacher.name,
+      content: text,
+      is_sent_by_prof: true,
+      student_key: activeStudent,
+      created_at: new Date().toISOString()
+    };
 
-    // Simulate auto reply after 1.5s in demo mode
-    setTimeout(() => {
-      const currentStudent = studentsData[activeStudent];
-      if (!currentStudent) return;
+    inputField.value = "";
 
-      const replies = [
-        `¡Entendido Profesor! Muchas gracias por el aviso. Estaré al pendiente.`,
-        `Buenas tardes profesor. Sí, perfecto. Revisaremos la materia juntos hoy por la tarde.`,
-        `Excelente, agradezco mucho su dedicación y comunicación directa con la familia.`,
-        `Hola. Perfecto, me conectaré a la reunión de padres de la próxima semana.`
-      ];
-      const replyText = replies[Math.floor(Math.random() * replies.length)];
-
-      const replyPayload = {
-        sender: currentStudent.parentName,
-        content: replyText,
-        is_sent_by_prof: false,
-        student_key: activeStudent,
-        created_at: new Date().toISOString()
-      };
-
-      mockMessages[activeStudent].push(replyPayload);
-
-      if (activeStudent === currentStudent.id) {
-        appendTeacherSingleMessageToUI(replyPayload);
-        showToast("Mensaje entrante del tutor", "💬");
+    if (useSupabaseDb && supabaseClient) {
+      try {
+        const { error } = await supabaseClient.from('chat_messages').insert([msgPayload]);
+        if (error) {
+          console.error("Error sending message to Supabase:", error);
+          showToast("Error de conexión al guardar mensaje", "❌");
+        }
+      } catch (err) {
+        console.error(err);
       }
-    }, 1500);
+    } else {
+      if (!mockMessages[activeStudent]) {
+        mockMessages[activeStudent] = [];
+      }
+      mockMessages[activeStudent].push(msgPayload);
+      appendMessageToArea(msgPayload, teacherChatArea, false);
+
+      // Simulate parent reply in demo mode
+      setTimeout(() => {
+        const currentStudent = studentsData[activeStudent];
+        if (!currentStudent) return;
+
+        const replies = [
+          `¡Entendido Profesor! Muchas gracias por el aviso. Estaré al pendiente.`,
+          `Buenas tardes profesor. Sí, perfecto. Revisaremos la materia juntos hoy por la tarde.`,
+          `Excelente, agradezco mucho su dedicación y comunicación directa con la familia.`,
+          `Hola. Perfecto, me conectaré a la reunión de padres de la próxima semana.`
+        ];
+        const replyText = replies[Math.floor(Math.random() * replies.length)];
+
+        const replyPayload = {
+          sender: currentStudent.parentName,
+          content: replyText,
+          is_sent_by_prof: false,
+          student_key: activeStudent,
+          created_at: new Date().toISOString()
+        };
+
+        mockMessages[activeStudent].push(replyPayload);
+
+        if (activeStudent === currentStudent.id && teacherActiveChatType === "tutor") {
+          appendMessageToArea(replyPayload, teacherChatArea, false);
+          showToast("Mensaje entrante del tutor", "💬");
+        }
+      }, 1500);
+    }
   }
 }
 
@@ -4995,7 +5530,7 @@ function openSiaceSyncModal(studentKey) {
         
         // Calculate grades averages sync summary
         const studentGrade = student.grade || "2B";
-        const teachersForGrade = Object.values(teachersData).filter(t => t.assigned_grade === studentGrade);
+        const teachersForGrade = Object.values(teachersData || {}).filter(t => t.assigned_grade === studentGrade);
         const subjects = [];
         teachersForGrade.forEach(t => {
           if (t.subjects) {
@@ -5436,3 +5971,763 @@ document.addEventListener("click", (e) => {
     console.error("Error en delegación de eventos del módulo de boletines:", err);
   }
 });
+
+
+// ==========================================================================
+// VISTA GENERAL & INTERACTIVE ACCORDIONS FOR ADMIN LANDING VIEW
+// ==========================================================================
+
+function showAdminLandingView() {
+  const landing = document.getElementById("adminLandingView");
+  const grid = document.getElementById("dashboardGrid");
+  const screen = document.getElementById("appScreen");
+  const content = document.getElementById("screenContent");
+
+  if (landing && grid) {
+    landing.classList.remove("hidden");
+    grid.classList.add("hidden");
+  }
+  if (screen && content) {
+    screen.classList.add("landing-mode");
+    content.classList.add("landing-mode");
+  }
+
+  // Close any open drawers
+  if (typeof teachersDrawer !== 'undefined' && teachersDrawer) {
+    teachersDrawer.classList.remove("open");
+    teachersDrawer.classList.add("hidden");
+  }
+  if (typeof studentsDrawer !== 'undefined' && studentsDrawer) {
+    studentsDrawer.classList.remove("open");
+    studentsDrawer.classList.add("hidden");
+  }
+  if (typeof settingsDrawer !== 'undefined' && settingsDrawer) {
+    settingsDrawer.classList.remove("open");
+    settingsDrawer.classList.add("hidden");
+  }
+  if (typeof financeDrawer !== 'undefined' && financeDrawer) {
+    financeDrawer.classList.remove("open");
+    financeDrawer.classList.add("hidden");
+  }
+  document.body.classList.remove("drawer-open");
+}
+
+function showAdminDashboardGrid() {
+  const landing = document.getElementById("adminLandingView");
+  const grid = document.getElementById("dashboardGrid");
+  const screen = document.getElementById("appScreen");
+  const content = document.getElementById("screenContent");
+
+  if (landing && grid) {
+    landing.classList.add("hidden");
+    grid.classList.remove("hidden");
+  }
+  if (screen && content) {
+    screen.classList.remove("landing-mode");
+    content.classList.remove("landing-mode");
+  }
+  setTimeout(drawConnectionCurve, 150);
+}
+
+function toggleLandingAccordion(card, content, arrow) {
+  const isOpen = card.classList.contains("open");
+  
+  if (isOpen) {
+    // Collapsing
+    content.style.transition = "max-height 0.4s ease, opacity 0.3s ease";
+    content.style.height = content.scrollHeight + "px";
+    // Force reflow
+    content.offsetHeight;
+    content.style.height = "0px";
+    content.style.opacity = "0";
+    card.classList.remove("open");
+    if (arrow) arrow.style.transform = "rotate(0deg)";
+    setTimeout(() => {
+      content.style.display = "none";
+      content.style.height = "0";
+      content.style.overflow = "hidden";
+      content.style.transition = "";
+    }, 420);
+  } else {
+    // Expanding
+    content.style.display = "block";
+    const targetHeight = content.scrollHeight;
+    content.style.height = "0px";
+    content.style.opacity = "0";
+    content.style.overflow = "hidden";
+    // Force reflow
+    content.offsetHeight;
+    content.style.transition = "height 0.4s ease, opacity 0.35s ease";
+    content.style.height = targetHeight + "px";
+    content.style.opacity = "1";
+    card.classList.add("open");
+    if (arrow) arrow.style.transform = "rotate(180deg)";
+    setTimeout(() => {
+      content.style.height = "auto";
+      content.style.overflow = "visible";
+      content.style.transition = "";
+    }, 420);
+  }
+}
+
+function initAdminLandingAccordions() {
+  // Configure both accordion cards: hide content initially, bind toggle
+  [
+    { cardId: "landingDocentesCard", contentId: "landingDocentesContent" },
+    { cardId: "landingAulasCard",    contentId: "landingAulasContent"    }
+  ].forEach(({ cardId, contentId }) => {
+    const card    = document.getElementById(cardId);
+    const content = document.getElementById(contentId);
+    const arrow   = card ? card.querySelector(".accordion-arrow") : null;
+    if (!card || !content) return;
+
+    // Start collapsed
+    content.style.display  = "none";
+    content.style.height   = "0";
+    content.style.opacity  = "0";
+    content.style.overflow = "hidden";
+    card.classList.remove("open");
+    if (arrow) arrow.style.transform = "rotate(0deg)";
+
+    const header = card.querySelector(".accordion-card-header");
+    if (header) {
+      header.addEventListener("click", () => toggleLandingAccordion(card, content, arrow));
+    }
+  });
+
+  // Bind Vista General toggle button
+  const adminLandingToggle = document.getElementById("adminLandingToggle");
+  if (adminLandingToggle) {
+    adminLandingToggle.addEventListener("click", () => showAdminLandingView());
+  }
+}
+
+function renderLandingDocentesList() {
+  const container = document.getElementById("landingDocentesList");
+  const countEl   = document.getElementById("landingDocentesCount");
+  if (!container) return;
+  container.innerHTML = "";
+
+  const teachers = Object.values(teachersData || {});
+  if (countEl) countEl.textContent = teachers.length;
+
+  if (teachers.length === 0) {
+    container.innerHTML = `<div class="lv-empty">No hay docentes registrados.</div>`;
+    return;
+  }
+
+  teachers.forEach((teacher, index) => {
+    // Avatar
+    let avatarHTML;
+    if (teacher.isImgPath || (teacher.profile_pic && (teacher.profile_pic.includes('/') || teacher.profile_pic.startsWith('data:image/')))) {
+      avatarHTML = `<img src="${teacher.profile_pic}" alt="${teacher.name}">`;
+    } else {
+      const grad = getRandomGradientClass(teacher.id);
+      const initials = (teacher.profile_pic || teacher.name || 'D').slice(0, 2).toUpperCase();
+      avatarHTML = `<div class="lv-avatar-fallback ${grad}">${initials}</div>`;
+    }
+
+    // Subjects as tags
+    const subjectTags = teacher.subjects && teacher.subjects.length
+      ? teacher.subjects.map(s => `<span class="lv-tag">${s}</span>`).join("")
+      : `<span class="lv-tag">Sin asignaturas</span>`;
+
+    const row = document.createElement("div");
+    row.className = "lv-list-row";
+    row.setAttribute("data-teacher-id", teacher.id);
+    row.innerHTML = `
+      <div class="lv-avatar">${avatarHTML}</div>
+      <div class="lv-info">
+        <p class="lv-name">${teacher.name}</p>
+        <p class="lv-meta">ID: ${teacher.employee_id || 'N/A'} &nbsp;·&nbsp; Aula: <strong>${teacher.assigned_grade || 'Ninguna'}</strong></p>
+        <p class="lv-meta" style="margin-top:3px;">${subjectTags}</p>
+      </div>
+    `;
+    row.addEventListener("click", () => {
+      showAdminDashboardGrid();
+      switchActiveTeacher(teacher.id);
+    });
+
+    container.appendChild(row);
+
+    // Divider between rows (not after last)
+    if (index < teachers.length - 1) {
+      const div = document.createElement("div");
+      div.className = "lv-divider";
+      container.appendChild(div);
+    }
+  });
+}
+
+function renderLandingAulasList() {
+  const container = document.getElementById("landingAulasList");
+  const countEl   = document.getElementById("landingAulasCount");
+  if (!container) return;
+  container.innerHTML = "";
+
+  // Gather unique grades
+  const grades = new Set();
+  Object.values(studentsData || {}).forEach(s => { if (s.grade) grades.add(s.grade); });
+  Object.values(teachersData || {}).forEach(t => { if (t.assigned_grade) grades.add(t.assigned_grade); });
+  const sortedGrades = Array.from(grades).sort();
+
+  if (countEl) countEl.textContent = sortedGrades.length;
+
+  if (sortedGrades.length === 0) {
+    container.innerHTML = `<div class="lv-empty">No hay aulas registradas.</div>`;
+    return;
+  }
+
+  sortedGrades.forEach(grade => {
+    const teacher          = Object.values(teachersData || {}).find(t => t.assigned_grade === grade);
+    const teacherName      = teacher ? teacher.name : "Sin docente";
+    const gradeStudents    = Object.values(studentsData || {}).filter(s => s.grade === grade);
+
+    // Classroom group wrapper
+    const group = document.createElement("div");
+    group.className = "lv-classroom-group";
+
+    // Header row for this classroom
+    const headerEl = document.createElement("div");
+    headerEl.className = "lv-classroom-header";
+    headerEl.innerHTML = `
+      <span class="lv-classroom-icon">🏫</span>
+      <span class="lv-classroom-label">Aula ${grade} <span style="font-weight:500;opacity:0.65;font-size:0.8rem;">(${gradeStudents.length} estudiantes)</span></span>
+      <span class="lv-classroom-teacher">Docente: ${teacherName}</span>
+      <span class="lv-classroom-chevron">▼</span>
+    `;
+
+    // Body (students list) — starts hidden
+    const body = document.createElement("div");
+    body.className = "lv-classroom-body";
+    body.style.display = "none";
+
+    if (gradeStudents.length === 0) {
+      body.innerHTML = `<div class="lv-empty" style="padding: 14px;">No hay estudiantes en esta aula.</div>`;
+    } else {
+      gradeStudents.forEach((student, idx) => {
+        // Avatar
+        let avatarHTML;
+        if (student.isImgPath || (student.img && (student.img.includes('/') || student.img.startsWith('data:image/')))) {
+          avatarHTML = `<img src="${student.img}" alt="${student.name}">`;
+        } else {
+          const grad = getRandomGradientClass(student.id);
+          const initials = (student.img || student.name || 'E').slice(0, 2).toUpperCase();
+          avatarHTML = `<div class="lv-avatar-fallback ${grad}">${initials}</div>`;
+        }
+
+        const row = document.createElement("div");
+        row.className = "lv-list-row lv-student-small";
+        row.setAttribute("data-student-id", student.id);
+        row.innerHTML = `
+          <div class="lv-avatar">${avatarHTML}</div>
+          <div class="lv-info">
+            <p class="lv-name">${student.name}</p>
+            <p class="lv-meta">ID: ${student.student_id || 'N/A'} &nbsp;·&nbsp; Tutor: ${student.parentName || 'Ninguno'}</p>
+          </div>
+        `;
+        row.addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (teacher) switchActiveTeacher(teacher.id);
+          else switchActiveTeacher(null, student.grade);
+          activeStudent = student.id;
+          updateStudentDetails(student.id);
+          document.querySelectorAll(".student-row").forEach(r => {
+            r.classList.toggle("active", r.getAttribute("data-student") === student.id);
+          });
+          showAdminDashboardGrid();
+        });
+        body.appendChild(row);
+        if (idx < gradeStudents.length - 1) {
+          const div = document.createElement("div");
+          div.className = "lv-divider";
+          body.appendChild(div);
+        }
+      });
+    }
+
+    // Toggle classroom body on header click
+    const chevron = headerEl.querySelector(".lv-classroom-chevron");
+    headerEl.addEventListener("click", () => {
+      const isOpen = body.style.display !== "none";
+      body.style.display = isOpen ? "none" : "block";
+      if (chevron) chevron.style.transform = isOpen ? "rotate(0deg)" : "rotate(180deg)";
+    });
+
+    group.appendChild(headerEl);
+    group.appendChild(body);
+    container.appendChild(group);
+  });
+}
+
+// ==========================================================================
+// TEACHER EDITING HELPER FUNCTIONS
+// ==========================================================================
+
+function resetTeacherFormEditMode() {
+  editingTeacherId = null;
+  const form = document.getElementById("addTeacherForm");
+  if (form) form.reset();
+  const submitBtnText = document.querySelector("#addTeacherForm button[type='submit'] span");
+  if (submitBtnText) {
+    submitBtnText.textContent = "💾 Registrar Docente";
+  }
+  const btnFormTab = document.getElementById("btnFormTab");
+  if (btnFormTab) btnFormTab.textContent = "+ Registrar";
+  const preview = document.getElementById("teacherPhotoPreview");
+  if (preview) preview.innerHTML = "<span>Subir Foto (PNG/JPG)</span>";
+}
+
+function openAdminEditTeacherModal(teacherId) {
+  const teacher = (teachersData || {})[teacherId];
+  if (!teacher) return;
+
+  editingTeacherId = teacherId;
+  
+  // Populate form
+  const nameInput = document.getElementById("regTeacherName");
+  const empIdInput = document.getElementById("regTeacherEmpId");
+  const cedulaInput = document.getElementById("regTeacherCedula");
+  const ageInput = document.getElementById("regTeacherAge");
+  const gradeInput = document.getElementById("regTeacherGrade");
+  const specsInput = document.getElementById("regTeacherSpecs");
+  const subjectsInput = document.getElementById("regTeacherSubjects");
+
+  if (nameInput) nameInput.value = teacher.name || "";
+  if (empIdInput) empIdInput.value = teacher.employee_id || "";
+  if (cedulaInput) cedulaInput.value = teacher.cedula || "";
+  if (ageInput) ageInput.value = teacher.age || "";
+  if (gradeInput) gradeInput.value = teacher.assigned_grade || "";
+  if (specsInput) specsInput.value = (teacher.specializations || []).join(", ");
+  if (subjectsInput) subjectsInput.value = (teacher.subjects || []).join(", ");
+
+  // Preview photo
+  const preview = document.getElementById("teacherPhotoPreview");
+  if (preview) {
+    if (teacher.profile_pic) {
+      if (teacher.isImgPath) {
+        preview.innerHTML = `<img src="${teacher.profile_pic}" style="width:100%; height:100%; object-fit:cover; border-radius:12px;">`;
+      } else {
+        preview.innerHTML = `<div class="avatar-fallback" style="width:100%; height:100%; display:flex; justify-content:center; align-items:center; background:var(--accent-lime); color:white; font-size:1.2rem; font-weight:bold; border-radius:12px;">${teacher.profile_pic}</div>`;
+      }
+    } else {
+      preview.innerHTML = "<span>Subir Foto (PNG/JPG)</span>";
+    }
+  }
+
+  // Change UI texts
+  const submitBtnText = document.querySelector("#addTeacherForm button[type='submit'] span");
+  if (submitBtnText) {
+    submitBtnText.textContent = "💾 Guardar Cambios";
+  }
+  const btnFormTab = document.getElementById("btnFormTab");
+  if (btnFormTab) btnFormTab.textContent = "✏️ Editar Datos";
+
+  // Open drawer if hidden
+  if (teachersDrawer && teachersDrawer.classList.contains("hidden")) {
+    teachersDrawer.classList.remove("hidden");
+    setTimeout(() => {
+      teachersDrawer.classList.add("open");
+      document.body.classList.add("drawer-open");
+    }, 50);
+  }
+
+  // Swap to the form tab
+  const btnListTab = document.getElementById("btnListTab");
+  const tabAddTeacher = document.getElementById("tabAddTeacher");
+  const tabTeachersList = document.getElementById("tabTeachersList");
+  if (btnFormTab && btnListTab && tabAddTeacher && tabTeachersList) {
+    btnFormTab.classList.add("active");
+    btnListTab.classList.remove("active");
+    tabAddTeacher.classList.add("active");
+    tabTeachersList.classList.remove("active");
+  }
+}
+
+// Dynamically populate the student registration grade dropdown from current teachers' grades
+function populateStudentGradeDropdown() {
+  const selectEl = document.getElementById("regStudentGrade");
+  if (!selectEl) return;
+
+  // Clear existing options
+  selectEl.innerHTML = "";
+
+  // Get all assigned grades from teachers
+  const grades = new Set();
+  Object.values(teachersData || {}).forEach(t => {
+    if (t.assigned_grade) {
+      grades.add(t.assigned_grade);
+    }
+  });
+
+  // Always include default grades if they aren't present
+  const defaultGrades = ["2B", "3A", "1A"];
+  defaultGrades.forEach(g => grades.add(g));
+
+  // Sort grades alphabetically
+  const sortedGrades = Array.from(grades).sort();
+
+  sortedGrades.forEach(grade => {
+    const opt = document.createElement("option");
+    opt.value = grade;
+    opt.textContent = `Aula ${grade}`;
+    selectEl.appendChild(opt);
+  });
+}
+
+
+function playChatNotificationSound() {
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+    
+    // First beep
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(880, ctx.currentTime);
+    gain1.gain.setValueAtTime(0.08, ctx.currentTime);
+    gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    osc1.start();
+    osc1.stop(ctx.currentTime + 0.12);
+    
+    // Second beep
+    setTimeout(() => {
+      if (ctx.state === 'closed') return;
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(880, ctx.currentTime);
+      gain2.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      osc2.start();
+      osc2.stop(ctx.currentTime + 0.12);
+    }, 120);
+  } catch (err) {
+    console.warn("Fallo al reproducir sonido con Web Audio API:", err);
+  }
+}
+
+function getCurrentUserId() {
+  const teacherView = document.getElementById("teacherDashboardView");
+  const isTeacher = teacherView && !teacherView.classList.contains("hidden");
+  if (isTeacher && activeTeacher) {
+    return activeTeacher;
+  }
+  if (activeAdminUser && activeAdminUser.email) {
+    return activeAdminUser.email;
+  }
+  const storedAdminEmail = localStorage.getItem("eduAdminEmail");
+  if (storedAdminEmail) return storedAdminEmail;
+  return "admin";
+}
+
+function getCurrentUserDisplayName() {
+  const teacherView = document.getElementById("teacherDashboardView");
+  const isTeacher = teacherView && !teacherView.classList.contains("hidden");
+  if (isTeacher && activeTeacher) {
+    const teacher = teachersData[activeTeacher];
+    return teacher ? teacher.name : "Docente";
+  }
+  if (activeAdminUser) {
+    return activeAdminUser.name || "Administrador";
+  }
+  return localStorage.getItem("eduAdminName") || "Administrador";
+}
+
+function getAllStaffMembers() {
+  const staff = [];
+  
+  // 1. Admin
+  const adminName = localStorage.getItem("eduAdminName") || "Egnis Cano";
+  const adminEmail = localStorage.getItem("eduAdminEmail") || "admin";
+  staff.push({
+    id: adminEmail,
+    name: adminName,
+    role: "admin",
+    roleName: "🔑 Administrador",
+    avatar: "EC"
+  });
+
+  // 2. Created users from localStorage (like secretary, sub admin, etc.)
+  let users = [];
+  try {
+    const storedUsers = localStorage.getItem("eduCreatedUsers");
+    if (storedUsers) {
+      const parsed = JSON.parse(storedUsers);
+      if (Array.isArray(parsed)) users = parsed;
+    }
+  } catch(e) {}
+  
+  // Default users if not in eduCreatedUsers yet
+  const defaultUsers = [
+    {
+      name: "Lic. Ana Reyes",
+      role: "secretaria",
+      roleName: "📝 Secretaria",
+      phone: "+507 6200-1111",
+      email: "ana.reyes@escuela.edu"
+    },
+    {
+      name: "Ing. Carlos Mendoza",
+      role: "sub administrador",
+      roleName: "🔑 Sub Administrador",
+      phone: "+507 6200-2222",
+      email: "carlos.mendoza@escuela.edu"
+    }
+  ];
+  defaultUsers.forEach(def => {
+    if (!users.some(u => u.email && u.email.toLowerCase() === def.email.toLowerCase())) {
+      users.push(def);
+    }
+  });
+
+  users.forEach(u => {
+    if (u.role !== "profesores") {
+      const initials = u.name.split(" ").map(w => w[0]).join("").toUpperCase().substring(0, 2);
+      staff.push({
+        id: u.email || u.name.toLowerCase().replace(/[^a-z]/g, ""),
+        name: u.name,
+        role: u.role,
+        roleName: u.roleName,
+        avatar: initials || "U"
+      });
+    }
+  });
+
+  // 3. Teachers from teachersData
+  for (const key in teachersData) {
+    const teacher = teachersData[key];
+    const initials = teacher.name.replace("Prof. ", "").split(" ").map(w => w[0]).join("").toUpperCase().substring(0, 2);
+    staff.push({
+      id: teacher.id,
+      name: teacher.name,
+      role: "profesores",
+      roleName: "👨‍🏫 Docente",
+      avatar: teacher.isImgPath ? teacher.profile_pic : (initials || "MD"),
+      isImg: !!teacher.isImgPath
+    });
+  }
+
+  return staff;
+}
+
+function getStaffName(userId) {
+  const member = getAllStaffMembers().find(m => m.id === userId);
+  return member ? member.name : userId;
+}
+
+function renderStaffList(containerId, isTeacher) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = "";
+
+  const myId = getCurrentUserId();
+  const staff = getAllStaffMembers();
+  
+  // Filter out ourselves
+  const others = staff.filter(m => m.id !== myId);
+
+  if (others.length === 0) {
+    container.innerHTML = `<p class="chat-placeholder">No hay otros miembros del personal.</p>`;
+    return;
+  }
+
+  others.forEach(member => {
+    const item = document.createElement("div");
+    item.className = "staff-list-item";
+    
+    let avatarHTML = "";
+    if (member.isImg) {
+      avatarHTML = `<img src="${member.avatar}" alt="${member.name}" class="chat-partner-avatar" style="width: 36px; height: 36px; border-radius: 50%;">`;
+    } else {
+      const fallbackGrad = getRandomGradientClass(member.id);
+      avatarHTML = `<div class="avatar-fallback ${fallbackGrad}" style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.85rem; border: 2px solid var(--text-main);">${member.avatar}</div>`;
+    }
+
+    item.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+        ${avatarHTML}
+        <div style="display: flex; flex-direction: column; line-height: 1.2;">
+          <strong style="color: var(--text-main); font-size: 0.88rem;">${member.name}</strong>
+          <span style="font-size: 0.72rem; color: var(--text-sub); font-weight: 600;">${member.roleName}</span>
+        </div>
+      </div>
+      <span style="font-size: 1.1rem; color: var(--text-main); font-weight: bold;">➔</span>
+    `;
+
+    item.addEventListener("click", () => {
+      if (isTeacher) {
+        showTeacherDirectChat(member.id);
+      } else {
+        showAdminDirectChat(member.id);
+      }
+    });
+
+    container.appendChild(item);
+  });
+}
+
+function showAdminDirectChat(partnerId) {
+  activeAdminChatPartner = partnerId;
+  const listArea = document.getElementById("adminStaffListArea");
+  const chatAreaBox = document.getElementById("adminDirectChatArea");
+  if (listArea) listArea.classList.add("hidden");
+  if (chatAreaBox) chatAreaBox.classList.remove("hidden");
+
+  const partnerInfo = document.getElementById("adminChatPartnerInfo");
+  if (partnerInfo) {
+    const member = getAllStaffMembers().find(m => m.id === partnerId);
+    if (member) {
+      let avatarHTML = "";
+      if (member.isImg) {
+        avatarHTML = `<img src="${member.avatar}" alt="${member.name}" class="chat-partner-avatar" style="width: 36px; height: 36px; border-radius: 50%;">`;
+      } else {
+        const fallbackGrad = getRandomGradientClass(member.id);
+        avatarHTML = `<div class="avatar-fallback ${fallbackGrad}" style="width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.85rem; border: 2px solid var(--text-main);">${member.avatar}</div>`;
+      }
+      partnerInfo.innerHTML = `
+        ${avatarHTML}
+        <div style="display: flex; flex-direction: column; line-height: 1.2;">
+          <strong style="font-size: 0.85rem; color: var(--text-main);">${member.name}</strong>
+          <span style="font-size: 0.68rem; color: var(--text-sub);">${member.roleName}</span>
+        </div>
+      `;
+    }
+  }
+
+  loadChatHistory("staff", null, document.getElementById("chatArea"));
+}
+
+function exitAdminDirectChat() {
+  activeAdminChatPartner = null;
+  const listArea = document.getElementById("adminStaffListArea");
+  const chatAreaBox = document.getElementById("adminDirectChatArea");
+  if (listArea) listArea.classList.remove("hidden");
+  if (chatAreaBox) chatAreaBox.classList.add("hidden");
+  
+  // Re-render staff list
+  renderStaffList("adminStaffListArea", false);
+}
+
+function showTeacherDirectChat(partnerId) {
+  activeTeacherChatPartner = partnerId;
+
+  // Show staff list in left column, hide tutor contacts
+  const staffListArea = document.getElementById("teacherStaffListArea");
+  const tutorContactsList = document.getElementById("teacherTutorContactsList");
+  if (staffListArea) staffListArea.classList.add("hidden");
+  if (tutorContactsList) tutorContactsList.style.display = "none";
+
+  // Show right panel: staff chat
+  const placeholder = document.getElementById("teacherChatPlaceholder");
+  const tutorArea = document.getElementById("teacherTutorChatArea");
+  const staffBox = document.getElementById("teacherDirectChatBox");
+  const inputBar = document.getElementById("teacherChatInputBar");
+  const header = document.getElementById("teacherActiveChatHeader");
+  const partnerInfo = document.getElementById("teacherChatPartnerInfo");
+
+  if (placeholder) placeholder.style.display = "none";
+  if (tutorArea) tutorArea.style.display = "none";
+  if (staffBox) staffBox.classList.remove("hidden");
+  if (inputBar) inputBar.style.display = "flex";
+  if (header) header.style.display = "flex";
+
+  const inputField = document.getElementById("teacherChatInputField");
+  if (inputField) inputField.placeholder = "Escribe un mensaje al personal...";
+
+  if (partnerInfo) {
+    const member = getAllStaffMembers().find(m => m.id === partnerId);
+    if (member) {
+      let avatarHTML = "";
+      if (member.isImg) {
+        avatarHTML = `<img src="${member.avatar}" alt="${member.name}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--text-main);">`;
+      } else {
+        const fallbackGrad = getRandomGradientClass(member.id);
+        avatarHTML = `<div class="avatar-fallback ${fallbackGrad}" style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:0.85rem;border:2px solid var(--text-main);">${member.avatar}</div>`;
+      }
+      partnerInfo.innerHTML = `
+        ${avatarHTML}
+        <div style="display:flex;flex-direction:column;line-height:1.2;">
+          <strong style="font-size:0.85rem;color:var(--text-main);">${member.name}</strong>
+          <span style="font-size:0.68rem;color:var(--text-sub);">${member.roleName}</span>
+        </div>
+      `;
+    }
+  }
+
+  loadChatHistory("staff", null, document.getElementById("teacherStaffChatArea"));
+}
+
+function exitTeacherDirectChat() {
+  activeTeacherChatPartner = null;
+  // Return to staff list view
+  const staffListArea = document.getElementById("teacherStaffListArea");
+  const staffBox = document.getElementById("teacherDirectChatBox");
+  const inputBar = document.getElementById("teacherChatInputBar");
+  const placeholder = document.getElementById("teacherChatPlaceholder");
+  const header = document.getElementById("teacherActiveChatHeader");
+
+  if (staffListArea) staffListArea.classList.remove("hidden");
+  if (staffBox) staffBox.classList.add("hidden");
+  if (inputBar) inputBar.style.display = "none";
+  if (placeholder) placeholder.style.display = "none";
+  if (header) header.style.display = "none";
+
+  renderStaffList("teacherStaffListArea", true);
+}
+
+function initChatTabsListeners() {
+  // Admin back button
+  const adminBackBtn = document.getElementById("adminChatBackBtn");
+  if (adminBackBtn) {
+    adminBackBtn.addEventListener("click", exitAdminDirectChat);
+  }
+
+  // Teacher Chat Dual Tabs
+  const teacherBtnTutor = document.getElementById("teacherBtnChatTutor");
+  const teacherBtnStaff = document.getElementById("teacherBtnChatStaff");
+  
+  if (teacherBtnTutor && teacherBtnStaff) {
+    teacherBtnTutor.addEventListener("click", () => {
+      teacherActiveChatType = "tutor";
+      teacherBtnTutor.classList.add("active");
+      teacherBtnStaff.classList.remove("active");
+      activeTeacherChatPartner = null;
+      
+      // Show tutor contacts in left column
+      const staffListArea = document.getElementById("teacherStaffListArea");
+      const tutorContactsList = document.getElementById("teacherTutorContactsList");
+      if (staffListArea) staffListArea.classList.add("hidden");
+      if (tutorContactsList) tutorContactsList.style.display = "flex";
+      renderTutorContactsList(activeStudent);
+
+      // Reset right panel to placeholder (user must select a student again)
+      resetTeacherChatRightPanel();
+    });
+
+    teacherBtnStaff.addEventListener("click", () => {
+      teacherActiveChatType = "staff";
+      teacherBtnStaff.classList.add("active");
+      teacherBtnTutor.classList.remove("active");
+      activeTeacherChatPartner = null;
+      
+      // Show staff contacts in left column
+      const staffListArea = document.getElementById("teacherStaffListArea");
+      const tutorContactsList = document.getElementById("teacherTutorContactsList");
+      if (tutorContactsList) tutorContactsList.style.display = "none";
+      if (staffListArea) staffListArea.classList.remove("hidden");
+      renderStaffList("teacherStaffListArea", true);
+      
+      // Reset right panel to placeholder
+      resetTeacherChatRightPanel();
+    });
+  }
+}
+
+
