@@ -2650,17 +2650,21 @@ body.dark-theme .avatar-opt .fallback-circle {
   align-items: center;
   justify-content: space-between;
   padding: 24px 80px;
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  position: sticky;
-  top: 0;
+  position: relative;
   z-index: 1000;
-  border-bottom: 2px dashed rgba(0,0,0,0.05);
-  background: var(--card-bg);
+  border-bottom: none;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.landing-header .header-bg-doodles {
+  display: none !important;
 }
 
 body.dark-theme .landing-header {
-  border-bottom-color: rgba(255,255,255,0.05);
+  border-bottom: none;
+  background: transparent;
 }
 
 .brand-logo {
@@ -6054,9 +6058,34 @@ body.dark-theme .chat-active-header {
   .logo-text { font-size: 1.2rem; }
   .stat-pill { padding: 4px 8px; font-size: 0.75rem; }
   .stat-num { font-size: 0.9rem; }
-  .landing-header { padding: 12px 14px; flex-wrap: wrap; gap: 8px; }
-  .brand-logo { height: 38px; }
-  .landing-nav { gap: 6px; flex-wrap: wrap; }
+  .landing-header {
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 16px !important;
+    padding: 24px 16px !important;
+    background: transparent !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+  }
+  .logo-container {
+    display: flex !important;
+    justify-content: center !important;
+    width: 100% !important;
+    margin-bottom: 8px !important;
+  }
+  .brand-logo-landing {
+    height: 100px !important;
+    filter: drop-shadow(0 6px 16px rgba(0,0,0,0.12)) !important;
+  }
+  .landing-nav {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
   .landing-nav .chubby-btn { font-size: 0.76rem; padding: 0 12px; height: 34px; }
   .landing-hero h1 { font-size: clamp(1.6rem, 5.5vw, 2.8rem); }
   .landing-hero p { font-size: 0.92rem; }
@@ -6074,6 +6103,7 @@ body.dark-theme .chat-active-header {
   .doodle { opacity: 0.05; }
   .doodle-formula-1, .doodle-formula-2 { font-size: 0.85rem; }
   .brand-logo { height: 32px; }
+  .brand-logo-landing { height: 80px !important; }
   .landing-nav .chubby-btn span.icon { display: none; }
   .hero-cta-group { flex-direction: column; }
   .hero-cta-group .chubby-btn { width: 100%; }
