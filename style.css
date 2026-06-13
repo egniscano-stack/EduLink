@@ -6302,6 +6302,7 @@ body.dark-theme .chat-active-header {
     overflow: visible !important;
   }
   #parentDashboardView .top-bar { flex-wrap: wrap; height: auto !important; padding: 8px 12px !important; gap: 6px; }
+  #parentChatToggleBtn { display: inline-block !important; margin-left: 8px; }
   #parentStudentAvatar { width: 54px !important; height: 54px !important; border-radius: 10px !important; }
   #parentStudentName { font-size: 1.4rem !important; }
   #parentStudentGrade { font-size: 0.88rem !important; }

@@ -7806,6 +7806,126 @@ function renderParentDashboard(studentId) {
   }
 }
 
+// Send message from Parent Portal
+async function sendParentMessage() {
+  const input = document.getElementById("parentChatInputField");
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) return;
+  
+  if (!activeParentStudentId) {
+    showToast("Error: Estudiante no activo", "❌");
+    return;
+  }
+  
+  const student = studentsData[activeParentStudentId];
+  const senderName = student ? `${student.parentName} (Tutor)` : "Acudiente";
+  
+  const msgPayload = {
+    sender: senderName,
+    content: text,
+    is_sent_by_prof: false,
+    student_key: activeParentStudentId,
+    created_at: new Date().toISOString()
+  };
+  
+  input.value = "";
+  
+  const parentChatArea = document.getElementById("parentChatArea");
+  
+  if (useSupabaseDb && supabaseClient) {
+    try {
+      const { error } = await supabaseClient.from('chat_messages').insert([msgPayload]);
+      if (error) {
+        console.error("Error al guardar mensaje en Supabase:", error);
+        showToast("Error al enviar el mensaje", "❌");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  } else {
+    if (!mockMessages[activeParentStudentId]) {
+      mockMessages[activeParentStudentId] = [];
+    }
+    mockMessages[activeParentStudentId].push(msgPayload);
+    appendMessageToArea(msgPayload, parentChatArea, false);
+  }
+}
+
+// Handle file uploads in Parent Chat
+async function handleParentChatFileSelection(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const allowedExtensions = [".pdf", ".jpg", ".jpeg", ".png", ".doc", ".docx", ".xls", ".xlsx"];
+  const fileNameLower = file.name.toLowerCase();
+  const isAllowed = allowedExtensions.some(ext => fileNameLower.endsWith(ext));
+
+  if (!isAllowed) {
+    showToast("Solo se permiten archivos PDF, imágenes (JPG, PNG), Word o Excel", "⚠️");
+    return;
+  }
+
+  const isOnline = useSupabaseDb && supabaseClient;
+  const sizeLimit = 50 * 1024 * 1024;
+  if (file.size > sizeLimit) {
+    showToast(`El archivo es demasiado grande (máximo 50MB)`, "⚠️");
+    return;
+  }
+
+  showToast(`Subiendo ${file.name}...`, "⏳");
+
+  try {
+    const fileUrl = await uploadFileToBucket(file, "school-assets", "chat");
+    if (!fileUrl) {
+      showToast("Fallo al procesar el archivo", "❌");
+      return;
+    }
+
+    const filePayload = {
+      name: file.name,
+      type: file.type,
+      data: fileUrl
+    };
+
+    const student = studentsData[activeParentStudentId];
+    const senderName = student ? `${student.parentName} (Tutor)` : "Acudiente";
+
+    const msgPayload = {
+      sender: senderName,
+      content: JSON.stringify({ text: `Archivo: ${file.name}`, file: filePayload }),
+      is_sent_by_prof: false,
+      student_key: activeParentStudentId,
+      created_at: new Date().toISOString()
+    };
+
+    e.target.value = "";
+
+    const parentChatArea = document.getElementById("parentChatArea");
+
+    if (isOnline) {
+      const { error } = await supabaseClient.from('chat_messages').insert([msgPayload]);
+      if (error) {
+        console.error("Error al enviar archivo a Supabase:", error);
+        showToast("Error al enviar el archivo", "❌");
+      } else {
+        showToast("Archivo enviado con éxito", "✅");
+        loadChatHistory("tutor", activeParentStudentId, parentChatArea);
+      }
+    } else {
+      if (!mockMessages[activeParentStudentId]) {
+        mockMessages[activeParentStudentId] = [];
+      }
+      mockMessages[activeParentStudentId].push(msgPayload);
+      appendMessageToArea(msgPayload, parentChatArea, false);
+      showToast("Archivo enviado con éxito", "✅");
+    }
+  } catch(err) {
+    console.error("Error en handleParentChatFileSelection:", err);
+    showToast("Error al procesar el archivo", "❌");
+  }
+}
+
 // Bind Parent Portal Global Events
 document.addEventListener("DOMContentLoaded", () => {
   const parentLogoutBtn = document.getElementById("parentLogoutBtn");
@@ -7829,4 +7949,41 @@ document.addEventListener("DOMContentLoaded", () => {
       showToast(isDark ? "Modo oscuro activado" : "Modo claro activado", "🌓");
     });
   }
+
+  // Interactivity for Parent Chat
+  const parentChatSendBtn = document.getElementById("parentChatSendBtn");
+  if (parentChatSendBtn) {
+    parentChatSendBtn.addEventListener("click", () => {
+      sendParentMessage();
+    });
+  }
+
+  const parentChatInputField = document.getElementById("parentChatInputField");
+  if (parentChatInputField) {
+    parentChatInputField.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        sendParentMessage();
+      }
+    });
+  }
+
+  const parentChatAttachBtn = document.getElementById("parentChatAttachBtn");
+  const parentChatFileInput = document.getElementById("parentChatFileInput");
+  if (parentChatAttachBtn && parentChatFileInput) {
+    parentChatAttachBtn.addEventListener("click", () => {
+      parentChatFileInput.click();
+    });
+    parentChatFileInput.addEventListener("change", handleParentChatFileSelection);
+  }
+
+  const parentChatToggleBtn = document.getElementById("parentChatToggleBtn");
+  if (parentChatToggleBtn) {
+    parentChatToggleBtn.addEventListener("click", () => {
+      const chatSection = document.querySelector("#parentDashboardView .chat-section");
+      if (chatSection) {
+        chatSection.scrollIntoView({ behavior: "smooth" });
+      }
+    });
+  }
 });
+
