@@ -6286,6 +6286,23 @@ function openBulletinModal(studentKey) {
       return;
     }
 
+    // Close any active sliding drawers in the administrator panel to avoid visual overlays
+    const drawers = ["teachersDrawer", "studentsDrawer", "settingsDrawer", "financeDrawer"];
+    drawers.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.add("hidden");
+        el.classList.remove("open");
+      }
+    });
+    document.body.classList.remove("drawer-open");
+
+    // Close admin dropdown menu
+    const adminDropdownMenu = document.getElementById("adminDropdownMenu");
+    if (adminDropdownMenu) {
+      adminDropdownMenu.classList.add("hidden");
+    }
+
     // Retrieve general school parameters
     const schoolName = localStorage.getItem("eduSchoolName") || "EduLink Academia";
     const schoolAddress = localStorage.getItem("eduSchoolAddress") || "Calle 50, Ciudad de Panamá";
@@ -7833,6 +7850,10 @@ document.addEventListener("DOMContentLoaded", () => {
       if (parentChatDrawer) {
         parentChatDrawer.classList.remove("open");
       }
+      const parentChatDrawerOverlay = document.getElementById("parentChatDrawerOverlay");
+      if (parentChatDrawerOverlay) {
+        parentChatDrawerOverlay.classList.remove("open");
+      }
     });
   }
 
@@ -7849,11 +7870,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const parentChatToggleBtn = document.getElementById("parentChatToggleBtn");
   const parentChatDrawer = document.getElementById("parentChatDrawer");
   const closeParentChatDrawerBtn = document.getElementById("closeParentChatDrawerBtn");
+  const parentChatDrawerOverlay = document.getElementById("parentChatDrawerOverlay");
 
   if (parentChatToggleBtn && parentChatDrawer) {
     parentChatToggleBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       parentChatDrawer.classList.toggle("open");
+      if (parentChatDrawerOverlay) {
+        parentChatDrawerOverlay.classList.toggle("open", parentChatDrawer.classList.contains("open"));
+      }
     });
   }
 
@@ -7861,13 +7886,27 @@ document.addEventListener("DOMContentLoaded", () => {
     closeParentChatDrawerBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       parentChatDrawer.classList.remove("open");
+      if (parentChatDrawerOverlay) {
+        parentChatDrawerOverlay.classList.remove("open");
+      }
+    });
+  }
+
+  if (parentChatDrawerOverlay && parentChatDrawer) {
+    parentChatDrawerOverlay.addEventListener("click", (e) => {
+      e.stopPropagation();
+      parentChatDrawer.classList.remove("open");
+      parentChatDrawerOverlay.classList.remove("open");
     });
   }
 
   document.addEventListener("click", (e) => {
     if (parentChatDrawer && parentChatDrawer.classList.contains("open")) {
-      if (!parentChatDrawer.contains(e.target) && e.target !== parentChatToggleBtn) {
+      if (!parentChatDrawer.contains(e.target) && e.target !== parentChatToggleBtn && e.target !== parentChatDrawerOverlay) {
         parentChatDrawer.classList.remove("open");
+        if (parentChatDrawerOverlay) {
+          parentChatDrawerOverlay.classList.remove("open");
+        }
       }
     }
   });

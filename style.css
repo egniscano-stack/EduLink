@@ -1892,7 +1892,7 @@ body.dark-theme .toast {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2000;
+  z-index: 3000;
   transition: opacity 0.3s ease;
 }
 
@@ -6296,6 +6296,24 @@ body.dark-theme .chat-active-header {
 
 .chat-drawer.open {
   right: 0 !important;
+}
+
+/* Chat Drawer Backdrop Overlay */
+.chat-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 2199; /* Just below .chat-drawer which has z-index: 2200 */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.chat-drawer-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 @media (max-width: 768px) {
