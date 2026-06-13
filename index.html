@@ -1344,8 +1344,12 @@
 
                     <!-- Chat Input -->
                     <div class="chat-input-bar">
-                      <input type="text" id="chatInputField" placeholder="Escribe un mensaje..." autocomplete="off">
-                      <button class="chubby-btn primary round-btn" id="chatSendBtn">
+                      <input type="file" id="adminChatFileInput" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx" style="display: none;">
+                      <button class="chubby-btn secondary round-btn" id="adminChatAttachBtn" type="button" style="padding: 0; width: 40px; height: 40px; min-width: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                        <span>📎</span>
+                      </button>
+                      <input type="text" id="chatInputField" placeholder="Escribe un mensaje..." autocomplete="off" style="flex: 1;">
+                      <button class="chubby-btn primary" id="chatSendBtn" style="min-width: 40px; width: 40px; height: 40px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center;">
                         <span>➔</span>
                       </button>
                     </div>
@@ -1551,19 +1555,19 @@
           </div>
           <!-- Tutor Chat Area -->
           <div id="teacherTutorChatArea" style="flex: 1; display: none; flex-direction: column; min-height: 0; padding: 0;">
-            <div class="chat-display-area" id="teacherChatArea" style="flex: 1; overflow-y: auto; padding: 16px; background: var(--color-bg-light); margin: 12px; border: 2px solid var(--text-main); border-radius: 16px;">
+            <div class="chat-display-area" id="teacherChatArea" style="flex: 1; margin: 12px;">
               <p class="chat-placeholder">Selecciona un alumno para chatear con su acudiente...</p>
             </div>
           </div>
           <!-- Staff Chat Area -->
           <div id="teacherDirectChatBox" class="hidden" style="flex: 1; display: flex; flex-direction: column; min-height: 0; padding: 0;">
-            <div class="chat-display-area" id="teacherStaffChatArea" style="flex: 1; overflow-y: auto; padding: 16px; background: var(--color-bg-light); margin: 12px; border: 2px solid var(--text-main); border-radius: 16px;">
+            <div class="chat-display-area" id="teacherStaffChatArea" style="flex: 1; margin: 12px;">
               <p class="chat-placeholder">Selecciona un miembro del personal para chatear...</p>
             </div>
           </div>
           <!-- Chat Input Bar (shared) -->
           <div class="chat-input-bar" id="teacherChatInputBar" style="display: none; gap: 8px; align-items: center; padding: 12px; border-top: 2px solid var(--text-main);">
-            <input type="file" id="teacherChatFileInput" accept=".pdf,.jpg,.jpeg,.png" style="display: none;">
+            <input type="file" id="teacherChatFileInput" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx" style="display: none;">
             <button class="chubby-btn secondary round-btn" id="teacherChatAttachBtn" type="button" style="padding: 0; width: 40px; height: 40px; min-width: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">
               <span>📎</span>
             </button>

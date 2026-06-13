@@ -1613,22 +1613,45 @@ function getMsgContentHTML(contentStr) {
       const parsed = JSON.parse(contentStr);
       if (parsed.file) {
         const file = parsed.file;
-        const isImg = file.type.startsWith("image/") || file.name.endsWith(".jpg") || file.name.endsWith(".png") || file.name.endsWith(".jpeg");
+        const fileNameLower = file.name.toLowerCase();
+        const isImg = file.type.startsWith("image/") || fileNameLower.endsWith(".jpg") || fileNameLower.endsWith(".png") || fileNameLower.endsWith(".jpeg");
+        
         if (isImg) {
           contentHtml = `
-            <div style="display: flex; flex-direction: column; gap: 6px;">
-              <div style="font-size: 0.75rem; font-style: italic; opacity: 0.7;">🖼️ Imagen: ${escapeHTML(file.name)}</div>
-              <img src="${file.data}" alt="${escapeHTML(file.name)}" style="max-width: 200px; max-height: 150px; border-radius: 8px; cursor: pointer; border: 1.5px solid var(--text-main);" onclick="window.openImageModal('${file.data}')">
+            <div class="chat-file-image">
+              <img src="${file.data}" alt="${escapeHTML(file.name)}" onclick="window.openImageModal('${file.data}')">
+              <div class="chat-file-name">${escapeHTML(file.name)}</div>
             </div>
           `;
         } else {
+          let icon = "📁";
+          let label = "Archivo";
+          let colorClass = "file-generic";
+          
+          if (fileNameLower.endsWith(".pdf")) {
+            icon = "📕";
+            label = "Documento PDF";
+            colorClass = "file-pdf";
+          } else if (fileNameLower.endsWith(".doc") || fileNameLower.endsWith(".docx")) {
+            icon = "📘";
+            label = "Documento Word";
+            colorClass = "file-word";
+          } else if (fileNameLower.endsWith(".xls") || fileNameLower.endsWith(".xlsx")) {
+            icon = "📗";
+            label = "Hoja de Excel";
+            colorClass = "file-excel";
+          }
+          
           contentHtml = `
-            <div style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.05); padding: 8px 12px; border-radius: 8px; border: 1.5px solid var(--text-main);">
-              <span style="font-size: 1.5rem;">📄</span>
-              <div style="display: flex; flex-direction: column; min-width: 0;">
-                <span style="font-size: 0.8rem; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 140px;" title="${escapeHTML(file.name)}">${escapeHTML(file.name)}</span>
-                <a href="${file.data}" download="${escapeHTML(file.name)}" style="font-size: 0.7rem; color: var(--color-cyan); font-weight: bold; text-decoration: underline;">Descargar PDF</a>
+            <div class="chat-file-doc ${colorClass}">
+              <span class="file-icon">${icon}</span>
+              <div class="file-info">
+                <span class="file-title" title="${escapeHTML(file.name)}">${escapeHTML(file.name)}</span>
+                <span class="file-subtitle">${label}</span>
               </div>
+              <a href="${file.data}" download="${escapeHTML(file.name)}" class="file-download-btn" title="Descargar">
+                📥
+              </a>
             </div>
           `;
         }
@@ -2696,6 +2719,15 @@ chatSendBtn.addEventListener("click", sendMessage);
 chatInputField.addEventListener("keypress", (e) => {
   if (e.key === "Enter") sendMessage();
 });
+
+const adminChatAttachBtn = document.getElementById("adminChatAttachBtn");
+const adminChatFileInput = document.getElementById("adminChatFileInput");
+if (adminChatAttachBtn && adminChatFileInput) {
+  adminChatAttachBtn.addEventListener("click", () => {
+    adminChatFileInput.click();
+  });
+  adminChatFileInput.addEventListener("change", handleAdminChatFileSelection);
+}
 triggerDirectChat.addEventListener("click", () => {
   const data = studentsData[activeStudent];
   chatInputField.value = `Estimado ${data.parentName.split(" ")[0]}, ¿podríamos agendar una videollamada corta?`;
@@ -5202,12 +5234,12 @@ async function handleTeacherChatFileSelection(e) {
   if (!file) return;
 
   // Validate type
-  const allowedExtensions = [".pdf", ".jpg", ".jpeg", ".png"];
+  const allowedExtensions = [".pdf", ".jpg", ".jpeg", ".png", ".doc", ".docx", ".xls", ".xlsx"];
   const fileNameLower = file.name.toLowerCase();
   const isAllowed = allowedExtensions.some(ext => fileNameLower.endsWith(ext));
 
   if (!isAllowed) {
-    showToast("Solo se permiten archivos PDF, JPG o PNG", "⚠️");
+    showToast("Solo se permiten archivos PDF, imágenes (JPG, PNG), Word o Excel", "⚠️");
     return;
   }
 
@@ -5303,6 +5335,110 @@ async function handleTeacherChatFileSelection(e) {
             showToast("Mensaje entrante del tutor", "💬");
           }
         }, 1500);
+      }
+    }
+  };
+
+  reader.onerror = function() {
+    showToast("Error al leer el archivo", "❌");
+  };
+
+  reader.readAsDataURL(file);
+}
+
+async function handleAdminChatFileSelection(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  // Validate type
+  const allowedExtensions = [".pdf", ".jpg", ".jpeg", ".png", ".doc", ".docx", ".xls", ".xlsx"];
+  const fileNameLower = file.name.toLowerCase();
+  const isAllowed = allowedExtensions.some(ext => fileNameLower.endsWith(ext));
+
+  if (!isAllowed) {
+    showToast("Solo se permiten archivos PDF, imágenes (JPG, PNG), Word o Excel", "⚠️");
+    return;
+  }
+
+  // Validate size (limit to 2MB)
+  if (file.size > 2 * 1024 * 1024) {
+    showToast("El archivo es demasiado grande (máximo 2MB)", "⚠️");
+    return;
+  }
+
+  showToast(`Subiendo ${file.name}...`, "⏳");
+
+  const reader = new FileReader();
+  reader.onload = async function(event) {
+    const dataUrl = event.target.result;
+
+    const filePayload = {
+      name: file.name,
+      type: file.type,
+      data: dataUrl
+    };
+
+    const isStaff = adminActiveChatType === "staff";
+    let msgPayload;
+
+    if (isStaff) {
+      const myId = getCurrentUserId();
+      const partnerId = activeAdminChatPartner;
+      if (!partnerId) return;
+
+      msgPayload = {
+        sender: myId,
+        receiver: partnerId,
+        content: JSON.stringify({ text: `Archivo: ${file.name}`, file: filePayload }),
+        created_at: new Date().toISOString()
+      };
+    } else {
+      const senderName = activeAdminUser ? `Prof. ${activeAdminUser.name}` : "Prof. Egnis Cano";
+      msgPayload = {
+        sender: senderName,
+        content: JSON.stringify({ text: `Archivo: ${file.name}`, file: filePayload }),
+        is_sent_by_prof: true,
+        student_key: activeStudent,
+        created_at: new Date().toISOString()
+      };
+    }
+
+    // Reset file input
+    e.target.value = "";
+
+    // Persist
+    if (useSupabaseDb && supabaseClient) {
+      try {
+        const targetTable = isStaff ? 'staff_messages' : 'chat_messages';
+        const { error } = await supabaseClient.from(targetTable).insert([msgPayload]);
+        if (error) {
+          console.error("Error sending file to Supabase:", error);
+          showToast("Error de conexión al enviar archivo", "❌");
+        } else {
+          showToast("Archivo enviado con éxito", "✅");
+          loadChatHistory(adminActiveChatType, isStaff ? activeAdminChatPartner : activeStudent, chatArea);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    } else {
+      if (isStaff) {
+        let list = [];
+        try {
+          const stored = localStorage.getItem("eduStaffMessages");
+          if (stored) list = JSON.parse(stored);
+        } catch(e) {}
+        list.push(msgPayload);
+        localStorage.setItem("eduStaffMessages", JSON.stringify(list));
+        appendMessageToArea(msgPayload, chatArea, true);
+        showToast("Archivo enviado con éxito", "✅");
+      } else {
+        if (!mockMessages[activeStudent]) {
+          mockMessages[activeStudent] = [];
+        }
+        mockMessages[activeStudent].push(msgPayload);
+        appendMessageToArea(msgPayload, chatArea, false);
+        showToast("Archivo enviado con éxito", "✅");
       }
     }
   };
