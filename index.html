@@ -206,6 +206,7 @@
         <a href="#howSection" class="nav-link">¿Cómo Funciona?</a>
         <a href="#testimonialsSection" class="nav-link">Testimonios</a>
         <button class="chubby-btn primary btn-open-auth">🔑 Iniciar Sesión</button>
+        <button class="chubby-btn secondary btn-open-parent-auth">👪 Portal Acudiente</button>
         <button id="themeToggleLanding" class="chubby-btn secondary round-btn" title="Cambiar Tema">🌓</button>
       </nav>
     </header>
@@ -218,6 +219,7 @@
         <p class="hero-desc">EduLink unifica la gestión de docentes, las calificaciones de alumnos, la mensajería instantánea y las finanzas del colegio en una sola plataforma lúdica y adaptable, potenciada por Supabase en tiempo real.</p>
         <div class="hero-actions">
           <button class="chubby-btn primary btn-open-auth">🚀 Iniciar Sesión</button>
+          <button class="chubby-btn secondary btn-open-parent-auth" style="background: white; border-color: var(--color-purple); color: var(--color-purple);">👪 Portal Acudiente</button>
           <a href="#featuresSection" class="chubby-btn secondary">Ver Características</a>
         </div>
       </div>
@@ -303,7 +305,10 @@
         <div class="about-content">
           <h2>Base de Datos Inteligente en la Nube</h2>
           <p>EduLink opera de forma dinámica conectándose directamente a tu panel de Supabase. Utiliza políticas de seguridad RLS robustas y Postgres replica para mantener las comunicaciones, conductas y balances financieros sincronizados al instante en todos tus dispositivos.</p>
-          <button class="chubby-btn primary btn-open-auth">🔑 Iniciar Sesión</button>
+          <div style="display: flex; gap: 10px;">
+            <button class="chubby-btn primary btn-open-auth">🔑 Iniciar Sesión</button>
+            <button class="chubby-btn secondary btn-open-parent-auth">👪 Portal Acudiente</button>
+          </div>
         </div>
       </div>
     </section>
@@ -421,8 +426,8 @@
         <div class="auth-right">
           <!-- Tab Switcher -->
           <div class="auth-tabs">
-            <button class="auth-tab active" id="tabLogin" data-tab="login">Iniciar Sesión</button>
-            <button class="auth-tab" id="tabRegister" data-tab="register">Registrar Escuela</button>
+            <button class="auth-tab active" id="tabLogin" data-tab="login">Personal</button>
+            <button class="auth-tab" id="tabRegister" data-tab="register">Registrar</button>
           </div>
 
           <!-- Login Form -->
@@ -453,6 +458,29 @@
               <span class="icon">🚀</span> Ingresar al Sistema
             </button>
             <p class="auth-switch-text">¿Aún no tienes cuenta? <a href="#" class="auth-link" id="switchToRegister">Regístrate gratis</a></p>
+          </form>
+
+          <!-- Parent Login Form -->
+          <form class="auth-form hidden" id="parentLoginForm">
+            <h3>Portal del Acudiente</h3>
+            <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 20px;">Accede con los datos del estudiante para ver su progreso académico.</p>
+            <div class="auth-field">
+              <label for="parentLoginName">Nombre del Estudiante</label>
+              <div class="auth-input-wrap">
+                <span class="auth-input-icon">👤</span>
+                <input type="text" id="parentLoginName" placeholder="Ej. Eimy Cano" autocomplete="name">
+              </div>
+            </div>
+            <div class="auth-field">
+              <label for="parentLoginCedula">Cédula del Estudiante</label>
+              <div class="auth-input-wrap">
+                <span class="auth-input-icon">🆔</span>
+                <input type="text" id="parentLoginCedula" placeholder="Ej. 1-896-635">
+              </div>
+            </div>
+            <button type="submit" class="chubby-btn primary auth-submit-btn" id="parentLoginSubmitBtn">
+              <span class="icon">👪</span> Ingresar al Portal
+            </button>
           </form>
 
           <!-- Register Form -->
@@ -1580,6 +1608,58 @@
 
       </div>
 
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+     VISTA: PORTAL ACUDIENTE / ESTUDIANTE
+     ========================================================================== -->
+  <div class="dashboard-view hidden" id="parentDashboardView">
+    <div class="top-bar" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 24px; border-bottom: 2px solid var(--text-main); background: var(--card-bg); flex-shrink: 0; height: 70px; box-sizing: border-box;">
+      <div class="top-bar-left">
+        <h2 style="font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.5rem; letter-spacing: -0.5px; color: var(--text-main); margin: 0;">
+          Portal Acudiente <span style="font-size: 1rem; color: var(--text-sub);">| EduLink</span>
+        </h2>
+      </div>
+      <div class="top-bar-right" style="display: flex; align-items: center; gap: 15px;">
+        <span class="user-badge" id="parentUserBadge">Acudiente</span>
+        <button class="chubby-btn secondary no-shadow" id="parentLogoutBtn" style="height: 38px; padding: 0 16px; font-size: 0.85rem; cursor: pointer;">
+          <span class="icon">🚪</span> Salir
+        </button>
+        <button class="theme-toggle" id="parentThemeToggle" title="Cambiar Tema" style="cursor: pointer; background: none; border: none; font-size: 1.2rem;">🌙</button>
+      </div>
+    </div>
+
+    <div class="main-content" style="flex: 1; overflow: hidden; padding: 20px; box-sizing: border-box;">
+      <div class="parent-grid" style="display: grid; grid-template-columns: 1fr 350px; gap: 20px; height: 100%; overflow: hidden;">
+        
+        <!-- Columna Izquierda: Perfil Académico -->
+        <section class="chubby-card effect-3d" style="display: flex; flex-direction: column; overflow-y: auto; padding: 20px; height: 100%; min-height: 0; box-sizing: border-box;">
+          <div class="parent-student-header" style="display: flex; align-items: center; gap: 15px; border-bottom: 2px solid var(--text-main); padding-bottom: 15px; margin-bottom: 20px; flex-shrink: 0;">
+            <div id="parentStudentAvatar" style="width: 70px; height: 70px; border-radius: 12px; border: 2.5px solid var(--text-main); overflow: hidden; display: flex; align-items: center; justify-content: center; background: var(--bg-light); font-size: 2rem; flex-shrink: 0;">👤</div>
+            <div>
+              <h3 id="parentStudentName" style="font-size: 1.8rem; margin: 0; color: var(--text-main);">Nombre Estudiante</h3>
+              <p id="parentStudentGrade" style="font-size: 1rem; margin: 0; color: var(--text-sub);">Grado: -- | Cédula: --</p>
+            </div>
+          </div>
+          
+          <div id="parentAcademicDataContainer" style="display: flex; flex-direction: column; gap: 20px;">
+            <!-- Renderizado dinámico de las calificaciones, incidencias, asistencia, etc. -->
+          </div>
+        </section>
+
+        <!-- Columna Derecha: Chat de Solo Lectura -->
+        <section class="chubby-card effect-3d chat-section" style="display: flex; flex-direction: column; height: 100%; min-height: 0; overflow: hidden; box-sizing: border-box;">
+          <div class="chat-header" style="flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 2px solid var(--text-main); margin-bottom: 10px;">
+            <h3 style="margin: 0;">💬 Comunicados del Docente</h3>
+            <span style="font-size: 0.75rem; color: var(--color-red); border: 1.5px solid var(--color-red); padding: 2px 6px; border-radius: 6px; font-weight: bold; background: rgba(255,0,0,0.05);">Solo Lectura</span>
+          </div>
+          <div class="chat-history" id="parentChatArea" style="flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: var(--bg-main); border-radius: 12px; border: 2px solid var(--text-main);">
+            <p class="chat-placeholder">Cargando mensajes...</p>
+          </div>
+        </section>
+
+      </div>
     </div>
   </div>
 

@@ -102,7 +102,12 @@ ON CONFLICT (id) DO UPDATE SET
   student_id = EXCLUDED.student_id,
   img = EXCLUDED.img,
   is_img_path = EXCLUDED.is_img_path,
-  grades = EXCLUDED.grades,
+  -- DO NOT overwrite grades/subject_grades if the existing row already has data
+  grades = CASE 
+    WHEN (public.students.subject_grades IS NULL OR public.students.subject_grades = '{}'::jsonb)
+    THEN EXCLUDED.grades 
+    ELSE public.students.grades 
+  END,
   conduct = EXCLUDED.conduct,
   parent_name = EXCLUDED.parent_name,
   parent_phone = EXCLUDED.parent_phone,
@@ -111,7 +116,12 @@ ON CONFLICT (id) DO UPDATE SET
   grade = EXCLUDED.grade,
   incidents = EXCLUDED.incidents,
   novelty_report = EXCLUDED.novelty_report,
-  subject_grades = EXCLUDED.subject_grades,
+  -- Only reset subject_grades if it's truly empty in the DB
+  subject_grades = CASE 
+    WHEN (public.students.subject_grades IS NULL OR public.students.subject_grades = '{}'::jsonb)
+    THEN EXCLUDED.subject_grades 
+    ELSE public.students.subject_grades 
+  END,
   cedula = EXCLUDED.cedula,
   age = EXCLUDED.age,
   address = EXCLUDED.address,

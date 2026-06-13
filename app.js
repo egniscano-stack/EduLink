@@ -78,7 +78,14 @@ let studentsData = {
     parentPhone: "62856279",
     parentEmail: "egniscano@gmail.com",
     conductText: "El docente aún no ha registrado observaciones de conducta.",
-    grade: "2B"
+    grade: "2B",
+    subject_grades: {
+      "Español": ["4.5", "4.0", "3.8", ""],
+      "Matemáticas": ["4.8", "4.2", "", ""]
+    },
+    incidents: [
+      { date: "12/06/2026", time: "10:30 AM", text: "Excelente participación en las dinámicas de clase." }
+    ]
   }
 };
 
@@ -105,6 +112,19 @@ try {
   }
 } catch (e) {
   console.error("Error reading eduTeachersData:", e);
+}
+
+let planningsData = {};
+try {
+  const storedPlannings = localStorage.getItem("eduPlanningsData");
+  if (storedPlannings) {
+    const parsed = JSON.parse(storedPlannings);
+    if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
+      planningsData = parsed;
+    }
+  }
+} catch (e) {
+  console.error("Error reading eduPlanningsData:", e);
 }
 
 let mockMessages = {
@@ -379,6 +399,9 @@ async function initSupabaseConnection() {
       // Cargar finanzas
       await syncFinancesFromSupabase();
 
+      // Cargar planning
+      await syncPlanningFromSupabase();
+
       // Suscribirse a mensajes en tiempo real
       setupRealtimeChatListener();
       showToast("Ecosistema conectado a Supabase", "⚡");
@@ -428,15 +451,17 @@ async function uploadFileToBucket(file, bucketName, folderName = "") {
         return publicUrlData.publicUrl;
       } else {
         console.error("Error al subir archivo a Supabase Storage:", error);
-        showToast("No se pudo subir a Supabase. Guardando localmente...", "⚠️");
+        showToast("Error Storage: " + (error.message || "Verifica políticas del bucket 'school-assets'"), "❌");
+        return null;
       }
     } catch (err) {
       console.error("Excepción en uploadFileToBucket:", err);
-      showToast("Error de conexión con Supabase Storage. Guardando localmente...", "⚠️");
+      showToast("Error de conexión con Supabase Storage.", "❌");
+      return null;
     }
   }
 
-  // Fallback a base64 DataURL
+  // Fallback a base64 DataURL (Solo en modo Offline)
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onload = (e) => resolve(e.target.result);
@@ -456,6 +481,41 @@ async function syncFinancesFromSupabase() {
     }
   } catch (err) {
     console.warn("Fallo al sincronizar finanzas:", err);
+  }
+}
+
+async function syncPlanningFromSupabase() {
+  if (!useSupabaseDb || !supabaseClient) return;
+  try {
+    const { data: plannings, error: pErr } = await supabaseClient.from('planning').select('*');
+    if (!pErr && plannings) {
+      planningsData = {};
+      plannings.forEach(p => {
+        planningsData[p.id] = {
+          id: p.id,
+          teacher_id: p.teacher_id,
+          subject: p.subject,
+          syllabus: p.syllabus || [],
+          activities: p.activities || []
+        };
+        // Save back to specific local storage keys for legacy compatibility
+        const syllabusKey = `eduTeacherPlanningSyllabus_${p.teacher_id}_${p.subject}`;
+        const activitiesKey = `eduTeacherPlanningActivities_${p.teacher_id}_${p.subject}`;
+        const planningKey = `eduTeacherPlanning_${p.teacher_id}_${p.subject}`;
+        try {
+          localStorage.setItem(syllabusKey, JSON.stringify(p.syllabus || []));
+          localStorage.setItem(activitiesKey, JSON.stringify(p.activities || []));
+          localStorage.setItem(planningKey, JSON.stringify({ syllabus: (p.syllabus || []).join(" • ") }));
+        } catch(e){}
+      });
+      try {
+        localStorage.setItem("eduPlanningsData", JSON.stringify(planningsData));
+      } catch(e){}
+    } else if (pErr) {
+      console.warn("Fallo al conectar con la tabla de planning en Supabase:", pErr);
+    }
+  } catch (err) {
+    console.error("Excepción al cargar planning de Supabase:", err);
   }
 }
 
@@ -1440,7 +1500,20 @@ function setupRealtimeChatListener() {
             appendMessageToArea(msg, chatArea, false);
           }
         }
-      } else if (!msg.is_sent_by_prof) {
+      }
+      
+      const parentView = document.getElementById("parentDashboardView");
+      const isParent = parentView && !parentView.classList.contains("hidden");
+      
+      if (isParent && msg.student_key === activeParentStudentId) {
+        const parentArea = document.getElementById("parentChatArea");
+        if (parentArea) {
+          appendMessageToArea(msg, parentArea, msg.is_sent_by_prof);
+        }
+        if (msg.is_sent_by_prof) {
+          playChatNotificationSound();
+        }
+      } else if (!msg.is_sent_by_prof && msg.student_key !== activeStudent && !isParent) {
         // Notification for another student
         const student = studentsData[msg.student_key];
         const studentName = student ? student.name : "un estudiante";
@@ -1562,6 +1635,14 @@ function setupRealtimeChatListener() {
       if (typeof renderDashboardStats === 'function') {
         renderDashboardStats();
       }
+      
+      // Refresh parent dashboard data if it is open
+      const parentView = document.getElementById("parentDashboardView");
+      if (parentView && !parentView.classList.contains("hidden") && activeParentStudentId === updatedStudent.id) {
+        if (typeof renderParentDashboardData === 'function') {
+          renderParentDashboardData(updatedStudent.id);
+        }
+      }
     })
     // 3. Teachers updates (subjects, grade assigned)
     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'teachers' }, payload => {
@@ -1572,7 +1653,10 @@ function setupRealtimeChatListener() {
         ...teachersData[updatedTeacher.id],
         name: updatedTeacher.name,
         subjects: updatedTeacher.subjects,
-        assigned_grade: updatedTeacher.assigned_grade
+        assigned_grade: updatedTeacher.assigned_grade,
+        specializations: updatedTeacher.specializations || teachersData[updatedTeacher.id]?.specializations || [],
+        profile_pic: updatedTeacher.profile_pic || teachersData[updatedTeacher.id]?.profile_pic || '',
+        isImgPath: updatedTeacher.is_img_path !== undefined ? updatedTeacher.is_img_path : (teachersData[updatedTeacher.id]?.isImgPath || false)
       };
 
       try {
@@ -1590,6 +1674,69 @@ function setupRealtimeChatListener() {
         updateStudentDetails(activeStudent);
       }
       renderStudentsList();
+
+      // Refresh parent dashboard teacher info card in real-time
+      const parentView = document.getElementById("parentDashboardView");
+      if (parentView && !parentView.classList.contains("hidden") && activeParentStudentId) {
+        const parentStudent = studentsData[activeParentStudentId];
+        if (parentStudent && parentStudent.grade === updatedTeacher.assigned_grade) {
+          if (typeof renderParentDashboardData === 'function') {
+            renderParentDashboardData(activeParentStudentId);
+          }
+        }
+      }
+    })
+
+    // 4. Planning updates
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'planning' }, payload => {
+      const eventType = payload.eventType;
+      const updatedPlanning = payload.new || payload.old;
+      console.log(`Realtime planning event (${eventType}):`, updatedPlanning);
+      
+      if (!updatedPlanning) return;
+
+      if (eventType === 'DELETE') {
+        delete planningsData[updatedPlanning.id];
+      } else {
+        planningsData[updatedPlanning.id] = {
+          id: updatedPlanning.id,
+          teacher_id: updatedPlanning.teacher_id,
+          subject: updatedPlanning.subject,
+          syllabus: updatedPlanning.syllabus || [],
+          activities: updatedPlanning.activities || []
+        };
+        // Also save to local storage specific keys for legacy compatibility
+        const syllabusKey = `eduTeacherPlanningSyllabus_${updatedPlanning.teacher_id}_${updatedPlanning.subject}`;
+        const activitiesKey = `eduTeacherPlanningActivities_${updatedPlanning.teacher_id}_${updatedPlanning.subject}`;
+        const planningKey = `eduTeacherPlanning_${updatedPlanning.teacher_id}_${updatedPlanning.subject}`;
+        try {
+          localStorage.setItem(syllabusKey, JSON.stringify(updatedPlanning.syllabus || []));
+          localStorage.setItem(activitiesKey, JSON.stringify(updatedPlanning.activities || []));
+          localStorage.setItem(planningKey, JSON.stringify({ syllabus: (updatedPlanning.syllabus || []).join(" • ") }));
+        } catch(e){}
+      }
+
+      try {
+        localStorage.setItem("eduPlanningsData", JSON.stringify(planningsData));
+      } catch(e){}
+
+      // If parent dashboard is open, refresh view in real-time!
+      const parentView = document.getElementById("parentDashboardView");
+      if (parentView && !parentView.classList.contains("hidden") && activeParentStudentId) {
+        if (typeof renderParentDashboardData === 'function') {
+          renderParentDashboardData(activeParentStudentId);
+        }
+      }
+
+      // If teacher dashboard is open, refresh planning
+      const teacherView = document.getElementById("teacherDashboardView");
+      if (teacherView && !teacherView.classList.contains("hidden")) {
+        const select = document.getElementById("teacherSubjectSelect");
+        if (select && select.value === updatedPlanning.subject && activeTeacher === updatedPlanning.teacher_id) {
+          loadSelectedSubjectPlanning();
+        }
+        loadTeacherStudents();
+      }
     })
     .subscribe();
 }
@@ -1708,8 +1855,12 @@ function appendMessageToArea(msg, area, isStaffChat) {
     bubbleClass = isMe ? "sent" : "received";
     senderColor = isMe ? "var(--color-cyan)" : "var(--color-orange)";
   } else {
-    bubbleClass = msg.is_sent_by_prof ? "sent" : "received";
-    senderColor = msg.is_sent_by_prof ? "var(--color-cyan)" : "var(--color-orange)";
+    const isTeacher = document.getElementById("teacherDashboardView") && !document.getElementById("teacherDashboardView").classList.contains("hidden");
+    const isAdmin = document.getElementById("adminDashboardView") && !document.getElementById("adminDashboardView").classList.contains("hidden");
+    const isMe = (isTeacher || isAdmin) ? msg.is_sent_by_prof : !msg.is_sent_by_prof;
+    
+    bubbleClass = isMe ? "sent" : "received";
+    senderColor = isMe ? "var(--color-cyan)" : "var(--color-orange)";
   }
 
   const contentHtml = getMsgContentHTML(msg.content);
@@ -2799,12 +2950,14 @@ function triggerPageWipe(targetPage) {
   pageWipe.classList.add("wipe-active");
   
   const teacherDashboardView = document.getElementById("teacherDashboardView");
+  const parentDashboardView  = document.getElementById("parentDashboardView");
   
   // Swap screens halfway through (0.6s)
   setTimeout(() => {
     if (targetPage === "dashboard") {
       landingView.classList.add("hidden");
       if (teacherDashboardView) teacherDashboardView.classList.add("hidden");
+      if (parentDashboardView) parentDashboardView.classList.add("hidden");
       dashboardView.classList.remove("hidden");
       document.body.classList.add("dashboard-mode");
       
@@ -2823,10 +2976,19 @@ function triggerPageWipe(targetPage) {
     } else if (targetPage === "teacher") {
       landingView.classList.add("hidden");
       dashboardView.classList.add("hidden");
+      if (parentDashboardView) parentDashboardView.classList.add("hidden");
       if (teacherDashboardView) teacherDashboardView.classList.remove("hidden");
+      document.body.classList.add("dashboard-mode");
+    } else if (targetPage === "parent") {
+      landingView.classList.add("hidden");
+      dashboardView.classList.add("hidden");
+      if (teacherDashboardView) teacherDashboardView.classList.add("hidden");
+      if (parentDashboardView) parentDashboardView.classList.remove("hidden");
       document.body.classList.add("dashboard-mode");
     } else {
       dashboardView.classList.add("hidden");
+      if (teacherDashboardView) teacherDashboardView.classList.add("hidden");
+      if (parentDashboardView) parentDashboardView.classList.add("hidden");
       if (teacherDashboardView) teacherDashboardView.classList.add("hidden");
       landingView.classList.remove("hidden");
       document.body.classList.remove("dashboard-mode");
@@ -2847,6 +3009,32 @@ document.querySelectorAll(".btn-open-auth").forEach(btn => {
     if (authSection) {
       authSection.classList.add("active");
       document.body.style.overflow = "hidden"; // Lock page scroll
+      
+      const tabLogin = document.getElementById("tabLogin");
+      if (tabLogin) tabLogin.click();
+    }
+  });
+});
+
+document.querySelectorAll(".btn-open-parent-auth").forEach(btn => {
+  btn.addEventListener("click", (e) => {
+    e.preventDefault();
+    const authSection = document.getElementById("authSection");
+    if (authSection) {
+      authSection.classList.add("active");
+      document.body.style.overflow = "hidden"; // Lock page scroll
+      
+      // The switchToLogin logic is handled by a direct switchTab call in initAuthForms
+      const pForm = document.getElementById("parentLoginForm");
+      if (pForm) {
+        // Trigger a global custom event or directly call the exposed switch mechanism, but since switchTab is scoped, we can click a hidden button or rely on the switchToStaffLogin
+        const switchToStaffLoginBtn = document.getElementById("switchToStaffLogin");
+        // Actually, we can just manually trigger the logic for parent since switchTab is inaccessible from here without a global reference.
+        // Let's just expose a global function for auth switching
+        if (window.switchAuthTabTo) {
+          window.switchAuthTabTo("parent-login");
+        }
+      }
     }
   });
 });
@@ -3076,44 +3264,68 @@ if (statsSection) {
 // ==========================================================================
 
 (function initAuthForms() {
-  const tabLogin    = document.getElementById("tabLogin");
-  const tabRegister = document.getElementById("tabRegister");
-  const loginForm   = document.getElementById("loginForm");
-  const regForm     = document.getElementById("registerForm");
+  const tabLogin       = document.getElementById("tabLogin");
+  const tabRegister    = document.getElementById("tabRegister");
+  const loginForm      = document.getElementById("loginForm");
+  const parentLoginForm= document.getElementById("parentLoginForm");
+  const regForm        = document.getElementById("registerForm");
   if (!tabLogin || !tabRegister || !loginForm || !regForm) return;
 
   // ── Tab Switch ────────────────────────────────────────────────────────────
-  function switchTab(activeTab, showForm, hideForm) {
+  function switchTab(activeTab) {
     tabLogin.classList.toggle("active", activeTab === "login");
     tabRegister.classList.toggle("active", activeTab === "register");
-    hideForm.style.transition = "opacity 0.2s ease, transform 0.2s ease";
-    hideForm.style.opacity = "0";
-    hideForm.style.transform = "translateX(20px)";
+    
+    const forms = [loginForm, parentLoginForm, regForm].filter(Boolean);
+    const targetForm = activeTab === "login" ? loginForm : (activeTab === "parent-login" ? parentLoginForm : regForm);
+    
+    // Manage tabs container visibility
+    const tabsContainer = document.querySelector(".auth-tabs");
+    if (tabsContainer) {
+      tabsContainer.style.display = activeTab === "parent-login" ? "none" : "flex";
+    }
+    
+    forms.forEach(f => {
+      if (f !== targetForm && !f.classList.contains("hidden")) {
+        f.style.transition = "opacity 0.2s ease, transform 0.2s ease";
+        f.style.opacity = "0";
+        f.style.transform = "translateX(20px)";
+        setTimeout(() => f.classList.add("hidden"), 220);
+      }
+    });
+
     setTimeout(() => {
-      hideForm.classList.add("hidden");
-      showForm.classList.remove("hidden");
-      showForm.style.opacity = "0";
-      showForm.style.transform = "translateX(-20px)";
+      targetForm.classList.remove("hidden");
+      targetForm.style.opacity = "0";
+      targetForm.style.transform = "translateX(-20px)";
       requestAnimationFrame(() => {
-        showForm.style.transition = "opacity 0.3s ease, transform 0.3s ease";
-        showForm.style.opacity = "1";
-        showForm.style.transform = "translateX(0)";
+        targetForm.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+        targetForm.style.opacity = "1";
+        targetForm.style.transform = "translateX(0)";
       });
     }, 220);
   }
+  
+  // Expose to window for external buttons
+  window.switchAuthTabTo = switchTab;
 
-  tabLogin.addEventListener("click",    () => switchTab("login",    loginForm, regForm));
-  tabRegister.addEventListener("click", () => switchTab("register", regForm, loginForm));
+  tabLogin.addEventListener("click", () => switchTab("login"));
+  tabRegister.addEventListener("click", () => switchTab("register"));
 
   // ── Cross-links ───────────────────────────────────────────────────────────
   document.getElementById("switchToRegister")?.addEventListener("click", (e) => {
     e.preventDefault();
-    switchTab("register", regForm, loginForm);
+    switchTab("register");
   });
 
   document.getElementById("switchToLogin")?.addEventListener("click", (e) => {
     e.preventDefault();
-    switchTab("login", loginForm, regForm);
+    switchTab("login");
+  });
+
+  document.getElementById("switchToStaffLogin")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    switchTab("login");
   });
 
   // ── Password Visibility ───────────────────────────────────────────────────
@@ -3302,6 +3514,55 @@ if (statsSection) {
       btn.innerHTML = `<span class="icon">🚀</span> Ingresar al Sistema`;
     }, 1200);
   });
+
+  // ── Parent Login Submit ───────────────────────────────────────────────────
+  if (parentLoginForm) {
+    parentLoginForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const parentName = document.getElementById("parentLoginName")?.value.trim().toLowerCase();
+      const parentCedula = document.getElementById("parentLoginCedula")?.value.trim().toLowerCase();
+      if (!parentName || !parentCedula) { showToast("Completa ambos campos", "⚠️"); return; }
+      
+      const btn = document.getElementById("parentLoginSubmitBtn");
+      btn.disabled = true;
+      btn.innerHTML = `<span class="icon">⏳</span> Validando datos...`;
+
+      setTimeout(() => {
+        let matchedStudentId = null;
+        const removeAccents = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const cleanInputName = removeAccents(parentName);
+        const cleanInputCedula = removeAccents(parentCedula);
+
+        for (const key in studentsData) {
+          const st = studentsData[key];
+          const stName = removeAccents(st.name.toLowerCase());
+          const stCedula = removeAccents((st.cedula || "").toLowerCase());
+          
+          if (stName === cleanInputName || stName.includes(cleanInputName)) {
+            if (stCedula === cleanInputCedula || cleanInputCedula.includes(stCedula)) {
+              matchedStudentId = key;
+              break;
+            }
+          }
+        }
+
+        if (matchedStudentId) {
+          showToast(`¡Bienvenido Acudiente de ${studentsData[matchedStudentId].name}!`, "👪");
+          const authSection = document.getElementById("authSection");
+          if (authSection) {
+            authSection.classList.remove("active");
+            document.body.style.overflow = "";
+          }
+          renderParentDashboard(matchedStudentId);
+          triggerPageWipe("parent");
+        } else {
+          showToast("No se encontró ningún estudiante con esos datos", "❌");
+        }
+        btn.disabled = false;
+        btn.innerHTML = `<span class="icon">👪</span> Ingresar al Portal`;
+      }, 1000);
+    });
+  }
 
   // ── Register Submit ───────────────────────────────────────────────────────
   regForm.addEventListener("submit", async (e) => {
@@ -3680,6 +3941,7 @@ function initializeTeacherDashboard() {
   const teacherPlanningScreen = document.getElementById("teacherPlanningScreen");
 
   if (navTeacherAlumnos && navTeacherPlanificacion && teacherAppScreen && teacherPlanningScreen) {
+
     navTeacherAlumnos.classList.add("primary");
     navTeacherAlumnos.classList.remove("secondary");
     navTeacherPlanificacion.classList.add("secondary");
@@ -3697,6 +3959,10 @@ function initializeTeacherDashboard() {
 
   // Load students for teacher's grade
   loadTeacherStudents();
+
+  // Sync any grades that are only in localStorage up to Supabase
+  // so the parent portal can see them in real-time
+  setTimeout(() => syncLocalGradesToSupabase(), 1500);
 }
 
 let teacherEventsBound = false;
@@ -3864,54 +4130,59 @@ function loadSelectedSubjectPlanning() {
     return;
   }
 
-  // Syllabus planning
-  const syllabusKey = `eduTeacherPlanningSyllabus_${activeTeacher}_${subject}`;
-  try {
-    const stored = localStorage.getItem(syllabusKey);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        renderPlanningSyllabus(parsed);
-      } else {
-        renderPlanningSyllabus(["Tema 1: Conceptos Básicos", "Tema 2: Desarrollo Práctico"]);
-      }
-    } else {
-      // Check legacy single-string syllabus fallback
-      const legacyKey = `eduTeacherPlanning_${activeTeacher}_${subject}`;
-      const legacyStored = localStorage.getItem(legacyKey);
-      if (legacyStored) {
-        const legacyParsed = JSON.parse(legacyStored);
-        if (legacyParsed.syllabus) {
-          const parts = legacyParsed.syllabus.split(/[•;]|\r?\n/).map(s => s.trim()).filter(Boolean);
-          renderPlanningSyllabus(parts.length > 0 ? parts : [legacyParsed.syllabus]);
-        } else {
-          renderPlanningSyllabus(["Tema 1: Conceptos Básicos", "Tema 2: Desarrollo Práctico"]);
-        }
-      } else {
-        renderPlanningSyllabus(["Tema 1: Conceptos Básicos", "Tema 2: Desarrollo Práctico"]);
-      }
-    }
-  } catch(e) {
-    renderPlanningSyllabus(["Tema 1: Conceptos Básicos", "Tema 2: Desarrollo Práctico"]);
+  // Find in global planningsData
+  const planningId = `${activeTeacher}_${subject}`;
+  const pl = planningsData[planningId];
+  
+  let topics = [];
+  let activities = [];
+  
+  if (pl) {
+    topics = pl.syllabus || [];
+    activities = pl.activities || [];
   }
 
-  // Activities planning
-  const activitiesKey = `eduTeacherPlanningActivities_${activeTeacher}_${subject}`;
-  try {
-    const storedActivities = localStorage.getItem(activitiesKey);
-    if (storedActivities) {
-      const parsed = JSON.parse(storedActivities);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        renderPlanningActivities(parsed);
+  // Syllabus fallback
+  if (topics.length === 0) {
+    const syllabusKey = `eduTeacherPlanningSyllabus_${activeTeacher}_${subject}`;
+    try {
+      const stored = localStorage.getItem(syllabusKey);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) topics = parsed;
       } else {
-        renderPlanningActivities(["Taller 1", "Investigación 1", "Examen parcial", "Prueba corta"]);
+        // Check legacy format
+        const legacyKey = `eduTeacherPlanning_${activeTeacher}_${subject}`;
+        const legacyStored = localStorage.getItem(legacyKey);
+        if (legacyStored) {
+          const legacyParsed = JSON.parse(legacyStored);
+          if (legacyParsed.syllabus) {
+            topics = legacyParsed.syllabus.split(/[•;]|\r?\n/).map(s => s.trim()).filter(Boolean);
+          }
+        }
       }
-    } else {
-      renderPlanningActivities(["Taller 1", "Investigación 1", "Examen parcial", "Prueba corta"]);
-    }
-  } catch(e) {
-    renderPlanningActivities(["Taller 1", "Investigación 1", "Examen parcial", "Prueba corta"]);
+    } catch(e) {}
   }
+  if (!Array.isArray(topics) || topics.length === 0) {
+    topics = ["Tema 1: Conceptos Básicos", "Tema 2: Desarrollo Práctico"];
+  }
+  renderPlanningSyllabus(topics);
+
+  // Activities fallback
+  if (activities.length === 0) {
+    const activitiesKey = `eduTeacherPlanningActivities_${activeTeacher}_${subject}`;
+    try {
+      const storedActivities = localStorage.getItem(activitiesKey);
+      if (storedActivities) {
+        const parsed = JSON.parse(storedActivities);
+        if (Array.isArray(parsed)) activities = parsed;
+      }
+    } catch(e) {}
+  }
+  if (!Array.isArray(activities) || activities.length === 0) {
+    activities = ["Taller 1", "Investigación 1", "Examen parcial", "Prueba corta"];
+  }
+  renderPlanningActivities(activities);
 }
 
 function renderPlanningActivities(activities) {
@@ -4153,7 +4424,47 @@ function saveTeacherPlanning() {
   const activitiesKey = `eduTeacherPlanningActivities_${activeTeacher}_${subject}`;
   localStorage.setItem(activitiesKey, JSON.stringify(activities));
 
+  // Save to global planningsData cache
+  const planningId = `${activeTeacher}_${subject}`;
+  planningsData[planningId] = {
+    id: planningId,
+    teacher_id: activeTeacher,
+    subject: subject,
+    syllabus: topics,
+    activities: activities
+  };
+  try {
+    localStorage.setItem("eduPlanningsData", JSON.stringify(planningsData));
+  } catch(e){}
+
   showToast(`Planificación de ${subject} guardada`, "💾");
+
+  // Sync to Supabase
+  if (useSupabaseDb && supabaseClient) {
+    (async () => {
+      try {
+        const { error } = await supabaseClient
+          .from('planning')
+          .upsert({
+            id: planningId,
+            teacher_id: activeTeacher,
+            subject: subject,
+            syllabus: topics,
+            activities: activities,
+            updated_at: new Date().toISOString()
+          });
+        if (error) {
+          console.error("Error saving planning to Supabase:", error);
+          showToast("Guardado local (Error al sincronizar con la base de datos)", "⚠️");
+        } else {
+          showToast("Planificación sincronizada con Supabase", "✅");
+        }
+      } catch(err) {
+        console.error("Excepción al guardar planificación en Supabase:", err);
+        showToast("Guardado local (Error de conexión)", "⚠️");
+      }
+    })();
+  }
 
   // Refresh students list
   loadTeacherStudents();
@@ -4366,31 +4677,45 @@ function renderTeacherPortalStudents(students) {
     teacherSubjects.forEach(subject => {
       // Find activities configured
       let activities = [];
-      const activitiesKey = `eduTeacherPlanningActivities_${activeTeacher}_${subject}`;
-      try {
-        const stored = localStorage.getItem(activitiesKey);
-        if (stored) {
-          activities = JSON.parse(stored);
-        }
-      } catch(e) {}
+      const planningId = `${activeTeacher}_${subject}`;
+      const pl = planningsData[planningId];
+      if (pl && Array.isArray(pl.activities)) {
+        activities = pl.activities;
+      } else {
+        const activitiesKey = `eduTeacherPlanningActivities_${activeTeacher}_${subject}`;
+        try {
+          const stored = localStorage.getItem(activitiesKey);
+          if (stored) {
+            activities = JSON.parse(stored);
+          }
+        } catch(e) {}
+      }
 
       if (!Array.isArray(activities) || activities.length === 0) {
         activities = ["Taller 1", "Investigación 1", "Examen parcial", "Prueba corta"];
       }
 
       // Check planning syllabus
-      const syllabusKey = `eduTeacherPlanningSyllabus_${activeTeacher}_${subject}`;
-      let planningRefHTML = "";
-      try {
-        const stored = localStorage.getItem(syllabusKey);
-        if (stored) {
-          const parsedSyllabus = JSON.parse(stored);
-          if (Array.isArray(parsedSyllabus) && parsedSyllabus.length > 0) {
-            planningRefHTML += `<span style="display:block;">📚 <strong>Temas:</strong> ${parsedSyllabus.map(t => escapeHTML(t)).join(" • ")}</span>`;
+      let syllabusTopics = [];
+      if (pl && Array.isArray(pl.syllabus)) {
+        syllabusTopics = pl.syllabus;
+      } else {
+        const syllabusKey = `eduTeacherPlanningSyllabus_${activeTeacher}_${subject}`;
+        try {
+          const stored = localStorage.getItem(syllabusKey);
+          if (stored) {
+            syllabusTopics = JSON.parse(stored);
           }
-        } else {
-          // Fallback legacy
-          const planningKey = `eduTeacherPlanning_${activeTeacher}_${subject}`;
+        } catch(e) {}
+      }
+
+      let planningRefHTML = "";
+      if (syllabusTopics && syllabusTopics.length > 0) {
+        planningRefHTML += `<span style="display:block;">📚 <strong>Temas:</strong> ${syllabusTopics.map(t => escapeHTML(t)).join(" • ")}</span>`;
+      } else {
+        // Fallback legacy
+        const planningKey = `eduTeacherPlanning_${activeTeacher}_${subject}`;
+        try {
           const storedPlanning = localStorage.getItem(planningKey);
           if (storedPlanning) {
             const parsed = JSON.parse(storedPlanning);
@@ -4398,8 +4723,8 @@ function renderTeacherPortalStudents(students) {
               planningRefHTML += `<span style="display:block;">📚 <strong>Temario:</strong> ${escapeHTML(parsed.syllabus)}</span>`;
             }
           }
-        }
-      } catch(e) {}
+        } catch(e) {}
+      }
 
       if (!planningRefHTML) {
         planningRefHTML = `<span style="font-style: italic; opacity: 0.6;">Sin temario académico asignado.</span>`;
@@ -4407,11 +4732,15 @@ function renderTeacherPortalStudents(students) {
 
       // Load stored grades JSON array
       let storedGrades = [];
-      const storedGradesRaw = localStorage.getItem(`eduStudentGradesJSON_${student.id}_${subject}`);
-      if (storedGradesRaw) {
-        try {
-          storedGrades = JSON.parse(storedGradesRaw);
-        } catch(e) {}
+      if (student.subject_grades && Array.isArray(student.subject_grades[subject])) {
+        storedGrades = student.subject_grades[subject];
+      } else {
+        const storedGradesRaw = localStorage.getItem(`eduStudentGradesJSON_${student.id}_${subject}`);
+        if (storedGradesRaw) {
+          try {
+            storedGrades = JSON.parse(storedGradesRaw);
+          } catch(e) {}
+        }
       }
 
       // Build specific grades inputs (compact layout)
@@ -4752,6 +5081,10 @@ function renderTeacherPortalStudents(students) {
       input.addEventListener("input", () => {
         updateRealtimeUIForStudentSubject(student.id, subject);
       });
+
+      input.addEventListener("change", () => {
+        saveAndSyncGrades(student.id, subject);
+      });
     });
 
     // Chat Acudiente Button listener
@@ -4776,8 +5109,6 @@ function renderTeacherPortalStudents(students) {
         for (const subject of teacherSubjects) {
           const inputs = card.querySelectorAll(`.activity-grade-input[data-subject="${subject}"]`);
           const gradesArray = [];
-          let subSum = 0;
-          let subCount = 0;
 
           inputs.forEach(input => {
             const val = input.value.trim().replace(/,/g, '.');
@@ -4791,16 +5122,14 @@ function renderTeacherPortalStudents(students) {
               input.style.borderColor = "var(--color-orange)";
             } else {
               gradesArray.push(val);
-              subSum += num;
-              subCount++;
             }
           });
 
           if (allValid) {
             localStorage.setItem(`eduStudentGradesJSON_${student.id}_${subject}`, JSON.stringify(gradesArray));
             studentsData[student.id].subject_grades[subject] = gradesArray;
-            const avg = subCount > 0 ? parseFloat((subSum / subCount).toFixed(1)) : 0.0;
-            newGrades.push(avg);
+            const avgStr = computeSubjectAverage(gradesArray);
+            newGrades.push(avgStr !== '--' ? parseFloat(avgStr) : 0.0);
           }
         }
 
@@ -5065,6 +5394,18 @@ function renderTeacherPortalStudents(students) {
   });
 }
 
+/**
+ * Shared helper: computes the average of a subject grades array.
+ * Ignores empty strings, nulls, and non-numeric values.
+ * Returns a string like "3.8" or "--" if no valid grades.
+ */
+function computeSubjectAverage(gradesArray) {
+  if (!Array.isArray(gradesArray)) return '--';
+  const valid = gradesArray.filter(g => g !== '' && g !== null && g !== undefined && !isNaN(parseFloat(g))).map(Number);
+  if (valid.length === 0) return '--';
+  return (valid.reduce((a, b) => a + b, 0) / valid.length).toFixed(1);
+}
+
 function updateRealtimeUIForStudentSubject(studentId, subject) {
   const container = document.getElementById(`portal-grades-container-${studentId}`);
   if (!container) return;
@@ -5076,19 +5417,25 @@ function updateRealtimeUIForStudentSubject(studentId, subject) {
   let sum = 0;
   let count = 0;
   let allValid = true;
+  const currentValues = [];
 
   inputs.forEach(input => {
     const val = input.value.trim().replace(/,/g, '.');
-    if (!val) return;
+    if (!val) {
+      currentValues.push('');
+      return;
+    }
 
     const num = parseFloat(val);
     if (isNaN(num) || num < 1.0 || num > 5.0) {
       allValid = false;
       input.style.borderColor = "var(--color-orange)";
+      currentValues.push('');
     } else {
       input.style.borderColor = "var(--text-main)";
       sum += num;
       count++;
+      currentValues.push(val);
     }
   });
 
@@ -5097,7 +5444,8 @@ function updateRealtimeUIForStudentSubject(studentId, subject) {
     avgLabel.style.borderColor = "var(--color-orange)";
     avgLabel.style.color = "var(--color-orange)";
   } else if (count > 0) {
-    const avg = (sum / count).toFixed(1);
+    // Use the shared helper on the current input values so teacher & parent see same average
+    const avg = computeSubjectAverage(currentValues);
     avgLabel.textContent = `Promedio: ${avg}`;
     avgLabel.style.borderColor = "var(--text-main)";
     avgLabel.style.color = "var(--text-main)";
@@ -5109,6 +5457,168 @@ function updateRealtimeUIForStudentSubject(studentId, subject) {
 
   // Update trimester overall average
   updateTrimesterAverageForStudent(studentId);
+}
+
+
+async function saveAndSyncGrades(studentId, subject) {
+  const student = studentsData[studentId];
+  if (!student) return;
+
+  const card = document.getElementById(`portal-student-${studentId}`);
+  if (!card) return;
+
+  const teacher = teachersData[activeTeacher];
+  const teacherSubjects = teacher ? teacher.subjects || [] : [];
+
+  let allValid = true;
+  const newGrades = [];
+
+  if (!student.subject_grades) {
+    student.subject_grades = {};
+  }
+
+  for (const sub of teacherSubjects) {
+    const inputs = card.querySelectorAll(`.activity-grade-input[data-subject="${sub}"]`);
+    const gradesArray = [];
+
+    inputs.forEach(input => {
+      const val = input.value.trim().replace(/,/g, '.');
+      if (!val) {
+        gradesArray.push("");
+        return;
+      }
+      const num = parseFloat(val);
+      if (isNaN(num) || num < 1.0 || num > 5.0) {
+        allValid = false;
+        input.style.borderColor = "var(--color-orange)";
+      } else {
+        input.style.borderColor = "";
+        gradesArray.push(val);
+      }
+    });
+
+    if (allValid) {
+      localStorage.setItem(`eduStudentGradesJSON_${studentId}_${sub}`, JSON.stringify(gradesArray));
+      student.subject_grades[sub] = gradesArray;
+      // Use the shared helper so stored average = displayed average in both portals
+      const avgStr = computeSubjectAverage(gradesArray);
+      newGrades.push(avgStr !== '--' ? parseFloat(avgStr) : 0.0);
+    }
+  }
+
+  if (!allValid) {
+    return;
+  }
+
+  student.grades = newGrades;
+  try {
+    localStorage.setItem("eduStudentsData", JSON.stringify(studentsData));
+  } catch(e) {}
+
+  if (useSupabaseDb && supabaseClient) {
+    try {
+      let { error } = await supabaseClient
+        .from('students')
+        .update({ 
+          grades: newGrades, 
+          subject_grades: student.subject_grades 
+        })
+        .eq('id', studentId);
+
+      if (error) {
+        console.warn("Fallo al actualizar con subject_grades, intentando fallback solo con grades:", error);
+        await supabaseClient
+          .from('students')
+          .update({ grades: newGrades })
+          .eq('id', studentId);
+      }
+    } catch(err) {
+      console.error("Error al sincronizar notas en Supabase:", err);
+    }
+  }
+
+  // After successful save, also refresh parent dashboard if open and watching this student
+  const parentView = document.getElementById("parentDashboardView");
+  if (parentView && !parentView.classList.contains("hidden") && activeParentStudentId === studentId) {
+    if (typeof renderParentDashboardData === 'function') {
+      renderParentDashboardData(studentId);
+    }
+  }
+}
+
+/**
+ * Syncs grades stored in localStorage (eduStudentGradesJSON_) to Supabase
+ * for all students of the active teacher. Called once on teacher dashboard load
+ * to ensure that grades previously entered locally (before Supabase sync was available)
+ * are pushed to the database so the parent portal can see them.
+ */
+async function syncLocalGradesToSupabase() {
+  if (!useSupabaseDb || !supabaseClient) return;
+  const teacher = teachersData[activeTeacher];
+  if (!teacher) return;
+  const teacherSubjects = teacher.subjects || [];
+  if (teacherSubjects.length === 0) return;
+
+  const grade = teacher.assigned_grade;
+  const studentsInGrade = Object.values(studentsData || {}).filter(s => s.grade === grade);
+
+  for (const student of studentsInGrade) {
+    if (!student.subject_grades) student.subject_grades = {};
+
+    let needsSync = false;
+    const newGrades = [];
+
+    for (const subject of teacherSubjects) {
+      // Check if this subject already has data in Supabase cache
+      const hasSupabaseGrades = Array.isArray(student.subject_grades[subject]) &&
+        student.subject_grades[subject].some(g => g !== '' && g !== null && g !== undefined);
+
+      if (!hasSupabaseGrades) {
+        // Try loading from localStorage
+        const lsKey = `eduStudentGradesJSON_${student.id}_${subject}`;
+        try {
+          const stored = localStorage.getItem(lsKey);
+          if (stored) {
+            const arr = JSON.parse(stored);
+            if (Array.isArray(arr) && arr.some(g => g !== '' && g !== null && g !== undefined)) {
+              student.subject_grades[subject] = arr;
+              needsSync = true;
+            }
+          }
+        } catch(e) {}
+      }
+
+      // Calculate average for grades array using the shared helper
+      const gradesArr = student.subject_grades[subject] || [];
+      const avgStr = computeSubjectAverage(gradesArr);
+      newGrades.push(avgStr !== '--' ? parseFloat(avgStr) : 0.0);
+    }
+
+    if (needsSync) {
+      student.grades = newGrades;
+      try {
+        const { error } = await supabaseClient
+          .from('students')
+          .update({
+            grades: newGrades,
+            subject_grades: student.subject_grades
+          })
+          .eq('id', student.id);
+        if (error) {
+          console.warn(`syncLocalGradesToSupabase: error syncing ${student.id}:`, error);
+        } else {
+          console.log(`syncLocalGradesToSupabase: synced grades for ${student.name}`);
+        }
+      } catch(err) {
+        console.warn(`syncLocalGradesToSupabase: exception for ${student.id}:`, err);
+      }
+    }
+  }
+
+  // Save updated studentsData to localStorage
+  try {
+    localStorage.setItem("eduStudentsData", JSON.stringify(studentsData));
+  } catch(e) {}
 }
 
 // ---- Teacher Chat: Helper functions for the integrated chat screen ----
@@ -5272,11 +5782,11 @@ async function handleTeacherChatFileSelection(e) {
     return;
   }
 
-  // Validate size (limit to 10MB if online, 2MB if offline)
+  // Validate size (limit to 50MB)
   const isOnline = useSupabaseDb && supabaseClient;
-  const sizeLimit = isOnline ? 10 * 1024 * 1024 : 2 * 1024 * 1024;
+  const sizeLimit = 50 * 1024 * 1024;
   if (file.size > sizeLimit) {
-    showToast(`El archivo es demasiado grande (máximo ${isOnline ? '10MB' : '2MB'})`, "⚠️");
+    showToast(`El archivo es demasiado grande (máximo 50MB)`, "⚠️");
     return;
   }
 
@@ -5300,7 +5810,8 @@ async function handleTeacherChatFileSelection(e) {
 
     const isStaff = teacherActiveChatType === "staff";
     const msgPayload = isStaff ? {
-      sender: `👨‍🏫 Docente: ${teacher.name}`,
+      sender: getCurrentUserId() || teacher.id,
+      receiver: typeof activeTeacherChatPartner !== 'undefined' ? activeTeacherChatPartner : "admin",
       content: JSON.stringify({ text: `Archivo: ${file.name}`, file: filePayload }),
       created_at: new Date().toISOString()
     } : {
@@ -5320,7 +5831,7 @@ async function handleTeacherChatFileSelection(e) {
       const { error } = await supabaseClient.from(targetTable).insert([msgPayload]);
       if (error) {
         console.error("Error sending file to Supabase:", error);
-        showToast("Error de conexión al enviar archivo", "❌");
+        showToast("Error DB: " + (error.message || "Error al guardar el archivo en el chat"), "❌");
       } else {
         showToast("Archivo enviado con éxito", "✅");
         loadTeacherChatMessages(activeStudent);
@@ -5386,11 +5897,11 @@ async function handleAdminChatFileSelection(e) {
     return;
   }
 
-  // Validate size (limit to 10MB if online, 2MB if offline)
+  // Validate size (limit to 50MB)
   const isOnline = useSupabaseDb && supabaseClient;
-  const sizeLimit = isOnline ? 10 * 1024 * 1024 : 2 * 1024 * 1024;
+  const sizeLimit = 50 * 1024 * 1024;
   if (file.size > sizeLimit) {
-    showToast(`El archivo es demasiado grande (máximo ${isOnline ? '10MB' : '2MB'})`, "⚠️");
+    showToast(`El archivo es demasiado grande (máximo 50MB)`, "⚠️");
     return;
   }
 
@@ -5443,7 +5954,7 @@ async function handleAdminChatFileSelection(e) {
       const { error } = await supabaseClient.from(targetTable).insert([msgPayload]);
       if (error) {
         console.error("Error sending file to Supabase:", error);
-        showToast("Error de conexión al enviar archivo", "❌");
+        showToast("Error DB: " + (error.message || "Error al guardar el archivo en el chat"), "❌");
       } else {
         showToast("Archivo enviado con éxito", "✅");
         loadChatHistory(adminActiveChatType, isStaff ? activeAdminChatPartner : activeStudent, chatArea);
@@ -6890,4 +7401,432 @@ function initChatTabsListeners() {
   }
 }
 
+// ==========================================================================
+// 21. PORTAL ACUDIENTE / ESTUDIANTE
+// ==========================================================================
+let activeParentStudentId = null;
 
+function renderParentDashboardData(studentId) {
+  const student = studentsData[studentId];
+  if (!student) return;
+
+  // Header info
+  const nameEl = document.getElementById("parentStudentName");
+  const gradeEl = document.getElementById("parentStudentGrade");
+  if (nameEl) nameEl.textContent = student.name;
+  if (gradeEl) gradeEl.textContent = `Grado: ${student.grade || '--'} | Cédula: ${student.cedula || '--'}`;
+  
+  // Profile picture
+  const avatarEl = document.getElementById("parentStudentAvatar");
+  if (avatarEl) {
+    if (student.isImgPath || student.is_img_path || (student.img && student.img.startsWith('data:image/')) || (student.img && student.img.includes('/'))) {
+      avatarEl.innerHTML = `<img src="${student.img}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='assets/profile-fallback.png'">`;
+    } else {
+      avatarEl.innerHTML = `<span style="font-size:2rem; font-weight:700;">${student.img || '👤'}</span>`;
+    }
+  }
+
+  // Academic Data Container
+  const container = document.getElementById("parentAcademicDataContainer");
+  if (container) {
+    // Preserve open/collapsed accordion states
+    let gradesOpen = true;
+    let incidentsOpen = true;
+    let conductOpen = true;
+    let teachersOpen = true;
+    
+    const existingGradesCard = document.getElementById("parentGradesCard");
+    if (existingGradesCard) {
+      gradesOpen = existingGradesCard.classList.contains("open");
+    }
+    const existingIncidentsCard = document.getElementById("parentIncidentsCard");
+    if (existingIncidentsCard) {
+      incidentsOpen = existingIncidentsCard.classList.contains("open");
+    }
+    const existingConductCard = document.getElementById("parentConductCard");
+    if (existingConductCard) {
+      conductOpen = existingConductCard.classList.contains("open");
+    }
+    const existingTeachersCard = document.getElementById("parentTeachersCard");
+    if (existingTeachersCard) {
+      teachersOpen = existingTeachersCard.classList.contains("open");
+    }
+
+    container.innerHTML = "";
+
+    // Determine all subjects for this student's grade
+    const assignedSubjects = [];
+    if (typeof teachersData !== 'undefined') {
+      Object.values(teachersData).forEach(t => {
+        if (t.assigned_grade === student.grade && Array.isArray(t.subjects)) {
+          t.subjects.forEach(sub => {
+            if (!assignedSubjects.includes(sub)) assignedSubjects.push(sub);
+          });
+        }
+      });
+    }
+
+    const subjectsObj = student.subject_grades || {};
+
+    // Merge localStorage grades into subjectsObj for any subjects with missing data
+    // This ensures parent portal shows grades even if Supabase hasn't synced yet
+    assignedSubjects.forEach(sub => {
+      const hasSupabaseGrades = Array.isArray(subjectsObj[sub]) &&
+        subjectsObj[sub].some(g => g !== '' && g !== null && g !== undefined);
+      if (!hasSupabaseGrades) {
+        // Try localStorage fallback using the same keys as the teacher dashboard
+        const lsKey = `eduStudentGradesJSON_${student.id}_${sub}`;
+        try {
+          const stored = localStorage.getItem(lsKey);
+          if (stored) {
+            const arr = JSON.parse(stored);
+            if (Array.isArray(arr) && arr.some(g => g !== '' && g !== null && g !== undefined)) {
+              subjectsObj[sub] = arr;
+            }
+          }
+        } catch(e) {}
+      }
+    });
+
+    // Add any subjects that might be in subject_grades but not in assignedSubjects
+    Object.keys(subjectsObj).forEach(sub => {
+      if (!assignedSubjects.includes(sub)) assignedSubjects.push(sub);
+    });
+
+    let subjectsHtml = '';
+    
+    assignedSubjects.forEach((sub, subIdx) => {
+      const grades = subjectsObj[sub] || [];
+      const avg = computeSubjectAverage(grades);
+      const color = (avg !== '--' && parseFloat(avg) < 3.0) ? 'var(--color-red)' : 'var(--color-blue)';
+      
+      // Determine individual subject open state
+      let subjectOpen = false;
+      const existingSubCard = document.getElementById(`parentSub_${subIdx}`);
+      if (existingSubCard) {
+        subjectOpen = existingSubCard.classList.contains("open");
+      }
+
+      // Find the teacher ID for this subject to retrieve syllabus and activities
+      let teacherId = null;
+      if (typeof teachersData !== 'undefined') {
+        Object.entries(teachersData).forEach(([tid, t]) => {
+          if (t.assigned_grade === student.grade && Array.isArray(t.subjects) && t.subjects.includes(sub)) {
+            teacherId = tid;
+          }
+        });
+      }
+
+      let activities = [];
+      let syllabusTopics = [];
+      
+      if (teacherId) {
+        const planningId = `${teacherId}_${sub}`;
+        const pl = planningsData[planningId];
+        if (pl) {
+          activities = pl.activities || [];
+          syllabusTopics = pl.syllabus || [];
+        }
+      }
+
+      // Local storage fallbacks
+      if (activities.length === 0 && teacherId) {
+        const activitiesKey = `eduTeacherPlanningActivities_${teacherId}_${sub}`;
+        try {
+          const stored = localStorage.getItem(activitiesKey);
+          if (stored) activities = JSON.parse(stored);
+        } catch(e){}
+      }
+      if (activities.length === 0) {
+        activities = ["Taller 1", "Investigación 1", "Examen parcial", "Prueba corta"];
+      }
+
+      if (syllabusTopics.length === 0 && teacherId) {
+        const syllabusKey = `eduTeacherPlanningSyllabus_${teacherId}_${sub}`;
+        try {
+          const stored = localStorage.getItem(syllabusKey);
+          if (stored) syllabusTopics = JSON.parse(stored);
+        } catch(e){}
+      }
+
+      let activitiesHtml = '';
+      activities.forEach((act, actIdx) => {
+        let val = '--';
+        if (Array.isArray(grades) && grades[actIdx] !== undefined && grades[actIdx] !== null && grades[actIdx] !== '') {
+          val = grades[actIdx];
+        }
+        const valNum = parseFloat(val);
+        const gradeColor = (!isNaN(valNum) && valNum < 3.0) ? 'var(--color-red)' : (!isNaN(valNum) ? 'var(--color-lime)' : 'var(--text-sub)');
+        
+        activitiesHtml += `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px dashed rgba(0,0,0,0.05); font-size: 0.88rem;">
+            <span style="color: var(--text-secondary); font-weight: 500;">📋 ${escapeHTML(act)}</span>
+            <span style="font-weight: 700; color: ${gradeColor};">${val}</span>
+          </div>
+        `;
+      });
+
+      let syllabusHtml = '';
+      if (syllabusTopics.length > 0) {
+        syllabusHtml = `
+          <div style="margin-top: 8px; font-size: 0.8rem; color: var(--text-sub); background: rgba(0,0,0,0.02); padding: 8px; border-radius: 6px; border-left: 3px solid var(--color-cyan); margin-bottom: 10px;">
+            <strong>📚 Temas:</strong> ${syllabusTopics.map(t => escapeHTML(t)).join(' • ')}
+          </div>
+        `;
+      }
+
+      subjectsHtml += `
+        <div id="parentSub_${subIdx}" class="subject-accordion-card ${subjectOpen ? 'open' : ''}" style="background: var(--bg-light); border: 1px solid var(--text-sub); border-radius: 8px; margin-bottom: 10px; overflow: hidden;">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; cursor: pointer;" onclick="toggleParentSubjectAccordion(${subIdx})">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="sub-arrow" style="transition: transform 0.3s; font-size: 0.75rem; color: var(--text-sub); display: inline-block; transform: rotate(${subjectOpen ? '90deg' : '0deg'});">▶</span>
+              <h4 style="margin: 0; font-size: 1.05rem; color: var(--text-main);">${sub}</h4>
+            </div>
+            <span style="font-size: 1.2rem; font-weight: 800; color: ${color};">${avg}</span>
+          </div>
+          <div id="parentSubContent_${subIdx}" style="display: ${subjectOpen ? 'block' : 'none'}; padding: 0 12px 12px 12px; border-top: 1px dashed rgba(0,0,0,0.05);">
+            ${syllabusHtml}
+            <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 8px;">
+              ${activitiesHtml}
+            </div>
+          </div>
+        </div>
+      `;
+    });
+
+    if (!subjectsHtml) {
+      subjectsHtml = '<p style="color: var(--text-sub); font-size: 0.9rem;">No hay asignaturas registradas para este estudiante.</p>';
+    }
+
+    container.innerHTML = `
+      <!-- Accordion 1: Calificaciones -->
+      <div class="chubby-card accordion-card ${gradesOpen ? 'open' : ''}" id="parentGradesCard" style="margin-bottom: 15px;">
+        <div class="accordion-card-header" style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; cursor:pointer;" onclick="toggleParentAccordion('parentGradesCard', 'parentGradesContent')">
+          <h4 style="margin:0;"><span class="icon">📚</span> Resumen de Calificaciones</h4>
+          <span class="accordion-arrow" style="transition: transform 0.3s; font-size: 0.8rem; color: var(--text-muted); display: inline-block; transform: rotate(${gradesOpen ? '180deg' : '0deg'});">▼</span>
+        </div>
+        <div class="accordion-card-content" id="parentGradesContent" style="display: ${gradesOpen ? 'block' : 'none'}; opacity: ${gradesOpen ? '1' : '0'}; height: ${gradesOpen ? 'auto' : '0px'}; overflow: ${gradesOpen ? 'visible' : 'hidden'}; transition: height 0.4s ease, opacity 0.35s ease;">
+          <div class="accordion-card-content-inner" style="padding: 12px 16px;">
+            ${subjectsHtml}
+          </div>
+        </div>
+      </div>
+      
+      <!-- Accordion 2: Incidencias -->
+      <div class="chubby-card accordion-card ${incidentsOpen ? 'open' : ''}" id="parentIncidentsCard" style="margin-top: 15px;">
+        <div class="accordion-card-header" style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; cursor:pointer;" onclick="toggleParentAccordion('parentIncidentsCard', 'parentIncidentsContent')">
+          <h4 style="margin:0;"><span class="icon">⚠️</span> Incidencias / Observaciones</h4>
+          <span class="accordion-arrow" style="transition: transform 0.3s; font-size: 0.8rem; color: var(--text-muted); display: inline-block; transform: rotate(${incidentsOpen ? '180deg' : '0deg'});">▼</span>
+        </div>
+        <div class="accordion-card-content" id="parentIncidentsContent" style="display: ${incidentsOpen ? 'block' : 'none'}; opacity: ${incidentsOpen ? '1' : '0'}; height: ${incidentsOpen ? 'auto' : '0px'}; overflow: ${incidentsOpen ? 'visible' : 'hidden'}; transition: height 0.4s ease, opacity 0.35s ease;">
+          <div class="accordion-card-content-inner" style="padding: 12px 16px;">
+            ${(student.incidents || []).length ? student.incidents.map(inc => `
+              <div style="background: var(--bg-light); padding: 10px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid var(--color-orange);">
+                <div style="font-size: 0.8rem; color: var(--text-sub);">${inc.date} ${inc.time || ''}</div>
+                <div style="font-size: 0.95rem;">${escapeHTML(inc.text || inc.desc || '')}</div>
+              </div>
+            `).join('') : '<p style="color: var(--text-sub); font-size: 0.9rem; margin: 0;">Sin incidencias reportadas.</p>'}
+          </div>
+        </div>
+      </div>
+
+      <!-- Accordion 3: Conducta -->
+      ${
+        (() => {
+          const conduct = student.conduct || 'sin_evaluar';
+          const conductText = student.conductText || student.conduct_text || 'El docente aún no ha registrado observaciones de conducta.';
+          const conductMap = {
+            'excelente':       { label: 'Excelente',        emoji: '⭐', color: 'var(--color-lime)',   bg: 'rgba(163,230,53,0.12)',   border: '#a3e635' },
+            'muy bueno':       { label: 'Muy Bueno',        emoji: '🌟', color: 'var(--color-cyan)',   bg: 'rgba(34,211,238,0.10)',   border: '#22d3ee' },
+            'participativo':   { label: 'Participativo',    emoji: '🙋', color: 'var(--color-blue)',   bg: 'rgba(59,130,246,0.10)',   border: '#3b82f6' },
+            'enfocado':        { label: 'Enfocado',         emoji: '🎯', color: 'var(--color-purple)', bg: 'rgba(168,85,247,0.10)',   border: '#a855f7' },
+            'adecuado':        { label: 'Adecuado',         emoji: '👍', color: 'var(--color-blue)',   bg: 'rgba(59,130,246,0.08)',   border: '#3b82f6' },
+            'conversador':     { label: 'Conversador',      emoji: '💬', color: 'var(--color-orange)', bg: 'rgba(251,146,60,0.10)',   border: '#fb923c' },
+            'necesita mejorar':{ label: 'Necesita Mejorar', emoji: '⚡', color: 'var(--color-red)',    bg: 'rgba(239,68,68,0.10)',    border: '#ef4444' },
+            'sin_evaluar':     { label: 'Sin Evaluar',      emoji: '📋', color: 'var(--text-sub)',     bg: 'rgba(0,0,0,0.04)',        border: 'var(--text-sub)' }
+          };
+          const cm = conductMap[conduct] || conductMap['sin_evaluar'];
+          return `
+          <div class="chubby-card accordion-card ${conductOpen ? 'open' : ''}" id="parentConductCard" style="margin-top: 15px;">
+            <div class="accordion-card-header" style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; cursor:pointer;" onclick="toggleParentAccordion('parentConductCard', 'parentConductContent')">
+              <h4 style="margin:0;"><span class="icon">🎭</span> Calificación de Conducta</h4>
+              <span class="accordion-arrow" style="transition: transform 0.3s; font-size: 0.8rem; color: var(--text-muted); display: inline-block; transform: rotate(${conductOpen ? '180deg' : '0deg'});">▼</span>
+            </div>
+            <div class="accordion-card-content" id="parentConductContent" style="display: ${conductOpen ? 'block' : 'none'}; opacity: ${conductOpen ? '1' : '0'}; height: ${conductOpen ? 'auto' : '0px'}; overflow: ${conductOpen ? 'visible' : 'hidden'}; transition: height 0.4s ease, opacity 0.35s ease;">
+              <div class="accordion-card-content-inner" style="padding: 12px 16px;">
+                <div style="display: flex; align-items: center; gap: 14px; background: ${cm.bg}; border: 2px solid ${cm.border}; border-radius: 14px; padding: 14px 16px; margin-bottom: 12px;">
+                  <span style="font-size: 2.2rem; flex-shrink: 0;">${cm.emoji}</span>
+                  <div style="flex: 1;">
+                    <div style="font-size: 1.1rem; font-weight: 800; color: ${cm.color}; font-family: 'Outfit', sans-serif; letter-spacing: -0.3px;">${cm.label}</div>
+                    <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 3px; line-height: 1.4;">${escapeHTML(conductText)}</div>
+                  </div>
+                </div>
+                <div style="font-size: 0.78rem; color: var(--text-sub); text-align: center; font-style: italic; opacity: 0.7;">
+                  📌 La conducta es evaluada exclusivamente por el docente
+                </div>
+              </div>
+            </div>
+          </div>
+          `;
+        })()
+      }
+
+      <!-- Accordion 4: Información del Docente -->
+      ${
+        (() => {
+          const assignedTeachers = Object.values(teachersData || {}).filter(t => t.assigned_grade === student.grade);
+          if (assignedTeachers.length === 0) return '';
+
+          const teacherCardsHtml = assignedTeachers.map(t => {
+            const hasPhoto = t.isImgPath || t.is_img_path || (t.profile_pic && (t.profile_pic.startsWith('data:') || t.profile_pic.includes('/')));
+            const avatarHtml = hasPhoto
+              ? `<img src="${t.profile_pic}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--text-main);flex-shrink:0;" onerror="this.style.display='none'">`
+              : `<div style="width:48px;height:48px;border-radius:50%;background:var(--color-blue);color:white;display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:800;flex-shrink:0;border:2px solid var(--text-main);">${(t.name||'?')[0].toUpperCase()}</div>`;
+
+            const subjectsHtml = (t.subjects || []).map(s =>
+              `<span style="display:inline-block;background:var(--color-blue);color:white;font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:20px;margin:2px 2px 2px 0;">${escapeHTML(s)}</span>`
+            ).join('');
+
+            const specsHtml = (t.specializations || []).map(sp =>
+              `<span style="display:inline-block;background:var(--bg-light);border:1px solid var(--text-sub);color:var(--text-secondary);font-size:0.67rem;padding:2px 7px;border-radius:20px;margin:2px 2px 2px 0;text-transform:capitalize;">${escapeHTML(sp)}</span>`
+            ).join('');
+
+            return `
+              <div style="background:var(--bg-light);border:1.5px solid var(--text-sub);border-radius:12px;padding:12px 14px;margin-bottom:10px;">
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+                  ${avatarHtml}
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-weight:800;font-size:0.95rem;color:var(--text-main);font-family:'Outfit',sans-serif;">${escapeHTML(t.name || 'Docente')}</div>
+                    <div style="font-size:0.75rem;color:var(--text-sub);margin-top:1px;">🏫 Grado: ${escapeHTML(t.assigned_grade || '--')}</div>
+                  </div>
+                </div>
+                <div style="margin-bottom:7px;">
+                  <div style="font-size:0.72rem;font-weight:700;color:var(--text-sub);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">📖 Materias que imparte</div>
+                  <div>${subjectsHtml || '<span style="color:var(--text-sub);font-size:0.8rem;">Sin materias asignadas</span>'}</div>
+                </div>
+                ${specsHtml ? `
+                <div>
+                  <div style="font-size:0.72rem;font-weight:700;color:var(--text-sub);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">🎓 Formación Académica</div>
+                  <div>${specsHtml}</div>
+                </div>` : ''}
+              </div>
+            `;
+          }).join('');
+
+          return `
+          <div class="chubby-card accordion-card ${teachersOpen ? 'open' : ''}" id="parentTeachersCard" style="margin-top: 15px;">
+            <div class="accordion-card-header" style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; cursor:pointer;" onclick="toggleParentAccordion('parentTeachersCard', 'parentTeachersContent')">
+              <h4 style="margin:0;"><span class="icon">👩‍🏫</span> Información del Docente</h4>
+              <span class="accordion-arrow" style="transition: transform 0.3s; font-size: 0.8rem; color: var(--text-muted); display: inline-block; transform: rotate(${teachersOpen ? '180deg' : '0deg'});">▼</span>
+            </div>
+            <div class="accordion-card-content" id="parentTeachersContent" style="display: ${teachersOpen ? 'block' : 'none'}; opacity: ${teachersOpen ? '1' : '0'}; height: ${teachersOpen ? 'auto' : '0px'}; overflow: ${teachersOpen ? 'visible' : 'hidden'}; transition: height 0.4s ease, opacity 0.35s ease;">
+              <div class="accordion-card-content-inner" style="padding: 12px 16px;">
+                ${teacherCardsHtml}
+              </div>
+            </div>
+          </div>
+          `;
+        })()
+      }
+    `;
+  }
+}
+
+// Global toggle functions for Parent Dashboard Accordions
+window.toggleParentAccordion = function(cardId, contentId) {
+  const card = document.getElementById(cardId);
+  const content = document.getElementById(contentId);
+  if (!card || !content) return;
+  const arrow = card.querySelector(".accordion-arrow");
+  const isOpen = card.classList.contains("open");
+  
+  if (isOpen) {
+    content.style.transition = "height 0.4s ease, opacity 0.3s ease";
+    content.style.height = content.scrollHeight + "px";
+    content.offsetHeight; // force reflow
+    content.style.height = "0px";
+    content.style.opacity = "0";
+    card.classList.remove("open");
+    if (arrow) arrow.style.transform = "rotate(0deg)";
+    setTimeout(() => {
+      content.style.display = "none";
+      content.style.height = "0";
+      content.style.overflow = "hidden";
+      content.style.transition = "";
+    }, 420);
+  } else {
+    content.style.display = "block";
+    const targetHeight = content.scrollHeight;
+    content.style.height = "0px";
+    content.style.opacity = "0";
+    content.style.overflow = "hidden";
+    content.offsetHeight; // force reflow
+    content.style.transition = "height 0.4s ease, opacity 0.35s ease";
+    content.style.height = targetHeight + "px";
+    content.style.opacity = "1";
+    card.classList.add("open");
+    if (arrow) arrow.style.transform = "rotate(180deg)";
+    setTimeout(() => {
+      content.style.height = "auto";
+      content.style.overflow = "visible";
+      content.style.transition = "";
+    }, 420);
+  }
+};
+
+window.toggleParentSubjectAccordion = function(subIdx) {
+  const card = document.getElementById(`parentSub_${subIdx}`);
+  const content = document.getElementById(`parentSubContent_${subIdx}`);
+  if (!card || !content) return;
+  const arrow = card.querySelector(".sub-arrow");
+  const isOpen = card.classList.contains("open");
+  
+  if (isOpen) {
+    content.style.display = "none";
+    card.classList.remove("open");
+    if (arrow) arrow.style.transform = "rotate(0deg)";
+  } else {
+    content.style.display = "block";
+    card.classList.add("open");
+    if (arrow) arrow.style.transform = "rotate(90deg)";
+  }
+};
+
+function renderParentDashboard(studentId) {
+  activeParentStudentId = studentId;
+  renderParentDashboardData(studentId);
+
+  // Load chat
+  const chatArea = document.getElementById("parentChatArea");
+  if (chatArea) {
+    chatArea.innerHTML = '<p class="chat-placeholder">Cargando historial...</p>';
+    setTimeout(() => {
+      loadChatHistory("tutor", studentId, chatArea);
+    }, 500);
+  }
+}
+
+// Bind Parent Portal Global Events
+document.addEventListener("DOMContentLoaded", () => {
+  const parentLogoutBtn = document.getElementById("parentLogoutBtn");
+  if (parentLogoutBtn) {
+    parentLogoutBtn.addEventListener("click", () => {
+      activeParentStudentId = null;
+      triggerPageWipe("landing");
+      const authSection = document.getElementById("authSection");
+      if (authSection) {
+        authSection.classList.add("active"); // Optionally show auth section
+        setTimeout(() => document.body.style.overflow = "hidden", 800);
+      }
+    });
+  }
+
+  const parentThemeToggle = document.getElementById("parentThemeToggle");
+  if (parentThemeToggle) {
+    parentThemeToggle.addEventListener("click", () => {
+      const isDark = document.body.classList.toggle("dark-theme");
+      document.body.classList.toggle("light-theme", !isDark);
+      showToast(isDark ? "Modo oscuro activado" : "Modo claro activado", "🌓");
+    });
+  }
+});
