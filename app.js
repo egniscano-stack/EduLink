@@ -1595,15 +1595,41 @@ function setupRealtimeChatListener() {
 }
 
 function isSenderMe(senderName) {
+  if (!senderName) return false;
+  
+  const myId = getCurrentUserId();
+  const myIdLower = myId ? myId.toLowerCase().trim() : "";
+  const senderLower = senderName.toLowerCase().trim();
+  
+  // 1. Direct ID / Email / Username match
+  if (senderLower === myIdLower) {
+    return true;
+  }
+  
+  // 2. Name-based match
   const teacherView = document.getElementById("teacherDashboardView");
   const isTeacher = teacherView && !teacherView.classList.contains("hidden");
+  
   if (isTeacher) {
-    const name = teachersData[activeTeacher]?.name;
-    return name && senderName.includes(name);
+    const teacher = teachersData[activeTeacher];
+    if (teacher) {
+      const teacherName = teacher.name.toLowerCase();
+      const cleanSender = senderLower.replace("prof.", "").trim();
+      const cleanTeacher = teacherName.replace("prof.", "").trim();
+      if (cleanSender.includes(cleanTeacher) || cleanTeacher.includes(cleanSender) || senderLower === activeTeacher.toLowerCase()) {
+        return true;
+      }
+    }
   } else {
-    const name = activeAdminUser ? activeAdminUser.name : "Egnis Cano";
-    return name && senderName.includes(name);
+    const adminName = activeAdminUser ? activeAdminUser.name.toLowerCase() : "egnis cano";
+    const cleanSender = senderLower.replace("prof.", "").trim();
+    const cleanAdmin = adminName.replace("prof.", "").trim();
+    if (cleanSender.includes(cleanAdmin) || cleanAdmin.includes(cleanSender) || senderLower === "admin") {
+      return true;
+    }
   }
+  
+  return false;
 }
 
 function getMsgContentHTML(contentStr) {
@@ -1620,7 +1646,10 @@ function getMsgContentHTML(contentStr) {
           contentHtml = `
             <div class="chat-file-image">
               <img src="${file.data}" alt="${escapeHTML(file.name)}" onclick="window.openImageModal('${file.data}')">
-              <div class="chat-file-name">${escapeHTML(file.name)}</div>
+              <div class="chat-file-name" style="display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 6px;">
+                <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.75rem;">🖼️ ${escapeHTML(file.name)}</span>
+                <a href="${file.data}" target="_blank" download="${escapeHTML(file.name)}" class="file-download-btn" style="width: 22px; height: 22px; min-width: 22px; font-size: 0.8rem;" title="Descargar / Abrir">📥</a>
+              </div>
             </div>
           `;
         } else {
@@ -1649,7 +1678,7 @@ function getMsgContentHTML(contentStr) {
                 <span class="file-title" title="${escapeHTML(file.name)}">${escapeHTML(file.name)}</span>
                 <span class="file-subtitle">${label}</span>
               </div>
-              <a href="${file.data}" download="${escapeHTML(file.name)}" class="file-download-btn" title="Descargar">
+              <a href="${file.data}" target="_blank" download="${escapeHTML(file.name)}" class="file-download-btn" title="Descargar / Abrir">
                 📥
               </a>
             </div>
@@ -5243,26 +5272,30 @@ async function handleTeacherChatFileSelection(e) {
     return;
   }
 
-  // Validate size (limit to 2MB in this demo for localStorage/performance safety)
-  if (file.size > 2 * 1024 * 1024) {
-    showToast("El archivo es demasiado grande (máximo 2MB)", "⚠️");
+  // Validate size (limit to 10MB if online, 2MB if offline)
+  const isOnline = useSupabaseDb && supabaseClient;
+  const sizeLimit = isOnline ? 10 * 1024 * 1024 : 2 * 1024 * 1024;
+  if (file.size > sizeLimit) {
+    showToast(`El archivo es demasiado grande (máximo ${isOnline ? '10MB' : '2MB'})`, "⚠️");
     return;
   }
 
   showToast(`Subiendo ${file.name}...`, "⏳");
 
-  const reader = new FileReader();
-  reader.onload = async function(event) {
-    const dataUrl = event.target.result;
-    
-    // Prepare message payload
+  try {
+    const fileUrl = await uploadFileToBucket(file, "school-assets", "chat");
+    if (!fileUrl) {
+      showToast("Fallo al procesar el archivo", "❌");
+      return;
+    }
+
     const teacher = teachersData[activeTeacher];
     if (!teacher) return;
 
     const filePayload = {
       name: file.name,
       type: file.type,
-      data: dataUrl
+      data: fileUrl
     };
 
     const isStaff = teacherActiveChatType === "staff";
@@ -5282,19 +5315,15 @@ async function handleTeacherChatFileSelection(e) {
     e.target.value = "";
 
     // Persist
-    if (useSupabaseDb && supabaseClient) {
-      try {
-        const targetTable = isStaff ? 'staff_messages' : 'chat_messages';
-        const { error } = await supabaseClient.from(targetTable).insert([msgPayload]);
-        if (error) {
-          console.error("Error sending file to Supabase:", error);
-          showToast("Error de conexión al enviar archivo", "❌");
-        } else {
-          showToast("Archivo enviado con éxito", "✅");
-          loadTeacherChatMessages(activeStudent);
-        }
-      } catch (err) {
-        console.error(err);
+    if (isOnline) {
+      const targetTable = isStaff ? 'staff_messages' : 'chat_messages';
+      const { error } = await supabaseClient.from(targetTable).insert([msgPayload]);
+      if (error) {
+        console.error("Error sending file to Supabase:", error);
+        showToast("Error de conexión al enviar archivo", "❌");
+      } else {
+        showToast("Archivo enviado con éxito", "✅");
+        loadTeacherChatMessages(activeStudent);
       }
     } else {
       if (isStaff) {
@@ -5337,13 +5366,10 @@ async function handleTeacherChatFileSelection(e) {
         }, 1500);
       }
     }
-  };
-
-  reader.onerror = function() {
-    showToast("Error al leer el archivo", "❌");
-  };
-
-  reader.readAsDataURL(file);
+  } catch(err) {
+    console.error("Error en handleTeacherChatFileSelection:", err);
+    showToast("Error al procesar el archivo", "❌");
+  }
 }
 
 async function handleAdminChatFileSelection(e) {
@@ -5360,22 +5386,27 @@ async function handleAdminChatFileSelection(e) {
     return;
   }
 
-  // Validate size (limit to 2MB)
-  if (file.size > 2 * 1024 * 1024) {
-    showToast("El archivo es demasiado grande (máximo 2MB)", "⚠️");
+  // Validate size (limit to 10MB if online, 2MB if offline)
+  const isOnline = useSupabaseDb && supabaseClient;
+  const sizeLimit = isOnline ? 10 * 1024 * 1024 : 2 * 1024 * 1024;
+  if (file.size > sizeLimit) {
+    showToast(`El archivo es demasiado grande (máximo ${isOnline ? '10MB' : '2MB'})`, "⚠️");
     return;
   }
 
   showToast(`Subiendo ${file.name}...`, "⏳");
 
-  const reader = new FileReader();
-  reader.onload = async function(event) {
-    const dataUrl = event.target.result;
+  try {
+    const fileUrl = await uploadFileToBucket(file, "school-assets", "chat");
+    if (!fileUrl) {
+      showToast("Fallo al procesar el archivo", "❌");
+      return;
+    }
 
     const filePayload = {
       name: file.name,
       type: file.type,
-      data: dataUrl
+      data: fileUrl
     };
 
     const isStaff = adminActiveChatType === "staff";
@@ -5407,19 +5438,15 @@ async function handleAdminChatFileSelection(e) {
     e.target.value = "";
 
     // Persist
-    if (useSupabaseDb && supabaseClient) {
-      try {
-        const targetTable = isStaff ? 'staff_messages' : 'chat_messages';
-        const { error } = await supabaseClient.from(targetTable).insert([msgPayload]);
-        if (error) {
-          console.error("Error sending file to Supabase:", error);
-          showToast("Error de conexión al enviar archivo", "❌");
-        } else {
-          showToast("Archivo enviado con éxito", "✅");
-          loadChatHistory(adminActiveChatType, isStaff ? activeAdminChatPartner : activeStudent, chatArea);
-        }
-      } catch (err) {
-        console.error(err);
+    if (isOnline) {
+      const targetTable = isStaff ? 'staff_messages' : 'chat_messages';
+      const { error } = await supabaseClient.from(targetTable).insert([msgPayload]);
+      if (error) {
+        console.error("Error sending file to Supabase:", error);
+        showToast("Error de conexión al enviar archivo", "❌");
+      } else {
+        showToast("Archivo enviado con éxito", "✅");
+        loadChatHistory(adminActiveChatType, isStaff ? activeAdminChatPartner : activeStudent, chatArea);
       }
     } else {
       if (isStaff) {
@@ -5441,13 +5468,10 @@ async function handleAdminChatFileSelection(e) {
         showToast("Archivo enviado con éxito", "✅");
       }
     }
-  };
-
-  reader.onerror = function() {
-    showToast("Error al leer el archivo", "❌");
-  };
-
-  reader.readAsDataURL(file);
+  } catch(err) {
+    console.error("Error en handleAdminChatFileSelection:", err);
+    showToast("Error al procesar el archivo", "❌");
+  }
 }
 
 window.openImageModal = function(src) {
