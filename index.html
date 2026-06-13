@@ -1653,29 +1653,30 @@
           </div>
         </section>
 
-        <!-- Columna Derecha: Chat Interactivo -->
+        <!-- Columna Derecha: Chat de Solo Lectura -->
         <section class="chubby-card effect-3d chat-section" style="display: flex; flex-direction: column; height: 100%; min-height: 0; overflow: hidden; box-sizing: border-box;">
           <div class="chat-header" style="flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 2px solid var(--text-main); margin-bottom: 10px;">
-            <h3 style="margin: 0;">💬 Mensajería Directa</h3>
-            <span class="badge badge-orange animate-pulse" id="parentLiveBadge">En Vivo</span>
+            <h3 style="margin: 0;">💬 Comunicados del Docente</h3>
+            <span style="font-size: 0.75rem; color: var(--color-red); border: 1.5px solid var(--color-red); padding: 2px 6px; border-radius: 6px; font-weight: bold; background: rgba(255,0,0,0.05);">Solo Lectura</span>
           </div>
-          <div class="chat-history" id="parentChatArea" style="flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: var(--bg-main); border-radius: 12px; border: 2px solid var(--text-main); margin-bottom: 10px;">
+          <div class="chat-history" id="parentChatArea" style="flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: var(--bg-main); border-radius: 12px; border: 2px solid var(--text-main);">
             <p class="chat-placeholder">Cargando mensajes...</p>
-          </div>
-          
-          <!-- Chat Input Bar for Parent -->
-          <div class="chat-input-bar" style="margin-top: auto;">
-            <input type="file" id="parentChatFileInput" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx" style="display: none;">
-            <button class="chubby-btn secondary round-btn" id="parentChatAttachBtn" type="button" style="padding: 0; width: 40px; height: 40px; min-width: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-              <span>📎</span>
-            </button>
-            <input type="text" id="parentChatInputField" placeholder="Escribe una respuesta..." autocomplete="off" style="flex: 1;">
-            <button class="chubby-btn primary" id="parentChatSendBtn" style="min-width: 40px; width: 40px; height: 40px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center;">
-              <span>➔</span>
-            </button>
           </div>
         </section>
 
+      </div>
+    </div>
+
+    <!-- Chat Drawer for Mobile (Collapsible) -->
+    <div class="chat-drawer" id="parentChatDrawer">
+      <div class="chat-drawer-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--text-main); padding-bottom: 10px; margin-bottom: 15px;">
+        <h3 style="margin: 0; display: flex; align-items: center; gap: 8px; font-family: 'Outfit'; font-weight: 800;">
+          💬 Comunicados <span style="font-size: 0.75rem; color: var(--color-red); border: 1.5px solid var(--color-red); padding: 2px 6px; border-radius: 6px; font-weight: bold; background: rgba(255,0,0,0.05);">Solo Lectura</span>
+        </h3>
+        <button id="closeParentChatDrawerBtn" style="background: none; border: none; font-size: 1.8rem; cursor: pointer; color: var(--text-main); font-weight: bold; line-height: 1;">&times;</button>
+      </div>
+      <div class="chat-history" id="parentChatAreaMobile" style="flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: var(--bg-main); border-radius: 12px; border: 2px solid var(--text-main);">
+        <p class="chat-placeholder">Cargando mensajes...</p>
       </div>
     </div>
   </div>
