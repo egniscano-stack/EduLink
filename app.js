@@ -144,6 +144,7 @@ let activeTeacherChatPartner = null;
 let activeStudent = "eimycano68";
 let parentSelectedTrimester = null;
 let parentFollowsTeacher = true; // When true, parent portal auto-follows teacher's active trimester
+let adminSelectedTrimesters = {}; // Map of studentId -> manually selected trimester by admin
 let editingStudentId = null;
 let editingTeacherId = null;
 let budgetFece = 12450.00;
@@ -2127,7 +2128,8 @@ function updateStudentDetails(studentKey) {
         };
 
         const adviser = Object.values(teachersData || {}).find(t => t && t.assigned_grade === studentGrade);
-        const activeTrimester = adviser ? adviser.active_trimester || 1 : 1;
+        const teacherTrimester = adviser ? adviser.active_trimester || 1 : 1;
+        const activeTrimester = adminSelectedTrimesters[studentKey] || teacherTrimester;
 
         const rows = subjects.map((subj, i) => {
           let storedGrades = [];
@@ -2182,7 +2184,13 @@ function updateStudentDetails(studentKey) {
         }).join("");
 
         gradesContainer.innerHTML = `
-          <div style="font-size: 0.72rem; color: var(--text-sub); font-weight: 700; margin-bottom: 6px; padding: 3px 8px; background: rgba(0,200,255,0.07); border-radius: 6px; display: inline-block;">📅 ${trimesterName}</div>
+          <div style="font-size: 0.72rem; color: var(--text-sub); font-weight: 700; margin-bottom: 6px; padding: 3px 8px; background: rgba(0,200,255,0.07); border-radius: 6px; display: inline-block;">
+            📅 <select id="adminActiveTrimesterSelect" data-student-id="${studentKey}" style="border: none; outline: none; font-family: 'Outfit'; font-weight: 800; background: transparent; color: var(--text-sub); cursor: pointer; font-size: 0.72rem; padding: 0;">
+              <option value="1" ${activeTrimester === 1 ? 'selected' : ''}>1er Trimestre</option>
+              <option value="2" ${activeTrimester === 2 ? 'selected' : ''}>2do Trimestre</option>
+              <option value="3" ${activeTrimester === 3 ? 'selected' : ''}>3er Trimestre</option>
+            </select>
+          </div>
           <div class="grades-by-subject">${rows}</div>
           <div class="grades-periods-row">
             <span class="grade-periods-title">Por Trimestre</span>
@@ -2195,6 +2203,14 @@ function updateStudentDetails(studentKey) {
           <button class="chubby-btn secondary siace-sync-btn full-width" data-student-id="${studentKey}" style="height: 36px; font-size: 0.78rem; display: flex; justify-content: center; align-items: center; margin-top: 10px; background-color: var(--color-purple); color: white; border-color: var(--color-purple);">
             <span>⚡ Sincronizar SIACE (MEDUCA)</span>
           </button>`;
+
+        const adminSelect = document.getElementById("adminActiveTrimesterSelect");
+        if (adminSelect) {
+          adminSelect.addEventListener("change", (e) => {
+            adminSelectedTrimesters[studentKey] = parseInt(e.target.value);
+            updateStudentDetails(studentKey);
+          });
+        }
 
         const adminSiaceBtn = gradesContainer.querySelector(".siace-sync-btn");
         if (adminSiaceBtn) {
@@ -3957,7 +3973,7 @@ function initializeTeacherDashboard() {
   // Set Active Trimester dropdown in UI
   const trimesterSelect = document.getElementById("teacherActiveTrimesterSelect");
   if (trimesterSelect) {
-    trimesterSelect.value = teacher.active_trimester || 1;
+    trimesterSelect.value = String(teacher.active_trimester || 1);
   }
 
   // Header Details
