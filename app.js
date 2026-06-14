@@ -1526,12 +1526,26 @@ function setupRealtimeChatListener() {
         }
         if (msg.is_sent_by_prof) {
           playChatNotificationSound();
+          
+          const chatDrawer = document.getElementById("parentChatDrawer");
+          if (!chatDrawer || !chatDrawer.classList.contains("open")) {
+            if (window.updateChatBadge) updateChatBadge("parentChatToggleBtn", false);
+          }
         }
       } else if (!msg.is_sent_by_prof && msg.student_key !== activeStudent && !isParent) {
         // Notification for another student
         const student = studentsData[msg.student_key];
         const studentName = student ? student.name : "un estudiante";
         showToast(`Mensaje del tutor de ${studentName}: ${msg.content}`, "💬");
+        if (window.updateChatBadge) updateChatBadge("navTeacherChat", false);
+      }
+      
+      if (!msg.is_sent_by_prof && msg.student_key === activeStudent && isTeacher) {
+        const chatScreen = document.getElementById("teacherChatScreen");
+        const isChatOpen = chatScreen && !chatScreen.classList.contains("hidden") && teacherActiveChatType === "tutor";
+        if (!isChatOpen) {
+          if (window.updateChatBadge) updateChatBadge("navTeacherChat", false);
+        }
       }
     })
     // 1b. Staff Messages (Personal Chat)
@@ -1551,16 +1565,19 @@ function setupRealtimeChatListener() {
       }
 
       if (isTeacher) {
-        // Determine the active partner for the teacher's conversation
         const isActiveConversation = teacherActiveChatType === "staff" && (
           activeTeacherChatPartner === msg.sender ||
           activeTeacherChatPartner === msg.receiver
         );
-        if (isActiveConversation) {
+        const chatScreen = document.getElementById("teacherChatScreen");
+        const isChatOpen = chatScreen && !chatScreen.classList.contains("hidden");
+
+        if (isActiveConversation && isChatOpen) {
           appendMessageToArea(msg, document.getElementById("teacherStaffChatArea"), true);
         } else if (msg.sender !== myId) {
           const name = getStaffName(msg.sender) || msg.sender;
           showToast(`Nuevo mensaje de ${name}: ${msg.content}`, "🏫");
+          if (window.updateChatBadge) updateChatBadge("navTeacherChat", false);
         }
       } else {
         // Determine the active partner for the admin's conversation
@@ -1568,11 +1585,15 @@ function setupRealtimeChatListener() {
           activeAdminChatPartner === msg.sender ||
           activeAdminChatPartner === msg.receiver
         );
-        if (isActiveConversation) {
+        const adminChatArea = document.getElementById("adminDirectChatArea");
+        const isChatOpen = adminChatArea && !adminChatArea.classList.contains("hidden");
+        
+        if (isActiveConversation && isChatOpen) {
           appendMessageToArea(msg, document.getElementById("chatArea"), true);
         } else if (msg.sender !== myId) {
           const name = getStaffName(msg.sender) || msg.sender;
           showToast(`Nuevo mensaje de ${name}: ${msg.content}`, "🏫");
+          if (window.updateChatBadge) updateChatBadge("adminDropdownMenuBtn", false);
         }
       }
     })
@@ -2527,11 +2548,15 @@ function copySqlToClipboard() {
 // 9. EVENT BINDINGS & LISTENERS
 // ==========================================================================
 
+// Initialize chat badges on load
+initializeChatBadges();
+
 // Drawer open/close toggles
 // Dropdown menu toggle and handling
 if (adminDropdownMenuBtn && adminDropdownMenu) {
   adminDropdownMenuBtn.addEventListener("click", (e) => {
     e.stopPropagation();
+    if (window.updateChatBadge) updateChatBadge("adminDropdownMenuBtn", true);
     const isHidden = adminDropdownMenu.classList.toggle("hidden");
     const chevron = adminDropdownMenuBtn.querySelector(".chevron");
     if (chevron) {
@@ -4117,6 +4142,7 @@ function setupTeacherPortalStaticEvents() {
   const navTeacherChat = document.getElementById("navTeacherChat");
   if (navTeacherChat) {
     navTeacherChat.addEventListener("click", () => {
+      if (window.updateChatBadge) updateChatBadge("navTeacherChat", true);
       switchTeacherTab(navTeacherChat);
       if (teacherChatScreen) teacherChatScreen.classList.remove("hidden");
       // Default to Tutor tab and render contacts list
@@ -8087,6 +8113,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (parentChatToggleBtn && parentChatDrawer) {
     parentChatToggleBtn.addEventListener("click", (e) => {
       e.stopPropagation();
+      if (window.updateChatBadge) updateChatBadge("parentChatToggleBtn", true);
       parentChatDrawer.classList.toggle("open");
       if (parentChatDrawerOverlay) {
         parentChatDrawerOverlay.classList.toggle("open", parentChatDrawer.classList.contains("open"));
@@ -8124,3 +8151,46 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+
+// --- Chat Badge Push Notification Logic ---
+window.updateChatBadge = function(targetId, reset = false) {
+  const target = document.getElementById(targetId);
+  if (!target) return;
+  
+  let key = "eduUnread_" + targetId;
+  let count = parseInt(localStorage.getItem(key)) || 0;
+  
+  if (reset) {
+    count = 0;
+  } else {
+    count++;
+  }
+  
+  localStorage.setItem(key, count);
+  
+  let badge = target.querySelector(".chat-badge");
+  if (count > 0) {
+    if (!badge) {
+      badge = document.createElement("span");
+      badge.className = "chat-badge";
+      if(window.getComputedStyle(target).position === "static") {
+        target.style.position = "relative";
+      }
+      target.appendChild(badge);
+    }
+    badge.textContent = count > 9 ? "9+" : count;
+  } else {
+    if (badge) badge.remove();
+  }
+};
+
+window.initializeChatBadges = function() {
+  ["parentChatToggleBtn", "navTeacherChat", "adminDropdownMenuBtn"].forEach(id => {
+    let c = parseInt(localStorage.getItem("eduUnread_" + id)) || 0;
+    if (c > 0) {
+      localStorage.setItem("eduUnread_" + id, c - 1);
+      if (window.updateChatBadge) updateChatBadge(id, false);
+    }
+  });
+};
+window.initializeChatBadges();
