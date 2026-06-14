@@ -5147,30 +5147,8 @@ function renderTeacherPortalStudents(students) {
     const saveBtn = card.querySelector(".save-grades-btn");
     if (saveBtn) {
       saveBtn.addEventListener("click", async () => {
-              // Fallback to updating only grades column
-              const fallback = await supabaseClient
-                .from('students')
-                .update({ 
-                  grades: newGrades 
-                })
-                .eq('id', student.id);
-              error = fallback.error;
-            }
-
-            if (error) {
-              console.error("Error updating grades in Supabase:", error);
-              showToast("Guardado local (Error al sincronizar con Supabase)", "⚠️");
-            } else {
-              showToast("Calificaciones guardadas y sincronizadas con Supabase", "✅");
-            }
-          } catch(err) {
-            console.error(err);
-            showToast("Guardado local (Error de red)", "⚠️");
-          }
-        } else {
-          showToast("Calificaciones guardadas localmente", "✅");
-        }
-
+        await saveAndSyncGrades(student.id, true);
+        
         // Update details in admin if it's the active student
         if (activeStudent === student.id) {
           updateStudentDetails(student.id);
