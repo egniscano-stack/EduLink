@@ -10,6 +10,10 @@
 
 ALTER TABLE public.students         REPLICA IDENTITY FULL;
 ALTER TABLE public.teachers         REPLICA IDENTITY FULL;
+
+-- Agregar columna active_trimester a profesores si no existe
+ALTER TABLE public.teachers ADD COLUMN IF NOT EXISTS active_trimester INT DEFAULT 1;
+
 ALTER TABLE public.chat_messages    REPLICA IDENTITY FULL;
 ALTER TABLE public.staff_messages   REPLICA IDENTITY FULL;
 ALTER TABLE public.school_settings  REPLICA IDENTITY FULL;

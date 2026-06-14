@@ -1436,8 +1436,16 @@
           </div>
         </div>
         
-        <div class="header-center">
+        <div class="header-center" style="display: flex; align-items: center; gap: 15px;">
           <span class="connection-status" id="teacherPortalGradeInfo" style="font-family: 'Outfit'; font-weight: 800; font-size: 1.1rem; color: var(--text-main); background: var(--color-bg-light); border: 2px solid var(--text-main); padding: 6px 16px; border-radius: 12px;">Grado: --</span>
+          <div class="trimester-select-box" style="display: flex; align-items: center; gap: 8px; background: var(--color-bg-light); border: 2px solid var(--text-main); padding: 4px 12px; border-radius: 12px;">
+            <label for="teacherActiveTrimesterSelect" style="font-family: 'Outfit'; font-weight: 800; font-size: 0.9rem; color: var(--text-main); margin: 0; white-space: nowrap;">Trimestre Activo:</label>
+            <select id="teacherActiveTrimesterSelect" style="border: none; outline: none; font-family: 'Outfit'; font-weight: 800; background: transparent; color: var(--text-main); cursor: pointer; font-size: 0.95rem; padding-right: 5px;">
+              <option value="1">1er Trimestre</option>
+              <option value="2">2do Trimestre</option>
+              <option value="3">3er Trimestre</option>
+            </select>
+          </div>
         </div>
 
         <div class="header-right">
@@ -1626,6 +1634,14 @@
         </h2>
       </div>
       <div class="top-bar-right" style="display: flex; align-items: center; gap: 15px;">
+        <div class="trimester-select-box" style="display: flex; align-items: center; gap: 8px; background: var(--color-bg-light); border: 2px solid var(--text-main); padding: 4px 12px; border-radius: 12px; height: 38px; box-sizing: border-box;">
+          <label for="parentActiveTrimesterSelect" style="font-family: 'Outfit'; font-weight: 800; font-size: 0.85rem; color: var(--text-main); margin: 0; white-space: nowrap;">Trimestre:</label>
+          <select id="parentActiveTrimesterSelect" style="border: none; outline: none; font-family: 'Outfit'; font-weight: 800; background: transparent; color: var(--text-main); cursor: pointer; font-size: 0.85rem; padding-right: 5px;">
+            <option value="1">1er Trimestre</option>
+            <option value="2">2do Trimestre</option>
+            <option value="3">3er Trimestre</option>
+          </select>
+        </div>
         <span class="user-badge" id="parentUserBadge">Acudiente</span>
         <button class="chubby-btn secondary no-shadow" id="parentLogoutBtn" style="height: 38px; padding: 0 16px; font-size: 0.85rem; cursor: pointer;">
           <span class="icon">🚪</span> Salir

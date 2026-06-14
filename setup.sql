@@ -23,6 +23,7 @@ CREATE TABLE public.teachers (
     specializations TEXT[] NOT NULL, -- Array de especializaciones, cursos o licenciaturas
     subjects TEXT[] NOT NULL, -- Array de asignaturas que imparte
     assigned_grade TEXT NOT NULL, -- Salon o grado asignado (ej: '2B', '3A', '1A')
+    active_trimester INT NOT NULL DEFAULT 1,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 

@@ -142,6 +142,7 @@ let teacherActiveChatType = "tutor";
 let activeAdminChatPartner = null;
 let activeTeacherChatPartner = null;
 let activeStudent = "eimycano68";
+let parentSelectedTrimester = null;
 let editingStudentId = null;
 let editingTeacherId = null;
 let budgetFece = 12450.00;
@@ -2099,12 +2100,16 @@ function updateStudentDetails(studentKey) {
           return "grade-chip grade-low";
         };
 
+        const adviser = Object.values(teachersData || {}).find(t => t && t.assigned_grade === studentGrade);
+        const activeTrimester = adviser ? adviser.active_trimester || 1 : 1;
+
         const rows = subjects.map((subj, i) => {
           let storedGrades = [];
-          if (data.subject_grades && data.subject_grades[subj]) {
-            storedGrades = data.subject_grades[subj];
+          const subjectKey = `${subj}_T${activeTrimester}`;
+          if (data.subject_grades && data.subject_grades[subjectKey]) {
+            storedGrades = data.subject_grades[subjectKey];
           } else {
-            const storedGradesRaw = localStorage.getItem(`eduStudentGradesJSON_${studentKey}_${subj}`);
+            const storedGradesRaw = localStorage.getItem(`eduStudentGradesJSON_${studentKey}_${subjectKey}`);
             if (storedGradesRaw) {
               try {
                 storedGrades = JSON.parse(storedGradesRaw);
@@ -3923,6 +3928,12 @@ function initializeTeacherDashboard() {
   const teacher = teachersData[activeTeacher];
   if (!teacher) return;
 
+  // Set Active Trimester dropdown in UI
+  const trimesterSelect = document.getElementById("teacherActiveTrimesterSelect");
+  if (trimesterSelect) {
+    trimesterSelect.value = teacher.active_trimester || 1;
+  }
+
   // Header Details
   const teacherNameEl = document.getElementById("teacherDashboardTeacherName");
   const gradeInfoEl = document.getElementById("teacherPortalGradeInfo");
@@ -3973,6 +3984,37 @@ let teacherEventsBound = false;
 function setupTeacherPortalStaticEvents() {
   if (teacherEventsBound) return;
   teacherEventsBound = true;
+
+  // Active Trimester Selector Listener
+  const trimesterSelect = document.getElementById("teacherActiveTrimesterSelect");
+  if (trimesterSelect) {
+    trimesterSelect.addEventListener("change", async (e) => {
+      const val = parseInt(e.target.value) || 1;
+      const teacher = teachersData[activeTeacher];
+      if (teacher) {
+        teacher.active_trimester = val;
+        try {
+          localStorage.setItem("eduTeachersData", JSON.stringify(teachersData));
+        } catch(err) {}
+
+        if (useSupabaseDb && supabaseClient) {
+          try {
+            const { error } = await supabaseClient
+              .from('teachers')
+              .update({ active_trimester: val })
+              .eq('id', activeTeacher);
+            if (error) {
+              console.error("Error al actualizar el trimestre activo en Supabase:", error);
+            }
+          } catch(err) {
+            console.error("Error de conexión al actualizar trimestre:", err);
+          }
+        }
+        showToast(`Cargando calificaciones del Trimestre ${val}`, "📅");
+        loadTeacherStudents();
+      }
+    });
+  }
 
   // Theme Toggle
   const teacherThemeToggle = document.getElementById("teacherThemeToggle");
@@ -4734,12 +4776,14 @@ function renderTeacherPortalStudents(students) {
         planningRefHTML = `<span style="font-style: italic; opacity: 0.6;">Sin temario académico asignado.</span>`;
       }
 
-      // Load stored grades JSON array
+      // Load stored grades JSON array based on active trimester
       let storedGrades = [];
-      if (student.subject_grades && Array.isArray(student.subject_grades[subject])) {
-        storedGrades = student.subject_grades[subject];
+      const activeTrimester = teacher ? teacher.active_trimester || 1 : 1;
+      const subjectKey = `${subject}_T${activeTrimester}`;
+      if (student.subject_grades && Array.isArray(student.subject_grades[subjectKey])) {
+        storedGrades = student.subject_grades[subjectKey];
       } else {
-        const storedGradesRaw = localStorage.getItem(`eduStudentGradesJSON_${student.id}_${subject}`);
+        const storedGradesRaw = localStorage.getItem(`eduStudentGradesJSON_${student.id}_${subjectKey}`);
         if (storedGradesRaw) {
           try {
             storedGrades = JSON.parse(storedGradesRaw);
@@ -4754,10 +4798,10 @@ function renderTeacherPortalStudents(students) {
         if (Array.isArray(storedGrades) && storedGrades[actIdx] !== undefined && storedGrades[actIdx] !== null) {
           val = storedGrades[actIdx];
         } else {
-          // Fallback to student grades array for first index
+          // Fallback to student baseline grades array for first index based on active trimester
           const idx = teacherSubjects.indexOf(subject);
-          if (idx !== -1 && student.grades && student.grades[idx] !== undefined && actIdx === 0) {
-            val = parseFloat(student.grades[idx]).toFixed(1);
+          if (idx !== -1 && student.grades && student.grades[activeTrimester - 1] !== undefined && actIdx === 0) {
+            val = parseFloat(student.grades[activeTrimester - 1]).toFixed(1);
           }
         }
 
@@ -5087,7 +5131,7 @@ function renderTeacherPortalStudents(students) {
       });
 
       input.addEventListener("change", () => {
-        saveAndSyncGrades(student.id, subject);
+        saveAndSyncGrades(student.id, false);
       });
     });
 
@@ -5103,64 +5147,6 @@ function renderTeacherPortalStudents(students) {
     const saveBtn = card.querySelector(".save-grades-btn");
     if (saveBtn) {
       saveBtn.addEventListener("click", async () => {
-        let allValid = true;
-        const newGrades = [];
-
-        if (!studentsData[student.id].subject_grades) {
-          studentsData[student.id].subject_grades = {};
-        }
-
-        for (const subject of teacherSubjects) {
-          const inputs = card.querySelectorAll(`.activity-grade-input[data-subject="${subject}"]`);
-          const gradesArray = [];
-
-          inputs.forEach(input => {
-            const val = input.value.trim().replace(/,/g, '.');
-            if (!val) {
-              gradesArray.push("");
-              return;
-            }
-            const num = parseFloat(val);
-            if (isNaN(num) || num < 1.0 || num > 5.0) {
-              allValid = false;
-              input.style.borderColor = "var(--color-orange)";
-            } else {
-              gradesArray.push(val);
-            }
-          });
-
-          if (allValid) {
-            localStorage.setItem(`eduStudentGradesJSON_${student.id}_${subject}`, JSON.stringify(gradesArray));
-            studentsData[student.id].subject_grades[subject] = gradesArray;
-            const avgStr = computeSubjectAverage(gradesArray);
-            newGrades.push(avgStr !== '--' ? parseFloat(avgStr) : 0.0);
-          }
-        }
-
-        if (!allValid) {
-          showToast("Corrige las notas inválidas (deben estar entre 1.0 y 5.0)", "⚠️");
-          return;
-        }
-
-        // Save to studentsData local
-        studentsData[student.id].grades = newGrades;
-        try {
-          localStorage.setItem("eduStudentsData", JSON.stringify(studentsData));
-        } catch(e) {}
-
-        // Sync to Supabase
-        if (useSupabaseDb && supabaseClient) {
-          try {
-            let { error } = await supabaseClient
-              .from('students')
-              .update({ 
-                grades: newGrades, 
-                subject_grades: studentsData[student.id].subject_grades 
-              })
-              .eq('id', student.id);
-
-            if (error) {
-              console.warn("Fallo al actualizar con subject_grades, intentando fallback solo con grades:", error);
               // Fallback to updating only grades column
               const fallback = await supabaseClient
                 .from('students')
@@ -5464,7 +5450,7 @@ function updateRealtimeUIForStudentSubject(studentId, subject) {
 }
 
 
-async function saveAndSyncGrades(studentId, subject) {
+async function saveAndSyncGrades(studentId, showToastNotification = false) {
   const student = studentsData[studentId];
   if (!student) return;
 
@@ -5473,13 +5459,18 @@ async function saveAndSyncGrades(studentId, subject) {
 
   const teacher = teachersData[activeTeacher];
   const teacherSubjects = teacher ? teacher.subjects || [] : [];
+  const activeTrimester = teacher ? teacher.active_trimester || 1 : 1;
 
   let allValid = true;
-  const newGrades = [];
+  const gradesKeySuffix = `_T${activeTrimester}`;
 
   if (!student.subject_grades) {
     student.subject_grades = {};
   }
+
+  // Calculate subject averages for the active trimester
+  let trimesterSum = 0;
+  let trimesterCount = 0;
 
   for (const sub of teacherSubjects) {
     const inputs = card.querySelectorAll(`.activity-grade-input[data-subject="${sub}"]`);
@@ -5502,19 +5493,50 @@ async function saveAndSyncGrades(studentId, subject) {
     });
 
     if (allValid) {
-      localStorage.setItem(`eduStudentGradesJSON_${studentId}_${sub}`, JSON.stringify(gradesArray));
-      student.subject_grades[sub] = gradesArray;
-      // Use the shared helper so stored average = displayed average in both portals
+      const subjectKey = `${sub}${gradesKeySuffix}`;
+      localStorage.setItem(`eduStudentGradesJSON_${studentId}_${subjectKey}`, JSON.stringify(gradesArray));
+      student.subject_grades[subjectKey] = gradesArray;
+      
       const avgStr = computeSubjectAverage(gradesArray);
-      newGrades.push(avgStr !== '--' ? parseFloat(avgStr) : 0.0);
+      if (avgStr !== '--') {
+        trimesterSum += parseFloat(avgStr);
+        trimesterCount++;
+      }
     }
   }
 
   if (!allValid) {
+    if (showToastNotification) {
+      showToast("Corrige las notas inválidas (deben estar entre 1.0 y 5.0)", "⚠️");
+    }
     return;
   }
 
-  student.grades = newGrades;
+  // Initialize student.grades if empty or not length 4
+  if (!Array.isArray(student.grades) || student.grades.length < 4) {
+    student.grades = [0, 0, 0, 0];
+  }
+
+  // Update the active trimester average
+  const currentTrimesterAvg = trimesterCount > 0 ? parseFloat((trimesterSum / trimesterCount).toFixed(1)) : 0.0;
+  student.grades[activeTrimester - 1] = currentTrimesterAvg;
+
+  // Set any trimesters beyond the active trimester to 0
+  for (let t = activeTrimester; t < 3; t++) {
+    student.grades[t] = 0.0;
+  }
+
+  // Calculate the overall final average (index 3) based on trimesters that have been worked on
+  let activeTrimestersSum = 0;
+  let activeTrimestersCount = 0;
+  for (let t = 0; t < 3; t++) {
+    if (t < activeTrimester) {
+      activeTrimestersSum += student.grades[t];
+      activeTrimestersCount++;
+    }
+  }
+  student.grades[3] = activeTrimestersCount > 0 ? parseFloat((activeTrimestersSum / activeTrimestersCount).toFixed(1)) : 0.0;
+
   try {
     localStorage.setItem("eduStudentsData", JSON.stringify(studentsData));
   } catch(e) {}
@@ -5524,20 +5546,37 @@ async function saveAndSyncGrades(studentId, subject) {
       let { error } = await supabaseClient
         .from('students')
         .update({ 
-          grades: newGrades, 
+          grades: student.grades, 
           subject_grades: student.subject_grades 
         })
         .eq('id', studentId);
 
       if (error) {
-        console.warn("Fallo al actualizar con subject_grades, intentando fallback solo con grades:", error);
-        await supabaseClient
+        console.warn("Fallo al actualizar con subject_grades, intentando fallback:", error);
+        const fallback = await supabaseClient
           .from('students')
-          .update({ grades: newGrades })
+          .update({ grades: student.grades })
           .eq('id', studentId);
+        error = fallback.error;
+      }
+
+      if (showToastNotification) {
+        if (error) {
+          console.error("Error al sincronizar calificaciones con Supabase:", error);
+          showToast("Guardado local (Error al sincronizar con Supabase)", "⚠️");
+        } else {
+          showToast("Calificaciones guardadas y sincronizadas con Supabase", "✅");
+        }
       }
     } catch(err) {
-      console.error("Error al sincronizar notas en Supabase:", err);
+      console.error("Error al sincronizar calificaciones con Supabase:", err);
+      if (showToastNotification) {
+        showToast("Guardado local (Error de red)", "⚠️");
+      }
+    }
+  } else {
+    if (showToastNotification) {
+      showToast("Calificaciones guardadas localmente", "✅");
     }
   }
 
@@ -5570,41 +5609,74 @@ async function syncLocalGradesToSupabase() {
     if (!student.subject_grades) student.subject_grades = {};
 
     let needsSync = false;
-    const newGrades = [];
 
-    for (const subject of teacherSubjects) {
-      // Check if this subject already has data in Supabase cache
-      const hasSupabaseGrades = Array.isArray(student.subject_grades[subject]) &&
-        student.subject_grades[subject].some(g => g !== '' && g !== null && g !== undefined);
+    // Loop through all three trimesters to sync trimester-specific grades
+    for (let t = 1; t <= 3; t++) {
+      for (const subject of teacherSubjects) {
+        const subjectKey = `${subject}_T${t}`;
+        const hasSupabaseGrades = Array.isArray(student.subject_grades[subjectKey]) &&
+          student.subject_grades[subjectKey].some(g => g !== '' && g !== null && g !== undefined);
 
-      if (!hasSupabaseGrades) {
-        // Try loading from localStorage
-        const lsKey = `eduStudentGradesJSON_${student.id}_${subject}`;
-        try {
-          const stored = localStorage.getItem(lsKey);
-          if (stored) {
-            const arr = JSON.parse(stored);
-            if (Array.isArray(arr) && arr.some(g => g !== '' && g !== null && g !== undefined)) {
-              student.subject_grades[subject] = arr;
-              needsSync = true;
+        if (!hasSupabaseGrades) {
+          const lsKey = `eduStudentGradesJSON_${student.id}_${subjectKey}`;
+          try {
+            const stored = localStorage.getItem(lsKey);
+            if (stored) {
+              const arr = JSON.parse(stored);
+              if (Array.isArray(arr) && arr.some(g => g !== '' && g !== null && g !== undefined)) {
+                student.subject_grades[subjectKey] = arr;
+                needsSync = true;
+              }
             }
-          }
-        } catch(e) {}
+          } catch(e) {}
+        }
       }
-
-      // Calculate average for grades array using the shared helper
-      const gradesArr = student.subject_grades[subject] || [];
-      const avgStr = computeSubjectAverage(gradesArr);
-      newGrades.push(avgStr !== '--' ? parseFloat(avgStr) : 0.0);
     }
 
     if (needsSync) {
+      // Recompute grades array [T1, T2, T3, Final] for the student
+      const activeTrimester = teacher.active_trimester || 1;
+      let newGrades = [0.0, 0.0, 0.0, 0.0];
+      
+      // Calculate averages for each trimester
+      for (let t = 1; t <= 3; t++) {
+        if (t > activeTrimester) {
+          newGrades[t - 1] = 0.0;
+          continue;
+        }
+        
+        let trimesterSum = 0;
+        let trimesterCount = 0;
+        for (const subject of teacherSubjects) {
+          const subjectKey = `${subject}_T${t}`;
+          const gradesArr = student.subject_grades[subjectKey] || [];
+          const avgStr = computeSubjectAverage(gradesArr);
+          if (avgStr !== '--') {
+            trimesterSum += parseFloat(avgStr);
+            trimesterCount++;
+          }
+        }
+        newGrades[t - 1] = trimesterCount > 0 ? parseFloat((trimesterSum / trimesterCount).toFixed(1)) : 0.0;
+      }
+      
+      // Calculate the final average based on active trimesters
+      let activeTrimestersSum = 0;
+      let activeTrimestersCount = 0;
+      for (let t = 0; t < 3; t++) {
+        if (t < activeTrimester) {
+          activeTrimestersSum += newGrades[t];
+          activeTrimestersCount++;
+        }
+      }
+      newGrades[3] = activeTrimestersCount > 0 ? parseFloat((activeTrimestersSum / activeTrimestersCount).toFixed(1)) : 0.0;
+      
       student.grades = newGrades;
+      
       try {
         const { error } = await supabaseClient
           .from('students')
           .update({
-            grades: newGrades,
+            grades: student.grades,
             subject_grades: student.subject_grades
           })
           .eq('id', student.id);
@@ -6224,17 +6296,18 @@ function openSiaceSyncModal(studentKey) {
         let totalSum = 0;
         let count = 0;
 
+        const adviser = Object.values(teachersData || {}).find(t => t && t.assigned_grade === studentGrade);
+        const activeTrimester = adviser ? adviser.active_trimester || 1 : 1;
+
         subjects.forEach((subj, idx) => {
           let val = 0.0;
-          if (student.subject_grades && student.subject_grades[subj]) {
-            const activeGradesNums = student.subject_grades[subj].filter(Boolean).map(Number);
+          const subjectKey = `${subj}_T${activeTrimester}`;
+          if (student.subject_grades && student.subject_grades[subjectKey]) {
+            const activeGradesNums = student.subject_grades[subjectKey].filter(Boolean).map(Number);
             val = activeGradesNums.length > 0 ? (activeGradesNums.reduce((a, b) => a + b, 0) / activeGradesNums.length) : 0.0;
           } else {
-            const score = student.grades && student.grades[idx % student.grades.length];
+            const score = student.grades && student.grades[activeTrimester - 1];
             val = parseFloat(score !== undefined && score !== null ? score : 0.0);
-          }
-          if (val === 0.0 && student.grades && student.grades.length > 0) {
-            val = parseFloat(student.grades[0]);
           }
           if (val === 0.0) val = 4.0; // Fallback default
           
@@ -6364,40 +6437,64 @@ function generateBulletinHTML(studentKey, student, teacherName, schoolName, scho
     return isNaN(val) ? 0.0 : val;
   };
 
+  const adviser = Object.values(teachersData || {}).find(t => t && t.assigned_grade === studentGrade);
+  const activeTrimester = adviser ? adviser.active_trimester || 1 : 1;
+
+  const getSubjectTrimesterGrade = (subj, trimNum) => {
+    // If this trimester has not been reached yet, it must be 0.0
+    if (trimNum > activeTrimester) {
+      return 0.0;
+    }
+
+    // Try loading trimester-specific grades
+    const key = `${subj}_T${trimNum}`;
+    if (student.subject_grades && Array.isArray(student.subject_grades[key])) {
+      const activeGradesNums = student.subject_grades[key].filter(Boolean).map(Number);
+      if (activeGradesNums.length > 0) {
+        return activeGradesNums.reduce((a, b) => a + b, 0) / activeGradesNums.length;
+      }
+    }
+
+    // Fallback logic for previous trimesters (using base grade + deterministic variance if available)
+    if (trimNum < activeTrimester) {
+      const baseGrade = getGradeValue(student.grades, trimNum - 1);
+      if (baseGrade > 0) {
+        return Math.max(1.0, Math.min(5.0, baseGrade + getDeterministicVariance(subj, trimNum * 10)));
+      }
+    }
+
+    return 0.0;
+  };
+
   let totalAvgSum = 0;
   let count = 0;
 
   const tableRows = subjects.map((subj, i) => {
-    let t1 = getGradeValue(student.grades, 0);
-    let t2 = getGradeValue(student.grades, 1);
-    let t3 = 0.0;
-    if (student.subject_grades && Array.isArray(student.subject_grades[subj])) {
-      const activeGradesNums = student.subject_grades[subj].filter(Boolean).map(Number);
-      t3 = activeGradesNums.length > 0 ? (activeGradesNums.reduce((a, b) => a + b, 0) / activeGradesNums.length) : 0.0;
-    } else {
-      t3 = getGradeValue(student.grades, 2);
-    }
+    let t1 = getSubjectTrimesterGrade(subj, 1);
+    let t2 = getSubjectTrimesterGrade(subj, 2);
+    let t3 = getSubjectTrimesterGrade(subj, 3);
     
-    // Default fallback values if empty (new student)
+    // Default fallback values if empty (new student with no grades entered yet)
     if (t1 === 0 && t2 === 0 && t3 === 0) {
-      t1 = 4.0; t2 = 4.0; t3 = 4.0;
+      if (activeTrimester === 1) t1 = 4.0;
+      else if (activeTrimester === 2) { t1 = 4.0; t2 = 4.0; }
+      else { t1 = 4.0; t2 = 4.0; t3 = 4.0; }
     }
 
-    // Apply deterministic variance per subject for t1 and t2 to make it realistic
-    if (t1 > 0) t1 = Math.max(1.0, Math.min(5.0, t1 + getDeterministicVariance(subj, 10)));
-    if (t2 > 0) t2 = Math.max(1.0, Math.min(5.0, t2 + getDeterministicVariance(subj, 20)));
-    if (t3 > 0 && !(student.subject_grades && Array.isArray(student.subject_grades[subj]))) {
-      t3 = Math.max(1.0, Math.min(5.0, t3 + getDeterministicVariance(subj, 30)));
-    }
+    let activeCount = 0;
+    let sum = 0;
+    if (activeTrimester >= 1) { sum += t1; activeCount++; }
+    if (activeTrimester >= 2) { sum += t2; activeCount++; }
+    if (activeTrimester >= 3) { sum += t3; activeCount++; }
+    const avgFinal = activeCount > 0 ? (sum / activeCount) : 0.0;
 
-    const avgFinal = (t1 + t2 + t3) / 3;
     totalAvgSum += avgFinal;
     count++;
 
     const t1Str = t1 > 0 ? t1.toFixed(1) : "0.0";
     const t2Str = t2 > 0 ? t2.toFixed(1) : "0.0";
     const t3Str = t3 > 0 ? t3.toFixed(1) : "0.0";
-    const avgFinalStr = avgFinal.toFixed(1);
+    const avgFinalStr = avgFinal > 0 ? avgFinal.toFixed(1) : "0.0";
 
     // Attendance values
     // If student is Ausente (attendance === false) we mock 2 absences in Trimestre 3, else 0
@@ -7431,6 +7528,25 @@ function renderParentDashboardData(studentId) {
   const student = studentsData[studentId];
   if (!student) return;
 
+  // Set default active trimester for this student's grade if not set
+  let activeTrimester = 1;
+  if (typeof teachersData !== 'undefined') {
+    const adviser = Object.values(teachersData).find(t => t.assigned_grade === student.grade);
+    if (adviser && adviser.active_trimester) {
+      activeTrimester = adviser.active_trimester;
+    }
+  }
+
+  if (parentSelectedTrimester === null) {
+    parentSelectedTrimester = activeTrimester;
+  }
+
+  // Update dropdown value in UI
+  const parentTrimesterSelect = document.getElementById("parentActiveTrimesterSelect");
+  if (parentTrimesterSelect) {
+    parentTrimesterSelect.value = parentSelectedTrimester;
+  }
+
   // Header info
   const nameEl = document.getElementById("parentStudentName");
   const gradeEl = document.getElementById("parentStudentGrade");
@@ -7492,17 +7608,18 @@ function renderParentDashboardData(studentId) {
     // Merge localStorage grades into subjectsObj for any subjects with missing data
     // This ensures parent portal shows grades even if Supabase hasn't synced yet
     assignedSubjects.forEach(sub => {
-      const hasSupabaseGrades = Array.isArray(subjectsObj[sub]) &&
-        subjectsObj[sub].some(g => g !== '' && g !== null && g !== undefined);
+      const subjectKey = `${sub}_T${parentSelectedTrimester}`;
+      const hasSupabaseGrades = Array.isArray(subjectsObj[subjectKey]) &&
+        subjectsObj[subjectKey].some(g => g !== '' && g !== null && g !== undefined);
       if (!hasSupabaseGrades) {
         // Try localStorage fallback using the same keys as the teacher dashboard
-        const lsKey = `eduStudentGradesJSON_${student.id}_${sub}`;
+        const lsKey = `eduStudentGradesJSON_${student.id}_${subjectKey}`;
         try {
           const stored = localStorage.getItem(lsKey);
           if (stored) {
             const arr = JSON.parse(stored);
             if (Array.isArray(arr) && arr.some(g => g !== '' && g !== null && g !== undefined)) {
-              subjectsObj[sub] = arr;
+              subjectsObj[subjectKey] = arr;
             }
           }
         } catch(e) {}
@@ -7511,14 +7628,27 @@ function renderParentDashboardData(studentId) {
 
     // Add any subjects that might be in subject_grades but not in assignedSubjects
     Object.keys(subjectsObj).forEach(sub => {
-      if (!assignedSubjects.includes(sub)) assignedSubjects.push(sub);
+      // Strip trimester suffix for comparison
+      const cleanSub = sub.replace(/_T\d+$/, '');
+      if (!assignedSubjects.includes(cleanSub)) assignedSubjects.push(cleanSub);
     });
 
     let subjectsHtml = '';
     
     assignedSubjects.forEach((sub, subIdx) => {
-      const grades = subjectsObj[sub] || [];
-      const avg = computeSubjectAverage(grades);
+      const subjectKey = `${sub}_T${parentSelectedTrimester}`;
+      const grades = subjectsObj[subjectKey] || [];
+      let avg = computeSubjectAverage(grades);
+      
+      // If the parent selected trimester is greater than the advisor's active trimester, force 0.0
+      if (parentSelectedTrimester > activeTrimester) {
+        avg = "0.0";
+      } else if (avg === '--' && student.grades && student.grades[parentSelectedTrimester - 1] !== undefined && student.grades[parentSelectedTrimester - 1] > 0) {
+        avg = parseFloat(student.grades[parentSelectedTrimester - 1]).toFixed(1);
+      } else if (avg === '--') {
+        avg = "0.0";
+      }
+      
       const color = (avg !== '--' && parseFloat(avg) < 3.0) ? 'var(--color-red)' : 'var(--color-blue)';
       
       // Determine individual subject open state
@@ -7573,7 +7703,9 @@ function renderParentDashboardData(studentId) {
       let activitiesHtml = '';
       activities.forEach((act, actIdx) => {
         let val = '--';
-        if (Array.isArray(grades) && grades[actIdx] !== undefined && grades[actIdx] !== null && grades[actIdx] !== '') {
+        if (parentSelectedTrimester > activeTrimester) {
+          val = '0.0';
+        } else if (Array.isArray(grades) && grades[actIdx] !== undefined && grades[actIdx] !== null && grades[actIdx] !== '') {
           val = grades[actIdx];
         }
         const valNum = parseFloat(val);
@@ -7863,6 +7995,17 @@ document.addEventListener("DOMContentLoaded", () => {
       const isDark = document.body.classList.toggle("dark-theme");
       document.body.classList.toggle("light-theme", !isDark);
       showToast(isDark ? "Modo oscuro activado" : "Modo claro activado", "🌓");
+    });
+  }
+
+  const parentActiveTrimesterSelect = document.getElementById("parentActiveTrimesterSelect");
+  if (parentActiveTrimesterSelect) {
+    parentActiveTrimesterSelect.addEventListener("change", (e) => {
+      parentSelectedTrimester = parseInt(e.target.value) || 1;
+      if (activeParentStudentId) {
+        showToast(`Cargando información del Trimestre ${parentSelectedTrimester}`, "📅");
+        renderParentDashboardData(activeParentStudentId);
+      }
     });
   }
 
