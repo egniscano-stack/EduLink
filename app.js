@@ -1651,6 +1651,15 @@ function setupRealtimeChatListener() {
       // Refresh parent dashboard data if it is open
       const parentView = document.getElementById("parentDashboardView");
       if (parentView && !parentView.classList.contains("hidden") && activeParentStudentId === updatedStudent.id) {
+        // Always sync parent trimester selection to the adviser's active trimester
+        // so that grade changes for T2/T3 are reflected immediately without manual switching
+        const studentForParent = studentsData[updatedStudent.id];
+        if (studentForParent) {
+          const adviserForParent = Object.values(teachersData).find(t => t.assigned_grade === studentForParent.grade);
+          if (adviserForParent && adviserForParent.active_trimester) {
+            parentSelectedTrimester = adviserForParent.active_trimester;
+          }
+        }
         if (typeof renderParentDashboardData === 'function') {
           renderParentDashboardData(updatedStudent.id);
         }
@@ -2153,6 +2162,7 @@ function updateStudentDetails(studentKey) {
         }).join("");
 
         const finalTrimesterAvg = subjectCount > 0 ? (totalSumOfAvgs / subjectCount).toFixed(1) : "0.0";
+        const trimesterName = activeTrimester === 1 ? "1er Trimestre" : activeTrimester === 2 ? "2do Trimestre" : "3er Trimestre";
 
         const trimesterLabels = ["Trimestre 1", "Trimestre 2", "Trimestre 3"];
         const periodCols = trimesterLabels.map((p, i) => {
@@ -2160,21 +2170,23 @@ function updateStudentDetails(studentKey) {
           if (data.grades && data.grades[i] !== undefined) {
             val = parseFloat(data.grades[i]);
           }
+          const isActive = (i + 1) === activeTrimester;
           const valFormatted = val.toFixed(1);
-          return `<div class="grade-period-col">
-            <span class="grade-period-label">${p}</span>
+          return `<div class="grade-period-col" style="${isActive ? 'border: 2px solid var(--color-cyan); border-radius: 8px; padding: 2px 4px;' : ''}">
+            <span class="grade-period-label">${p}${isActive ? ' ✏️' : ''}</span>
             <span class="${gradeColor(valFormatted)}">${valFormatted}</span>
           </div>`;
         }).join("");
 
         gradesContainer.innerHTML = `
+          <div style="font-size: 0.72rem; color: var(--text-sub); font-weight: 700; margin-bottom: 6px; padding: 3px 8px; background: rgba(0,200,255,0.07); border-radius: 6px; display: inline-block;">📅 ${trimesterName}</div>
           <div class="grades-by-subject">${rows}</div>
           <div class="grades-periods-row">
             <span class="grade-periods-title">Por Trimestre</span>
             <div class="grade-period-cols">${periodCols}</div>
           </div>
           <div class="grades-avg-row">
-            <span>Promedio General Trimestre</span>
+            <span>Promedio General ${trimesterName}</span>
             <span class="${gradeColor(finalTrimesterAvg)} grade-avg-chip">${finalTrimesterAvg}</span>
           </div>
           <button class="chubby-btn secondary siace-sync-btn full-width" data-student-id="${studentKey}" style="height: 36px; font-size: 0.78rem; display: flex; justify-content: center; align-items: center; margin-top: 10px; background-color: var(--color-purple); color: white; border-color: var(--color-purple);">
@@ -5595,6 +5607,14 @@ async function saveAndSyncGrades(studentId, showToastNotification = false) {
   // After successful save, also refresh parent dashboard if open and watching this student
   const parentView = document.getElementById("parentDashboardView");
   if (parentView && !parentView.classList.contains("hidden") && activeParentStudentId === studentId) {
+    // Sync trimester before refreshing parent view so T2/T3 grades show immediately
+    const studentForParent = studentsData[studentId];
+    if (studentForParent && typeof teachersData !== 'undefined') {
+      const adviserForParent = Object.values(teachersData).find(t => t.assigned_grade === studentForParent.grade);
+      if (adviserForParent && adviserForParent.active_trimester) {
+        parentSelectedTrimester = adviserForParent.active_trimester;
+      }
+    }
     if (typeof renderParentDashboardData === 'function') {
       renderParentDashboardData(studentId);
     }
@@ -7549,9 +7569,12 @@ function renderParentDashboardData(studentId) {
     }
   }
 
-  if (parentSelectedTrimester === null) {
+  // Only initialize parentSelectedTrimester once (first open).
+  // Real-time updates keep it synced via the postgres_changes listeners.
+  if (parentSelectedTrimester === null || parentSelectedTrimester === undefined) {
     parentSelectedTrimester = activeTrimester;
   }
+
 
   // Update dropdown value in UI
   const parentTrimesterSelect = document.getElementById("parentActiveTrimesterSelect");
