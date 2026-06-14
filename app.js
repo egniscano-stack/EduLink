@@ -143,6 +143,7 @@ let activeAdminChatPartner = null;
 let activeTeacherChatPartner = null;
 let activeStudent = "eimycano68";
 let parentSelectedTrimester = null;
+let parentFollowsTeacher = true; // When true, parent portal auto-follows teacher's active trimester
 let editingStudentId = null;
 let editingTeacherId = null;
 let budgetFece = 12450.00;
@@ -1651,12 +1652,13 @@ function setupRealtimeChatListener() {
       // Refresh parent dashboard data if it is open
       const parentView = document.getElementById("parentDashboardView");
       if (parentView && !parentView.classList.contains("hidden") && activeParentStudentId === updatedStudent.id) {
-        // Always sync parent trimester selection to the adviser's active trimester
-        // so that grade changes for T2/T3 are reflected immediately without manual switching
+        // When new grade data arrives, always follow teacher's active trimester
+        // so that T2/T3 grades are shown immediately in real-time
         const studentForParent = studentsData[updatedStudent.id];
         if (studentForParent) {
           const adviserForParent = Object.values(teachersData).find(t => t.assigned_grade === studentForParent.grade);
           if (adviserForParent && adviserForParent.active_trimester) {
+            parentFollowsTeacher = true;
             parentSelectedTrimester = adviserForParent.active_trimester;
           }
         }
@@ -1664,6 +1666,7 @@ function setupRealtimeChatListener() {
           renderParentDashboardData(updatedStudent.id);
         }
       }
+
     })
     // 3. Teachers updates (subjects, grade assigned)
     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'teachers' }, payload => {
@@ -1703,6 +1706,8 @@ function setupRealtimeChatListener() {
         const parentStudent = studentsData[activeParentStudentId];
         if (parentStudent && parentStudent.grade === updatedTeacher.assigned_grade) {
           if (updatedTeacher.active_trimester !== undefined) {
+            // Teacher changed active trimester → reset parent to follow teacher automatically
+            parentFollowsTeacher = true;
             parentSelectedTrimester = updatedTeacher.active_trimester;
           }
           if (typeof renderParentDashboardData === 'function') {
@@ -1710,6 +1715,7 @@ function setupRealtimeChatListener() {
           }
         }
       }
+
     })
 
     // 4. Planning updates
@@ -5612,6 +5618,7 @@ async function saveAndSyncGrades(studentId, showToastNotification = false) {
     if (studentForParent && typeof teachersData !== 'undefined') {
       const adviserForParent = Object.values(teachersData).find(t => t.assigned_grade === studentForParent.grade);
       if (adviserForParent && adviserForParent.active_trimester) {
+        parentFollowsTeacher = true;
         parentSelectedTrimester = adviserForParent.active_trimester;
       }
     }
@@ -7560,7 +7567,7 @@ function renderParentDashboardData(studentId) {
   const student = studentsData[studentId];
   if (!student) return;
 
-  // Set default active trimester for this student's grade if not set
+  // Set active trimester from the grade's adviser
   let activeTrimester = 1;
   if (typeof teachersData !== 'undefined') {
     const adviser = Object.values(teachersData).find(t => t.assigned_grade === student.grade);
@@ -7569,9 +7576,9 @@ function renderParentDashboardData(studentId) {
     }
   }
 
-  // Only initialize parentSelectedTrimester once (first open).
-  // Real-time updates keep it synced via the postgres_changes listeners.
-  if (parentSelectedTrimester === null || parentSelectedTrimester === undefined) {
+  // If following teacher automatically (default), always show teacher's active trimester
+  // If parent manually selected a trimester via dropdown, use their selection
+  if (parentFollowsTeacher || parentSelectedTrimester === null || parentSelectedTrimester === undefined) {
     parentSelectedTrimester = activeTrimester;
   }
 
@@ -7685,14 +7692,19 @@ function renderParentDashboardData(studentId) {
       const grades = subjectsObj[subjectKey] || [];
       let avg = computeSubjectAverage(grades);
       
+      // Use integer comparison to avoid type coercion bugs (string vs number)
+      const selectedT = parseInt(parentSelectedTrimester, 10);
+      const activeT = parseInt(activeTrimester, 10);
+      
       // If the parent selected trimester is greater than the advisor's active trimester, force 0.0
-      if (parentSelectedTrimester > activeTrimester) {
+      if (selectedT > activeT) {
         avg = "0.0";
-      } else if (avg === '--' && student.grades && student.grades[parentSelectedTrimester - 1] !== undefined && student.grades[parentSelectedTrimester - 1] > 0) {
-        avg = parseFloat(student.grades[parentSelectedTrimester - 1]).toFixed(1);
+      } else if (avg === '--' && student.grades && student.grades[selectedT - 1] !== undefined && student.grades[selectedT - 1] > 0) {
+        avg = parseFloat(student.grades[selectedT - 1]).toFixed(1);
       } else if (avg === '--') {
         avg = "0.0";
       }
+
       
       const color = (avg !== '--' && parseFloat(avg) < 3.0) ? 'var(--color-red)' : 'var(--color-blue)';
       
@@ -7748,11 +7760,12 @@ function renderParentDashboardData(studentId) {
       let activitiesHtml = '';
       activities.forEach((act, actIdx) => {
         let val = '--';
-        if (parentSelectedTrimester > activeTrimester) {
+        if (parseInt(parentSelectedTrimester, 10) > parseInt(activeTrimester, 10)) {
           val = '0.0';
         } else if (Array.isArray(grades) && grades[actIdx] !== undefined && grades[actIdx] !== null && grades[actIdx] !== '') {
           val = grades[actIdx];
         }
+
         const valNum = parseFloat(val);
         const gradeColor = (!isNaN(valNum) && valNum < 3.0) ? 'var(--color-red)' : (!isNaN(valNum) ? 'var(--color-lime)' : 'var(--text-sub)');
         
@@ -7993,6 +8006,7 @@ window.toggleParentSubjectAccordion = function(subIdx) {
 function renderParentDashboard(studentId) {
   activeParentStudentId = studentId;
   parentSelectedTrimester = null;
+  parentFollowsTeacher = true; // Reset to auto-follow teacher on new student open
   renderParentDashboardData(studentId);
 
   // Load chat
@@ -8048,12 +8062,14 @@ document.addEventListener("DOMContentLoaded", () => {
   if (parentActiveTrimesterSelect) {
     parentActiveTrimesterSelect.addEventListener("change", (e) => {
       parentSelectedTrimester = parseInt(e.target.value) || 1;
+      parentFollowsTeacher = false; // Parent manually selected, stop auto-following teacher
       if (activeParentStudentId) {
         showToast(`Cargando información del Trimestre ${parentSelectedTrimester}`, "📅");
         renderParentDashboardData(activeParentStudentId);
       }
     });
   }
+
 
   // Parent Chat Drawer Toggles
   const parentChatToggleBtn = document.getElementById("parentChatToggleBtn");
