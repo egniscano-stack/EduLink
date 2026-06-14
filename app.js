@@ -2548,9 +2548,6 @@ function copySqlToClipboard() {
 // 9. EVENT BINDINGS & LISTENERS
 // ==========================================================================
 
-// Initialize chat badges on load
-initializeChatBadges();
-
 // Drawer open/close toggles
 // Dropdown menu toggle and handling
 if (adminDropdownMenuBtn && adminDropdownMenu) {
