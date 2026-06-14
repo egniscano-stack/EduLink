@@ -1686,6 +1686,9 @@ function setupRealtimeChatListener() {
       if (parentView && !parentView.classList.contains("hidden") && activeParentStudentId) {
         const parentStudent = studentsData[activeParentStudentId];
         if (parentStudent && parentStudent.grade === updatedTeacher.assigned_grade) {
+          if (updatedTeacher.active_trimester !== undefined) {
+            parentSelectedTrimester = updatedTeacher.active_trimester;
+          }
           if (typeof renderParentDashboardData === 'function') {
             renderParentDashboardData(activeParentStudentId);
           }
@@ -7936,6 +7939,7 @@ window.toggleParentSubjectAccordion = function(subIdx) {
 
 function renderParentDashboard(studentId) {
   activeParentStudentId = studentId;
+  parentSelectedTrimester = null;
   renderParentDashboardData(studentId);
 
   // Load chat

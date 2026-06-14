@@ -6353,6 +6353,53 @@ body.dark-theme .chat-active-header {
 
 @media (max-width: 480px) {
   #parentDashboardView .top-bar h2 { font-size: 0.9rem !important; }
+  #parentDashboardView .top-bar {
+    padding: 8px 10px !important;
+    gap: 4px !important;
+  }
+  #parentDashboardView .top-bar-left h2 span {
+    display: none !important;
+  }
+  #parentDashboardView .top-bar-right {
+    gap: 6px !important;
+  }
+  #parentDashboardView .top-bar-right .trimester-select-box {
+    padding: 4px 6px !important;
+    height: 32px !important;
+    gap: 2px !important;
+    border-radius: 8px !important;
+  }
+  #parentDashboardView .top-bar-right .trimester-select-box label {
+    display: none !important;
+  }
+  #parentDashboardView .top-bar-right .trimester-select-box select {
+    font-size: 0.8rem !important;
+  }
+  #parentUserBadge {
+    display: none !important;
+  }
+  #parentLogoutBtn {
+    padding: 0 8px !important;
+    height: 32px !important;
+    border-radius: 8px !important;
+  }
+  #parentLogoutBtn .btn-text {
+    display: none !important;
+  }
+  #parentLogoutBtn span.icon {
+    display: inline-block !important;
+    margin: 0 !important;
+  }
+  #parentThemeToggle {
+    font-size: 1.15rem !important;
+    padding: 2px !important;
+  }
+  #parentChatToggleBtn {
+    font-size: 1.25rem !important;
+    padding: 2px !important;
+    display: inline-block !important;
+    margin-left: 2px !important;
+  }
   #parentStudentAvatar { width: 46px !important; height: 46px !important; }
   #parentStudentName { font-size: 1.15rem !important; }
   #parentStudentGrade { font-size: 0.8rem !important; }
