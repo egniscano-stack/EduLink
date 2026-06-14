@@ -358,9 +358,13 @@ async function initSupabaseConnection() {
           age: t.age,
           specializations: t.specializations,
           subjects: t.subjects,
-          assigned_grade: t.assigned_grade
+          assigned_grade: t.assigned_grade,
+          active_trimester: t.active_trimester || 1
         };
       });
+      try {
+        localStorage.setItem("eduTeachersData", JSON.stringify(teachersData));
+      } catch (e) {}
 
       // Cargar estudiantes
       studentsData = {};
@@ -396,6 +400,9 @@ async function initSupabaseConnection() {
           attendance: s.attendance !== null && s.attendance !== undefined ? s.attendance : true
         };
       });
+      try {
+        localStorage.setItem("eduStudentsData", JSON.stringify(studentsData));
+      } catch (e) {}
 
       // Cargar finanzas
       await syncFinancesFromSupabase();
@@ -4691,6 +4698,23 @@ function renderTeacherPortalStudents(students) {
   const container = document.getElementById("teacherPortalStudentsList");
   if (!container) return;
 
+  // Detect which student card and sub-accordion were expanded/active before clearing
+  let expandedStudentId = null;
+  let expandedSubAccordionKey = "calif"; // Default to calif
+
+  const openDetails = container.querySelector(".portal-student-details:not(.hidden)");
+  if (openDetails) {
+    expandedStudentId = openDetails.id.replace("portal-details-", "");
+    const activeSub = openDetails.querySelector(".portal-sub-accordion.active");
+    if (activeSub) {
+      if (activeSub.id.startsWith("sub-acc-datos-")) expandedSubAccordionKey = "datos";
+      else if (activeSub.id.startsWith("sub-acc-incid-")) expandedSubAccordionKey = "incid";
+      else if (activeSub.id.startsWith("sub-acc-cond-")) expandedSubAccordionKey = "cond";
+      else if (activeSub.id.startsWith("sub-acc-noved-")) expandedSubAccordionKey = "noved";
+      else expandedSubAccordionKey = "calif";
+    }
+  }
+
   container.innerHTML = "";
 
   if (students.length === 0) {
@@ -4702,9 +4726,15 @@ function renderTeacherPortalStudents(students) {
   const teacherSubjects = teacher ? teacher.subjects || [] : [];
 
   students.forEach(student => {
+    const isExpanded = (student.id === expandedStudentId);
+    const activeSubKey = isExpanded ? expandedSubAccordionKey : "calif";
+
     const card = document.createElement("div");
     card.className = "portal-student-card";
     card.id = `portal-student-${student.id}`;
+    if (isExpanded) {
+      card.style.borderColor = "var(--color-cyan)";
+    }
 
     // Get attendance state from state or localStorage
     let isPresent = true;
@@ -4865,15 +4895,15 @@ function renderTeacherPortalStudents(students) {
       </div>
 
       <!-- COLLAPSIBLE DETAILS SECTION (hidden by default) -->
-      <div class="portal-student-details hidden" id="portal-details-${student.id}" style="margin-top: 14px; border-top: 1.5px dashed var(--text-main); padding-top: 14px; display: flex; flex-direction: column; gap: 10px;">
+      <div class="portal-student-details ${isExpanded ? '' : 'hidden'}" id="portal-details-${student.id}" style="margin-top: 14px; border-top: 1.5px dashed var(--text-main); padding-top: 14px; display: flex; flex-direction: column; gap: 10px;">
         
         <!-- Accordion 1: Calificaciones -->
-        <div class="portal-sub-accordion active" id="sub-acc-calif-${student.id}">
+        <div class="portal-sub-accordion ${activeSubKey === 'calif' ? 'active' : ''}" id="sub-acc-calif-${student.id}">
           <button class="portal-sub-accordion-header" onclick="toggleSubAccordion('${student.id}', 'calif')">
             <span>📊 Calificaciones Académicas</span>
-            <span class="chevron">▼</span>
+            <span class="chevron">${activeSubKey === 'calif' ? '▼' : '▶'}</span>
           </button>
-          <div class="portal-sub-accordion-content" style="display: block;">
+          <div class="portal-sub-accordion-content" style="display: ${activeSubKey === 'calif' ? 'block' : 'none'};">
             
             <!-- Overall trimester average realce -->
             <div class="trimester-avg-card">
@@ -4900,12 +4930,12 @@ function renderTeacherPortalStudents(students) {
         </div>
 
         <!-- Accordion 2: Datos Personales -->
-        <div class="portal-sub-accordion" id="sub-acc-datos-${student.id}">
+        <div class="portal-sub-accordion ${activeSubKey === 'datos' ? 'active' : ''}" id="sub-acc-datos-${student.id}">
           <button class="portal-sub-accordion-header" onclick="toggleSubAccordion('${student.id}', 'datos')">
             <span>👤 Datos Personales</span>
-            <span class="chevron">▶</span>
+            <span class="chevron">${activeSubKey === 'datos' ? '▼' : '▶'}</span>
           </button>
-          <div class="portal-sub-accordion-content">
+          <div class="portal-sub-accordion-content" style="display: ${activeSubKey === 'datos' ? 'block' : 'none'};">
             <div class="personal-data-grid">
               <div class="personal-data-item">
                 <div class="personal-data-label">Nombre del Alumno</div>
@@ -4941,12 +4971,12 @@ function renderTeacherPortalStudents(students) {
         </div>
 
         <!-- Accordion 3: Registro de Incidencias -->
-        <div class="portal-sub-accordion" id="sub-acc-incid-${student.id}">
+        <div class="portal-sub-accordion ${activeSubKey === 'incid' ? 'active' : ''}" id="sub-acc-incid-${student.id}">
           <button class="portal-sub-accordion-header" onclick="toggleSubAccordion('${student.id}', 'incid')">
             <span>⚠️ Registro de Incidencias</span>
-            <span class="chevron">▶</span>
+            <span class="chevron">${activeSubKey === 'incid' ? '▼' : '▶'}</span>
           </button>
-          <div class="portal-sub-accordion-content">
+          <div class="portal-sub-accordion-content" style="display: ${activeSubKey === 'incid' ? 'block' : 'none'};">
             <div style="display: flex; flex-direction: column; gap: 10px;">
               <div class="form-group" style="margin: 0;">
                 <label style="font-weight: 800; font-size: 0.85rem; margin-bottom: 6px; display: block;">Describir Nueva Incidencia:</label>
@@ -4969,12 +4999,12 @@ function renderTeacherPortalStudents(students) {
         </div>
 
         <!-- Accordion 4: Conducta -->
-        <div class="portal-sub-accordion" id="sub-acc-cond-${student.id}">
+        <div class="portal-sub-accordion ${activeSubKey === 'cond' ? 'active' : ''}" id="sub-acc-cond-${student.id}">
           <button class="portal-sub-accordion-header" onclick="toggleSubAccordion('${student.id}', 'cond')">
             <span>🌟 Calificación de Conducta</span>
-            <span class="chevron">▶</span>
+            <span class="chevron">${activeSubKey === 'cond' ? '▼' : '▶'}</span>
           </button>
-          <div class="portal-sub-accordion-content">
+          <div class="portal-sub-accordion-content" style="display: ${activeSubKey === 'cond' ? 'block' : 'none'};">
             <div style="display: flex; flex-direction: column; gap: 10px;">
               <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 12px;">
                 <div class="form-group" style="margin: 0;">
@@ -5003,12 +5033,12 @@ function renderTeacherPortalStudents(students) {
         </div>
 
         <!-- Accordion 5: Informe de Novedades -->
-        <div class="portal-sub-accordion" id="sub-acc-noved-${student.id}">
+        <div class="portal-sub-accordion ${activeSubKey === 'noved' ? 'active' : ''}" id="sub-acc-noved-${student.id}">
           <button class="portal-sub-accordion-header" onclick="toggleSubAccordion('${student.id}', 'noved')">
             <span>📝 Informe de Novedades</span>
-            <span class="chevron">▶</span>
+            <span class="chevron">${activeSubKey === 'noved' ? '▼' : '▶'}</span>
           </button>
-          <div class="portal-sub-accordion-content">
+          <div class="portal-sub-accordion-content" style="display: ${activeSubKey === 'noved' ? 'block' : 'none'};">
             <div style="display: flex; flex-direction: column; gap: 10px;">
               <label style="font-weight: 800; font-size: 0.85rem; margin-bottom: 2px; display: block;">Seleccione Novedades Observadas:</label>
               <div class="novedad-checkbox-grid">
