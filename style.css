@@ -6266,12 +6266,13 @@ body.dark-theme .chat-active-header {
     min-height: 0 !important;
     overflow: visible !important;
   }
-  /* Chat panel: give it a fixed scrollable height */
+  /* Chat panel: hidden on tablet/mobile as we use the top bar drawer */
   #parentDashboardView .chat-section {
-    height: 340px !important;
-    min-height: 240px !important;
-    overflow: hidden !important;
-    flex-shrink: 0 !important;
+    display: none !important;
+  }
+  #parentChatToggleBtn {
+    display: inline-block !important;
+    margin-left: 8px;
   }
 }
 
@@ -6343,13 +6344,11 @@ body.dark-theme .chat-active-header {
     overflow: visible !important;
   }
   #parentDashboardView .top-bar { flex-wrap: wrap; height: auto !important; padding: 8px 12px !important; gap: 6px; }
-  #parentChatToggleBtn { display: inline-block !important; margin-left: 8px; }
   #parentStudentAvatar { width: 54px !important; height: 54px !important; border-radius: 10px !important; }
   #parentStudentName { font-size: 1.4rem !important; }
   #parentStudentGrade { font-size: 0.88rem !important; }
   .accordion-card-header { padding: 10px 14px !important; }
   .accordion-card-header h4 { font-size: 0.94rem !important; }
-  #parentDashboardView .chat-section { display: none !important; } /* Hide default chat card at bottom on mobile */
 }
 
 @media (max-width: 480px) {
@@ -6357,7 +6356,6 @@ body.dark-theme .chat-active-header {
   #parentStudentAvatar { width: 46px !important; height: 46px !important; }
   #parentStudentName { font-size: 1.15rem !important; }
   #parentStudentGrade { font-size: 0.8rem !important; }
-  #parentDashboardView .chat-section { height: 260px !important; }
   .accordion-card-header h4 { font-size: 0.87rem !important; }
 }
 

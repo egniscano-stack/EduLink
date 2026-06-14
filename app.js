@@ -1659,6 +1659,7 @@ function setupRealtimeChatListener() {
         name: updatedTeacher.name,
         subjects: updatedTeacher.subjects,
         assigned_grade: updatedTeacher.assigned_grade,
+        active_trimester: updatedTeacher.active_trimester !== undefined ? updatedTeacher.active_trimester : (teachersData[updatedTeacher.id]?.active_trimester || 1),
         specializations: updatedTeacher.specializations || teachersData[updatedTeacher.id]?.specializations || [],
         profile_pic: updatedTeacher.profile_pic || teachersData[updatedTeacher.id]?.profile_pic || '',
         isImgPath: updatedTeacher.is_img_path !== undefined ? updatedTeacher.is_img_path : (teachersData[updatedTeacher.id]?.isImgPath || false)
@@ -7530,6 +7531,16 @@ function renderParentDashboardData(studentId) {
   const gradeEl = document.getElementById("parentStudentGrade");
   if (nameEl) nameEl.textContent = student.name;
   if (gradeEl) gradeEl.textContent = `Grado: ${student.grade || '--'} | Cédula: ${student.cedula || '--'}`;
+
+  // Update Attendance Badge
+  const attendanceBadge = document.getElementById("parentStudentAttendanceBadge");
+  if (attendanceBadge) {
+    const isPresent = student.attendance !== false;
+    attendanceBadge.textContent = isPresent ? "🟢 Presente" : "🔴 Ausente";
+    attendanceBadge.style.backgroundColor = isPresent ? "rgba(163, 230, 53, 0.12)" : "rgba(239, 68, 68, 0.12)";
+    attendanceBadge.style.color = isPresent ? "var(--color-lime)" : "var(--color-red)";
+    attendanceBadge.style.borderColor = isPresent ? "#a3e635" : "#ef4444";
+  }
   
   // Profile picture
   const avatarEl = document.getElementById("parentStudentAvatar");
