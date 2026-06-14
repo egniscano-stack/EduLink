@@ -2152,9 +2152,6 @@ function updateStudentDetails(studentKey) {
           if (Array.isArray(storedGrades) && storedGrades.filter(Boolean).length > 0) {
             const activeGradesNums = storedGrades.filter(Boolean).map(Number);
             val = activeGradesNums.reduce((a, b) => a + b, 0) / activeGradesNums.length;
-          } else {
-            const score = data.grades && data.grades[i % data.grades.length];
-            val = parseFloat(score !== undefined && score !== null ? score : 0.0);
           }
           
           const valFormatted = val.toFixed(1);
@@ -7694,12 +7691,8 @@ function renderParentDashboardData(studentId) {
       
       // Use integer comparison to avoid type coercion bugs (string vs number)
       const selectedT = parseInt(parentSelectedTrimester, 10);
-      const activeT = parseInt(activeTrimester, 10);
       
-      // If the parent selected trimester is greater than the advisor's active trimester, force 0.0
-      if (selectedT > activeT) {
-        avg = "0.0";
-      } else if (avg === '--' && student.grades && student.grades[selectedT - 1] !== undefined && student.grades[selectedT - 1] > 0) {
+      if (avg === '--' && student.grades && student.grades[selectedT - 1] !== undefined && student.grades[selectedT - 1] > 0) {
         avg = parseFloat(student.grades[selectedT - 1]).toFixed(1);
       } else if (avg === '--') {
         avg = "0.0";
@@ -7760,9 +7753,7 @@ function renderParentDashboardData(studentId) {
       let activitiesHtml = '';
       activities.forEach((act, actIdx) => {
         let val = '--';
-        if (parseInt(parentSelectedTrimester, 10) > parseInt(activeTrimester, 10)) {
-          val = '0.0';
-        } else if (Array.isArray(grades) && grades[actIdx] !== undefined && grades[actIdx] !== null && grades[actIdx] !== '') {
+        if (Array.isArray(grades) && grades[actIdx] !== undefined && grades[actIdx] !== null && grades[actIdx] !== '') {
           val = grades[actIdx];
         }
 
